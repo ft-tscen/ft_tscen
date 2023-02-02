@@ -54,10 +54,7 @@ export class LoginService {
 
       session.login = true;
       session.user = { intra: login, usual_full_name };
-      return {
-        ok: session.login,
-        user: session.user,
-      };
+      return { ok: session.login };
     } catch (error) {
       return { ok: false, error };
     }

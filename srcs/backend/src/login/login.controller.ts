@@ -1,12 +1,14 @@
 import { Controller, Get, Query, Redirect, Session } from '@nestjs/common';
 import { LoginService } from './login.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('login')
 @Controller('login')
 export class LoginController {
   constructor(private loginService: LoginService) {}
 
   @Get()
-  @Redirect('/user/me')
+  @Redirect('http://localhost:3000')
   checkLogin(@Session() session: Record<string, any>) {
     if (!session.login) {
       return {
@@ -16,10 +18,14 @@ export class LoginController {
   }
 
   @Get('/redirect')
+  @Redirect('http://localhost:3000')
   async login(
     @Session() session: Record<string, any>,
     @Query('code') code: string,
   ) {
-    return await this.loginService.login(session, code);
+    const { ok, error } = await this.loginService.login(session, code);
+    if (!ok) {
+      return { ok, error };
+    }
   }
 }
