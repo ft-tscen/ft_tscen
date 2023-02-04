@@ -1,11 +1,17 @@
 import { LoginOutput } from './dtos/login.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { loginModuleOptions } from './login.interfaces';
+import { User } from 'src/user/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class LoginService {
   constructor(
     @Inject('login_options') private readonly options: loginModuleOptions,
+    @InjectRepository(User) private readonly users: Repository<User>,
+    private readonly userService: UserService,
   ) {}
 
   getOAuthUrl(): string {
@@ -46,14 +52,25 @@ export class LoginService {
           'Content-Type': 'application/json; charset=utf-8',
         },
       });
-      const { login, usual_full_name } = await getMe.json();
+      const { login: intra, usual_full_name } = await getMe.json();
 
-      if (!login || !usual_full_name) {
+      if (!intra || !usual_full_name) {
         return { ok: false, error: 'Fail to call get me' };
       }
 
       session.login = true;
-      session.user = { intra: login, usual_full_name };
+      const { ok, user } = await this.userService.getMe(intra);
+      if (ok) {
+        session.user = user;
+      } else {
+        const { ok, user } = await this.userService.createUser(
+          intra,
+          usual_full_name,
+        );
+        if (ok) {
+          session.user = user;
+        }
+      }
       return { ok: session.login };
     } catch (error) {
       return { ok: false, error };

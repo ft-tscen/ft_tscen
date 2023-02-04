@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { LoginModule } from './login/login.module';
+import { TfaModule } from './tfa/tfa.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -27,6 +29,12 @@ import { LoginModule } from './login/login.module';
       secret: process.env.NESTJS_SECRET,
       redirect: `http://localhost:${process.env.NESTJS_PORT}/login/redirect`,
     }),
+    TfaModule.forRoot({
+      apiKey: process.env.NESTJS_SOLAPI_API,
+      secretKey: process.env.NESTJS_SOLAPI_SECRET,
+      sender: process.env.NESTJS_SOLAPI_SENDER,
+    }),
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
