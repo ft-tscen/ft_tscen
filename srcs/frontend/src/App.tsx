@@ -1,15 +1,11 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
-import LoginTest from "./example/login";
+import LiveChat from "./example/chat";
 
 function App() {
 	return (
 		<div className="App">
-			<header className="App-header">
-				<img src={logo} className="App-logo" alt="logo" />
-				<LoginTest />
-			</header>
+			<LiveChat />
 		</div>
 	);
 }

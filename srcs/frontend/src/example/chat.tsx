@@ -10,6 +10,7 @@ import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3001/chat", { withCredentials: true });
 
+console.log("");
 interface IChat {
 	username: string;
 	message: string;
@@ -18,26 +19,22 @@ interface IChat {
 const LiveChat = () => {
 	const [chats, setChats] = useState<IChat[]>([]);
 	const [message, setMessage] = useState<string>("");
-	const chatContainerEl = useRef<HTMLDivElement>(null);
+	const chatContainer = useRef<HTMLDivElement>(null);
 
-	// 채팅이 길어지면(chats.length) 스크롤이 생성되므로, 스크롤의 위치를 최근 메시지에 위치시키기 위함
+	// 스크롤 위치 조정
 	useEffect(() => {
-		if (!chatContainerEl.current) return;
-
-		const chatContainer = chatContainerEl.current;
-		const { scrollHeight, clientHeight } = chatContainer;
-
+		if (!chatContainer.current) return;
+		const { scrollHeight, clientHeight } = chatContainer.current;
 		if (scrollHeight > clientHeight) {
-			chatContainer.scrollTop = scrollHeight - clientHeight;
+			chatContainer.current.scrollTop = scrollHeight - clientHeight;
 		}
 	}, [chats.length]);
 
-	// message event listener
+	// 채팅 수신
 	useEffect(() => {
 		const messageHandler = (chat: IChat) =>
 			setChats((prevChats) => [...prevChats, chat]);
 		socket.on("message", messageHandler);
-
 		return () => {
 			socket.off("message", messageHandler);
 		};
@@ -51,7 +48,6 @@ const LiveChat = () => {
 		(e: FormEvent<HTMLFormElement>) => {
 			e.preventDefault();
 			if (!message) return alert("메시지를 입력해 주세요.");
-
 			socket.emit("message", message, (chat: IChat) => {
 				setChats((prevChats) => [...prevChats, chat]);
 				setMessage("");
@@ -63,30 +59,30 @@ const LiveChat = () => {
 	return (
 		<>
 			<h1>WebSocket Chat</h1>
-			<ChatContainer ref={chatContainerEl}>
+			<div
+				ref={chatContainer}
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					border: "1px solid #000",
+					padding: "1rem",
+					width: "400px",
+					height: "300px",
+					overflow: "auto",
+					margin: "auto",
+				}}
+			>
 				{chats.map((chat, index) => (
-					<MessageBox
-						key={index}
-						className={classNames({
-							my_message: socket.id === chat.username,
-							alarm: !chat.username,
-						})}
-					>
-						<span>
-							{chat.username
-								? socket.id === chat.username
-									? ""
-									: chat.username
-								: ""}
-						</span>
-						<Message className="message">{chat.message}</Message>
-					</MessageBox>
+					<div key={index} style={{ marginBottom: "20px" }}>
+						<div style={{ display: "flex" }}>ID: {chat.username}</div>
+						<div style={{ display: "flex" }}>{chat.message}</div>
+					</div>
 				))}
-			</ChatContainer>
-			<MessageForm onSubmit={onSendMessage}>
+			</div>
+			<form onSubmit={onSendMessage}>
 				<input type="text" onChange={onChange} value={message} />
 				<button>보내기</button>
-			</MessageForm>
+			</form>
 		</>
 	);
 };
