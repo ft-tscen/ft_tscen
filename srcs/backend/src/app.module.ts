@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { LoginModule } from './login/login.module';
+import { GameModule } from './game/game.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { LoginModule } from './login/login.module';
       secret: process.env.NESTJS_SECRET,
       redirect: `http://localhost:${process.env.NESTJS_PORT}/login/redirect`,
     }),
+    GameModule,
   ],
   controllers: [AppController],
   providers: [AppService],
