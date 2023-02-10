@@ -1,4 +1,7 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 import { LoginController } from './login.controller';
 import { loginModuleOptions } from './login.interfaces';
 import { LoginService } from './login.service';
@@ -9,11 +12,13 @@ export class LoginModule {
   static forRoot(options: loginModuleOptions): DynamicModule {
     return {
       module: LoginModule,
+      imports: [TypeOrmModule.forFeature([User])],
       exports: [LoginService],
       controllers: [LoginController],
       providers: [
         { provide: 'login_options', useValue: options },
         LoginService,
+        UserService,
       ],
     };
   }

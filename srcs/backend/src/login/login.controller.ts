@@ -5,7 +5,7 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('login')
 @Controller('login')
 export class LoginController {
-  constructor(private loginService: LoginService) {}
+  constructor(private readonly loginService: LoginService) {}
 
   @Get()
   @Redirect('http://localhost:3000')
