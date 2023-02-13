@@ -1,8 +1,9 @@
-import { Ball } from './ball.dto';
-import { P1 } from './p1.dto';
-import { P2 } from './p2.dto';
-import { Score } from './score.dto';
+import { BallDto } from './ball.dto';
+import { PlayerDto } from './player.dto';
 
-export class GameOutput {
-  constructor(private  ball: Ball, private p1: P1, private p2: P2, private score: Score) {}
+export interface GameDto {
+  roomName: string;
+  ball: BallDto;
+  p1: PlayerDto;
+  p2: PlayerDto;
 }
