@@ -25,7 +25,7 @@ let createdRooms: string[] = [];
 @WebSocketGateway({
   namespace: 'game',
   cors: {
-    origin: ['http://localhost:3000/game'],
+    origin: ['http://localhost:3000'],
   },
 })
 export class GamesGateway
