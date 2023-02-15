@@ -15,19 +15,24 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { GameDto } from './dtos/game.dto';
 import { GameService } from './game.service'
 
-let createdRooms: string[] = [];
+class gameInfo {
+	roomName: string;
+	gameDto: GameDto;
+}
 
-@UseGuards(AuthGuard)
+let createdRooms: string[] = [];
+let gameInfos: gameInfo[] = [];
+
 @ApiResponse({
   status: 200,
   description: 'returns game config',
 })
 @ApiResponse({ status: 403, description: 'Forbidden.' })
 @WebSocketGateway({
-  namespace: 'game',
-  cors: {
-    origin: ['http://localhost:3000'],
-  },
+	namespace: 'game',
+	cors: {
+		origin: ['http://localhost:3000'],
+	},
 })
 export class GamesGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -64,108 +69,88 @@ export class GamesGateway
   @SubscribeMessage('test')
   handleTest(@ConnectedSocket() socket: Socket) {
     this.logger.log(`${socket.id}: test success!`);
-	//socket.emit(`${socket.id}: test success!`);
+    socket.emit('test', `${socket.id}: test success!`);
   }
 
 //  @SubscribeMessage('up')
 //  handleUp(
-//    @ConnectedSocket() socket: Socket,
-//    @MessageBody() { }: any,
+//    @ConnectedSocket() socket: Socket
 //  ) {
-//    //socket.broadcast.to(roomName).emit('moving', { ball, p1, p2 });
-//    return { };
+//
+//
 //  }
 
 //  @SubscribeMessage('down')
 //  handleDown(
-//    @ConnectedSocket() socket: Socket,
-//    @MessageBody() { }: any,
+//    @ConnectedSocket() socket: Socket
 //  ) {
-//    //socket.broadcast.to(roomName).emit('moving', { });
-//    return { };
+//
+//
 //  }
 
 //  @SubscribeMessage('stop')
 //  handleStop(
-//    @ConnectedSocket() socket: Socket,
-//    @MessageBody() { }: any,
+//    @ConnectedSocket() socket: Socket
 //  ) {
-//    //socket.broadcast.to(roomName).emit('moving', { });
-//    return { };
+//
+//
 //  }
 
-//  @SubscribeMessage('moving')
-//  handleMoving(
-//    @ConnectedSocket() socket: Socket,
-//    @MessageBody() { }: any,
-//  ) {
-//    socket.broadcast.to(roomName).emit('moving', { });
-//    return { };
-//  }
+  @SubscribeMessage('room-list')
+  handleRoomList() {
+    return createdRooms;
+  }
 
-//  @SubscribeMessage('smash')
-//  handleEvent(
-//    @ConnectedSocket() socket: Socket,
-//    @MessageBody() { }: any,
-//  ) {
-//    // ===========================
-//    // 여기에 충돌 로직을 구현
-//    // ===========================
+  @SubscribeMessage('ready-game')
+  handleStartGame() {
 
-//    socket.broadcast.to(roomName).emit('smash', { });
-//    return { };
-//  }
+   // if (모든 플레이어 준비 완료시)
+   //   this->gameService->gameStart();
+   // else
+   //   ready_flag = true;
 
-//  @SubscribeMessage('room-list')
-//  handleRoomList() {
-//    return createdRooms;
-//  }
+  }
 
-//  @SubscribeMessage('ready-game')
-//  handleStartGame() {
-//    // if ready === true
-//  }
+  @SubscribeMessage('create-room')
+  handleCreateRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() roomName: string,
+  ) {
+    const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
+    if (exists) {
+      return { success: false, payload: `${roomName} room already existed!` };
+    }
 
-//  @SubscribeMessage('create-room')
-//  handleCreateRoom(
-//    @ConnectedSocket() socket: Socket,
-//    @MessageBody() roomName: string,
-//  ) {
-//    const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
-//    if (exists) {
-//      return { success: false, payload: `${roomName} room already existed!` };
-//    }
+    socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
+    createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
+    this.nsp.emit('create-room', roomName); // 대기실 방 생성
 
-//    socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
-//    createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
-//    this.nsp.emit('create-room', roomName); // 대기실 방 생성
+    return { success: true, payload: roomName };
+  }
 
-//    return { success: true, payload: roomName };
-//  }
+  @SubscribeMessage('join-room')
+  handleJoinRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() roomName: string,
+  ) {
+    socket.join(roomName); // join room
+    socket.broadcast
+      .to(roomName)
+      .emit('message', { message: `${socket.id} join room!` });
 
-//  @SubscribeMessage('join-room')
-//  handleJoinRoom(
-//    @ConnectedSocket() socket: Socket,
-//    @MessageBody() roomName: string,
-//  ) {
-//    socket.join(roomName); // join room
-//    socket.broadcast
-//      .to(roomName)
-//      .emit('message', { message: `${socket.id} join room!` });
+    return { success: true };
+  }
 
-//    return { success: true };
-//  }
+  @SubscribeMessage('leave-room')
+  handleLeaveRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() roomName: string,
+  ) {
+    socket.leave(roomName); // leave room
+    socket.broadcast
+      .to(roomName)
+      .emit('message', { message: `${socket.id} out room!` });
 
-//  @SubscribeMessage('leave-room')
-//  handleLeaveRoom(
-//    @ConnectedSocket() socket: Socket,
-//    @MessageBody() roomName: string,
-//  ) {
-//    socket.leave(roomName); // leave room
-//    socket.broadcast
-//      .to(roomName)
-//      .emit('message', { message: `${socket.id} out room!` });
-
-//    return { success: true };
-//  }
+    return { success: true };
+  }
 }
