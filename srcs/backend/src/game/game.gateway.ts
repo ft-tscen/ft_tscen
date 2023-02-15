@@ -13,6 +13,7 @@ import {
 import { Namespace, Socket } from 'socket.io';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GameDto } from './dtos/game.dto';
+import { GameService } from './game.service'
 
 let createdRooms: string[] = [];
 
@@ -31,7 +32,8 @@ let createdRooms: string[] = [];
 export class GamesGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  private logger = new Logger('Gateway');
+//  constructor (private gameService: GameService, private gameDto: GameDto) {}
+  private logger = new Logger('Game Gateway');
 
   @WebSocketServer() nsp: Namespace;
 
@@ -48,7 +50,7 @@ export class GamesGateway
       ); // 유저가 생성한 room 목록 중에 삭제되는 room 있으면 제거
     });
 
-    this.logger.log('+=+=+= WebSever init Success +=+=+=');
+    this.logger.log('+=+=+=+=+=+= WebSever init Success +=+=+=+=+=+=');
   }
 
   handleConnection(@ConnectedSocket() socket: Socket) {
@@ -56,76 +58,114 @@ export class GamesGateway
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-    this.logger.log(`${socket.id} -=-=-= Socket Disconnected -=-=-=`);
+    this.logger.log(`${socket.id} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`);
   }
 
-  @SubscribeMessage('moving')
-  handleMoving(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() { roomName, ball, p1, p2 }: GameDto,
-  ) {
-    socket.broadcast.to(roomName).emit('moving', { ball, p1, p2 });
-    return { ball, p1, p2 };
+  @SubscribeMessage('test')
+  handleTest(@ConnectedSocket() socket: Socket) {
+    this.logger.log(`${socket.id}: test success!`);
+	//socket.emit(`${socket.id}: test success!`);
   }
 
-  @SubscribeMessage('smash')
-  handleEvent(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() { roomName, ball, p1, p2 }: GameDto,
-  ) {
-    // ===========================
-    // 여기에 충돌 로직을 구현
-    // ===========================
+//  @SubscribeMessage('up')
+//  handleUp(
+//    @ConnectedSocket() socket: Socket,
+//    @MessageBody() { }: any,
+//  ) {
+//    //socket.broadcast.to(roomName).emit('moving', { ball, p1, p2 });
+//    return { };
+//  }
 
-    socket.broadcast.to(roomName).emit('smash', { ball, p1, p2 });
-    return { ball, p1, p2 };
-  }
+//  @SubscribeMessage('down')
+//  handleDown(
+//    @ConnectedSocket() socket: Socket,
+//    @MessageBody() { }: any,
+//  ) {
+//    //socket.broadcast.to(roomName).emit('moving', { });
+//    return { };
+//  }
 
-  @SubscribeMessage('room-list')
-  handleRoomList() {
-    return createdRooms;
-  }
+//  @SubscribeMessage('stop')
+//  handleStop(
+//    @ConnectedSocket() socket: Socket,
+//    @MessageBody() { }: any,
+//  ) {
+//    //socket.broadcast.to(roomName).emit('moving', { });
+//    return { };
+//  }
 
-  @SubscribeMessage('create-room')
-  handleCreateRoom(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() roomName: string,
-  ) {
-    const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
-    if (exists) {
-      return { success: false, payload: `${roomName} room already existed!` };
-    }
+//  @SubscribeMessage('moving')
+//  handleMoving(
+//    @ConnectedSocket() socket: Socket,
+//    @MessageBody() { }: any,
+//  ) {
+//    socket.broadcast.to(roomName).emit('moving', { });
+//    return { };
+//  }
 
-    socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
-    createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
-    this.nsp.emit('create-room', roomName); // 대기실 방 생성
+//  @SubscribeMessage('smash')
+//  handleEvent(
+//    @ConnectedSocket() socket: Socket,
+//    @MessageBody() { }: any,
+//  ) {
+//    // ===========================
+//    // 여기에 충돌 로직을 구현
+//    // ===========================
 
-    return { success: true, payload: roomName };
-  }
+//    socket.broadcast.to(roomName).emit('smash', { });
+//    return { };
+//  }
 
-  @SubscribeMessage('join-room')
-  handleJoinRoom(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() roomName: string,
-  ) {
-    socket.join(roomName); // join room
-    socket.broadcast
-      .to(roomName)
-      .emit('message', { message: `${socket.id} join room!` });
+//  @SubscribeMessage('room-list')
+//  handleRoomList() {
+//    return createdRooms;
+//  }
 
-    return { success: true };
-  }
+//  @SubscribeMessage('ready-game')
+//  handleStartGame() {
+//    // if ready === true
+//  }
 
-  @SubscribeMessage('leave-room')
-  handleLeaveRoom(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() roomName: string,
-  ) {
-    socket.leave(roomName); // leave room
-    socket.broadcast
-      .to(roomName)
-      .emit('message', { message: `${socket.id} out room!` });
+//  @SubscribeMessage('create-room')
+//  handleCreateRoom(
+//    @ConnectedSocket() socket: Socket,
+//    @MessageBody() roomName: string,
+//  ) {
+//    const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
+//    if (exists) {
+//      return { success: false, payload: `${roomName} room already existed!` };
+//    }
 
-    return { success: true };
-  }
+//    socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
+//    createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
+//    this.nsp.emit('create-room', roomName); // 대기실 방 생성
+
+//    return { success: true, payload: roomName };
+//  }
+
+//  @SubscribeMessage('join-room')
+//  handleJoinRoom(
+//    @ConnectedSocket() socket: Socket,
+//    @MessageBody() roomName: string,
+//  ) {
+//    socket.join(roomName); // join room
+//    socket.broadcast
+//      .to(roomName)
+//      .emit('message', { message: `${socket.id} join room!` });
+
+//    return { success: true };
+//  }
+
+//  @SubscribeMessage('leave-room')
+//  handleLeaveRoom(
+//    @ConnectedSocket() socket: Socket,
+//    @MessageBody() roomName: string,
+//  ) {
+//    socket.leave(roomName); // leave room
+//    socket.broadcast
+//      .to(roomName)
+//      .emit('message', { message: `${socket.id} out room!` });
+
+//    return { success: true };
+//  }
 }
