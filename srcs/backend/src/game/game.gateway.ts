@@ -48,15 +48,15 @@ export class GamesGateway
       ); // 유저가 생성한 room 목록 중에 삭제되는 room 있으면 제거
     });
 
-    this.logger.log('웹소켓 서버 초기화 ✅');
+    this.logger.log('+=+=+= WebSever init Success +=+=+=');
   }
 
   handleConnection(@ConnectedSocket() socket: Socket) {
-    this.logger.log(`${socket.id} 소켓 연결`);
+    this.logger.log(`${socket.id} Socket Connected`);
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-    this.logger.log(`${socket.id} 소켓 연결 해제 ❌`);
+    this.logger.log(`${socket.id} -=-=-= Socket Disconnected -=-=-=`);
   }
 
   @SubscribeMessage('moving')
@@ -93,7 +93,7 @@ export class GamesGateway
   ) {
     const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
     if (exists) {
-      return { success: false, payload: `${roomName} 방이 이미 존재합니다.` };
+      return { success: false, payload: `${roomName} room already existed!` };
     }
 
     socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
@@ -111,7 +111,7 @@ export class GamesGateway
     socket.join(roomName); // join room
     socket.broadcast
       .to(roomName)
-      .emit('message', { message: `${socket.id}가 들어왔습니다.` });
+      .emit('message', { message: `${socket.id} join room!` });
 
     return { success: true };
   }
@@ -124,7 +124,7 @@ export class GamesGateway
     socket.leave(roomName); // leave room
     socket.broadcast
       .to(roomName)
-      .emit('message', { message: `${socket.id}가 나갔습니다.` });
+      .emit('message', { message: `${socket.id} out room!` });
 
     return { success: true };
   }
