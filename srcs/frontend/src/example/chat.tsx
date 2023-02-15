@@ -8,16 +8,19 @@ import {
 } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3001/chat", { withCredentials: true });
+const socket = io("http://localhost:3001/chat", { withCredentials: true,  query: {
+    nickname: 'donghyun'
+  } });
 
 console.log("");
-interface IChat {
-	username: string;
+export interface ChatDto {
+	author: string;
+	target: string;
 	message: string;
-}
+  }
 
 const LiveChat = () => {
-	const [chats, setChats] = useState<IChat[]>([]);
+	const [chats, setChats] = useState<ChatDto[]>([]);
 	const [message, setMessage] = useState<string>("");
 	const chatContainer = useRef<HTMLDivElement>(null);
 
@@ -32,11 +35,11 @@ const LiveChat = () => {
 
 	// 채팅 수신
 	useEffect(() => {
-		const messageHandler = (chat: IChat) =>
+		const messageHandler = (chat: ChatDto) =>
 			setChats((prevChats) => [...prevChats, chat]);
-		socket.on("message", messageHandler);
+		socket.on("channel-msg", messageHandler);
 		return () => {
-			socket.off("message", messageHandler);
+			socket.off("channel-msg", messageHandler);
 		};
 	}, []);
 
@@ -48,7 +51,7 @@ const LiveChat = () => {
 		(e: FormEvent<HTMLFormElement>) => {
 			e.preventDefault();
 			if (!message) return alert("메시지를 입력해 주세요.");
-			socket.emit("message", message, (chat: IChat) => {
+			socket.emit("channel-msg", {author: socket.id, target: socket.id ,message}, (chat: ChatDto) => {
 				setChats((prevChats) => [...prevChats, chat]);
 				setMessage("");
 			});
@@ -74,7 +77,7 @@ const LiveChat = () => {
 			>
 				{chats.map((chat, index) => (
 					<div key={index} style={{ marginBottom: "20px" }}>
-						<div style={{ display: "flex" }}>ID: {chat.username}</div>
+						<div style={{ display: "flex" }}>ID: {chat.author}</div>
 						<div style={{ display: "flex" }}>{chat.message}</div>
 					</div>
 				))}

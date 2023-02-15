@@ -9,6 +9,6 @@ export class ChatController {
 
   @Get('/rooms')
   getRoomList() {
-    return this.chatGateway.getRoomList();
+    return ;
   }
 }

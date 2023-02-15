@@ -3,6 +3,7 @@ import NavBar from "./components/NavBar";
 import Home from "./components/Home";
 import { Route, Routes } from "react-router-dom";
 import { api } from "./axios/api";
+import LiveChat from "./example/chat";
 
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
@@ -28,7 +29,7 @@ function App() {
 		<>
 			<NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 			<Routes>
-				<Route path="/" element={<Home isLoggedIn={loggedIn} />} />
+				<Route path="/" element={<LiveChat/>} />
 			</Routes>
 		</>
 	);
