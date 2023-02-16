@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 
 import { userType, netType, ballType, dataType } from './GameType';
-// import { io } from "socket.io-client";
 
-// const socket = io("http://localhost:3001");
+import { socket } from "../../index"
 
 function Game() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -12,17 +11,20 @@ function Game() {
 
 	const [canvas, setCanvas] = useState<any>();
 	const [ctx, setCtx] = useState<any>();
+	const [rerender, setRerender] = useState(true);
 	// const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
 	// const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 	// const [startGame, setStartGame] = useState<boolean>(false);
 	const [ready, setReady] = useState<boolean>(false);
 	const [init, setInit] = useState<boolean>(false);
 
+	const [gameMod, setGameMod] = useState(0);
+	const [socket, setSocket] = useState<any>([]);
 	// const [leftScore, setLeftScore] = useState(0);
 	// const [rightScore, setRightScore] = useState(0);
 
-	// const [leftName, setLeftName] = useState<string>("user");
-	// const [rightName, setRightName] = useState<string>("com");
+	const [leftName, setLeftName] = useState<string>("user");
+	const [rightName, setRightName] = useState<string>("com");
 
 	let lName:string;
 	let rName:string;
@@ -69,9 +71,10 @@ function Game() {
 	const [data, setData] = useState<dataType>();
 
 	useEffect(()=> {
+		// setSocket(socket);
 		const canvas = canvasRef.current;
 		if (canvas) {
-			console.log(ball.velocityX);
+			// console.log(ball.velocityX);
 			canvas.height = CanvasHeight;
 			canvas.width = CanvasWidth;
 			setCanvas(canvas);
@@ -82,7 +85,7 @@ function Game() {
 				radius : 10,
 				velocityX : 5,
 				velocityY : 5,
-				speed : 7,
+				speed : 5,
 				color : "WHITE"
 			});
 			setNet({
@@ -110,37 +113,26 @@ function Game() {
 			})
 		}
 
-		// socket.on("setData", (newData) => {
-		// 	setLeftName(newData.leftName);
-		// 	setRightName(newData.rightName);
-		// 	lName = newData.leftName;
-		// 	rName = newData.rightName;
-		// 	setLeftScore(newData.leftScore);
-		// 	setRightScore(newData.rightScore);
-		// 	lScore = newData.leftScore;
-		// 	rScore = newData.RightScore;
-		// })
-
 		// socket.on('scoreUpdate', (res: boolean) => {
 		// 	if (res == true) {
 		// 		lScore++;
-		// 		setLeftScore(lScore);
+		// 		// setLeftScore(lScore);
 		// 	} 
 		// 	else {
 		// 		rScore++;
-		// 		setRightScore(rScore);
+		// 		// setRightScore(rScore);
 		// 	}
 		// })
-
+		setRerender(!rerender);
 		// socket.on('endGame', () => {
 		// 	killSockets(socket);
 		// })
-	}, []);
+	}, [rerender]);
 
 	// function killSockets(socketi : any) {
 	// 	socket.off('endGame');
 	// 	socket.off('scoreUpdate');
-	// 	socket.off('setData');
+	// 	// socket.off('setData');
 	// }
 
 	useEffect(() => {
@@ -153,6 +145,7 @@ function Game() {
 				if (e.code === 'KeyR') {
 					console.log("press R");
 					setReady(true);
+					socket.emit('ready', (res: boolean) => {});
 				}
 			});
 			// setReady(true);
@@ -188,57 +181,64 @@ function Game() {
 		}
 	}, {once:true});
 
-	// useEffect(() => {
-	// 	if (ready) {
-	// 		if (paddleUp === true) {
-	// 			////test/////
-	// 			if (leftUser.y > 0) {
-	// 				leftUser.y -= leftUser.speed;
-	// 			}
-	// 			/////socket////
-	// 			// socket.emit('PaddleUp');	// 		}
-	// 		if (paddleDown === true) {
-	// 			////test/////
-	// 			if (leftUser.y < CanvasHeight - RightUser.height) {
-	// 				leftUser.y += leftUser.speed;
-	// 			}
-	// 			/////socket////
-	// 			// socket.emit('PaddleDown');
-	// 		}
-	// 		// // socket //
-	// 		// if (paddleDown === false && paddleUp === false) {
-	// 		// 	socket.emit('PaddleStop');
-	// 		// }
-	// 	}
-	// }, [paddleDown, paddleUp]);
+	useEffect(() => {
+		if (ready) {
+			if (paddleUp === true) {
+				////test/////
+				// if (leftUser.y > 0) {
+				// 	leftUser.y -= leftUser.speed;
+				// }
+				/////socket////
+				socket.emit('PaddleUp');
+			}
+			if (paddleDown === true) {
+				////test/////
+				// if (leftUser.y < CanvasHeight - RightUser.height) {
+				// 	leftUser.y += leftUser.speed;
+				// }
+				/////socket////
+				socket.emit('PaddleDown');
+			}
+			// // socket //
+			if (paddleDown === false && paddleUp === false) {
+				socket.emit('PaddleStop');
+			}
+		}
+	}, [paddleDown, paddleUp]);
 
 	useEffect(() => {
 		if (ready) {
 			if (paddleUp === true) {
 				////test/////
-				console.log("up");
-				console.log(ball.velocityX);
-				if (leftUser.y > 0) {
-					leftUser.y -= leftUser.speed;
-				}
+				// console.log("up");
+				// console.log(ball.velocityX);
+				// if (leftUser.y > 0) {
+				// 	leftUser.y -= leftUser.speed;
+				// }
 				/////socket////
-				// socket.emit('PaddleUp');
+				socket.emit('PaddleUp');
 			}
 			if (paddleDown === true) {
 				////test/////
-				console.log("down");
-				if (leftUser.y < CanvasHeight - RightUser.height) {
-					leftUser.y += leftUser.speed;
-				}
+				// console.log("down");
+				// if (leftUser.y < CanvasHeight - RightUser.height) {
+				// 	leftUser.y += leftUser.speed;
+				// }
 				/////socket////
-				// socket.emit('PaddleDown');
+				socket.emit('PaddleDown');
 			}
 			// // socket //
-			// if (paddleDown === false && paddleUp === false) {
-			// 	socket.emit('PaddleStop');
-			// }
+			if (paddleDown === false && paddleUp === false) {
+				socket.emit('PaddleStop');
+			}
 		}
 	}, [paddleDown, paddleUp]);
+
+	useEffect(() => {
+		if (canvas && ctx)
+			if (data)
+				render(data);
+	}, [data])
 
 	function drawRect(x: number, y:number, w:number, h:number, color:string) {
 		if (ctx) {
@@ -273,6 +273,7 @@ function Game() {
 
 	function render(data: dataType){
 		if (ctx) {
+			ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 			drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
 			drawText(lScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
 			drawText(rScore.toString(),3*CanvasWidth/4,CanvasHeight/5,"WHITE");
@@ -282,81 +283,6 @@ function Game() {
 			drawCircle(data.ball_x,data.ball_y,ball.radius,ball.color);
 		}
 	}
-
-/////////////////////////////test////////////////////////
-
-	function rendertest(){
-		if (ctx) {
-			drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
-			drawText(lScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
-			drawText(rScore.toString(),3*CanvasWidth/4,CanvasHeight/5,"WHITE");
-			drawNet();
-			drawRect(leftUser.x,leftUser.y,leftUser.width, leftUser.height, leftUser.color);
-			drawRect(RightUser.x,RightUser.y,RightUser.width,RightUser.height,RightUser.color);
-			drawCircle(ball.x,ball.y,ball.radius,ball.color);
-		}
-	}
-
-	function resetBall() {
-		ball.x = canvas.width/2;
-		ball.y = canvas.height/2;
-		ball.speed = 5;
-		ball.velocityX = -ball.velocityX;
-	}
-
-	function setScore() {
-		if(ball.x - ball.radius < 0){
-			rScore++
-			resetBall();
-		}else if(ball.x + ball.radius > canvas.width){
-			lScore++;
-			resetBall();
-		}
-	}
-
-	function collision(ball:any, player:any) {
-		player.top = player.y;
-		player.bottom = player.y + player.height;
-		player.left = player.x;
-		player.right = player.x + player.width;
-	
-		ball.top = ball.y - ball.radius;
-		ball.bottom = ball.y + ball.radius;
-		ball.left = ball.x - ball.radius;
-		ball.right = ball.x + ball.radius;
-	
-		return ball.right > player.left && ball.top < player.bottom && ball.left < player.right && ball.bottom > player.top;
-	}
-
-	function update() {
-		setScore();
-		ball.x += ball.velocityX;
-		ball.y += ball.velocityY;
-		RightUser.y += ((ball.y - (RightUser.y + RightUser.height/2)))*0.1;
-		if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height)
-			ball.velocityY = -ball.velocityY;
-		let player = (ball.x + ball.radius < canvas.width/2) ? leftUser : RightUser;
-		if(collision(ball,player)){
-			let collidePoint = (ball.y - (player.y + player.height/2));
-			collidePoint = collidePoint / (player.height/2);
-			let angleRad = (Math.PI/4) * collidePoint;
-			let direction = (ball.x + ball.radius < canvas.width/2) ? 1 : -1;
-			ball.velocityX = direction * ball.speed * Math.cos(angleRad);
-			ball.velocityY = ball.speed * Math.sin(angleRad);
-			// ball.speed += 1;
-		}
-	}
-
-	function gameLoop() {
-		// updateKeyPress();
-		if (ready) {
-			update();
-			rendertest();
-		}
-		// requestAnimationFrame(gameLoop);
-	}
-
-	setInterval(gameLoop, 1000/60);
 
 	return (
 		<div>

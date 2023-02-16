@@ -7,8 +7,53 @@ import { PlayerDto } from "./dtos/player.dto";
 const CanvasWidth = 600;
 const CanvasHeight = 400;
 
-@Injectable()
 export class GameLogic {
+
+	private init_test(roomName: string, GameMod: gameMod): GameDto {
+		const params: GameDto = <GameDto>{
+			roomName: roomName,
+			ball: {
+				x: CanvasWidth/2,
+				y: CanvasHeight/2,
+				radius: 5,
+				speed: 5,
+				velocityX: 5,
+				velocityY: 5
+			},
+			p1: {
+				name: "user",
+				padleX: 5,
+				padleY: (CanvasHeight - 100)/2,
+				padleW: CanvasWidth/60 ,
+				padleH: CanvasHeight/4 ,
+				score: 0,
+				padleUp: false,
+				padleDown: false,
+				speed: CanvasHeight/300,
+				// socket: p1,
+			},
+			p2: {
+				name: "com",
+				padleX: CanvasWidth - 15,
+				padleY: (CanvasHeight - 100)/2,
+				padleW: CanvasWidth/60 ,
+				padleH: CanvasHeight/4 ,
+				score: 0,
+				padleUp: false,
+				padleDown: false,
+				speed: CanvasHeight/300,
+				// socket: p2,
+			},
+			gameMod: GameMod,
+			front: {
+				leftPaddle : (CanvasHeight - 100)/2,
+				rightPaddle : (CanvasHeight - 100)/2,
+				ballX : CanvasWidth/2,
+				ballY : CanvasHeight/2
+			}
+		}
+		return	params;
+	}
 
 	private init_game(p1: Socket, p2: Socket, roomName: string, GameMod: gameMod): GameDto {
 		const params: GameDto = <GameDto>{
@@ -40,9 +85,27 @@ export class GameLogic {
 				socket: p2,
 			},
 			gameMod: GameMod,
+			front: {
+				leftPaddle : (CanvasHeight - 100)/2,
+				rightPaddle : (CanvasHeight - 100)/2,
+				ballX : CanvasWidth/2,
+				ballY : CanvasHeight/2
+			}
 		}
 		return	params;
 	}
+
+	// private async startMatch(p1: Socket, p2: Socket, roomName: string, GameMod: gameMod{
+	// 	const params: GameDto = this.init_game(player1, player2, "test", 0);
+	// 	this.currentMatch.set(
+	// 		match.id,
+	// 		param
+	// 	);
+	// 	player1.join(match.id);
+	// 	player2.join(match.id);
+	// 	this.gateway.server.to(match.id).emit('set_names', param.names);
+	// 	this.gateway.server.to(match.id).emit('game_countdownStart', specialMode);
+	// }
 
 	private resetBall(GameDto: GameDto) {
 		GameDto.ball.x = CanvasWidth/2;
@@ -67,7 +130,7 @@ export class GameLogic {
 	}
 
 	private update(Game: GameDto) {
-		// ready 확인 추가 자리
+		// ready 확인 추가 자리 //
 		if (Game.ball.x - Game.ball.radius < 0) {
 			Game.p2.score++;
 			this.resetBall(Game);
@@ -76,7 +139,9 @@ export class GameLogic {
 			Game.p1.score++;
 			this.resetBall(Game);
 		}
-
+		// 패들 계산
+		this.paddleCalculate(Game);
+		// 공 계산
 		Game.ball.x += Game.ball.velocityX;
 		Game.ball.y += Game.ball.velocityY;
 		// soloMod
@@ -92,18 +157,73 @@ export class GameLogic {
 			Game.ball.velocityY = Game.ball.speed * Math.sin(angleRad);
 			Game.ball.speed += 1;
 		}
+		Game.front.leftPaddle = Game.p1.padleY;
+		Game.front.rightPaddle = Game.p2.padleY;
+		Game.front.ballX = Game.ball.x;
+		Game.front.ballY = Game.ball.y;
+		// render 호출하는 socket 추가
 	}
 
-	// private getClientGame(client: Socket): GameDto {
-	// 	for (const room of client.rooms) {
-	// 		const tmp: GameDto = this.currentMatch.get(room);
-			
-	// 	}
+	private paddleUp (client: Socket)  {
+		const Game : GameDto = this.init_test("test", gameMod.soloGame);
+		// if (client.id === Game.p1.socket)
+			Game.p1.padleUp = true;
+		// if (client.id === Game.p2.socket)
+			Game.p2.padleUp = true;
+	}
+
+	private paddleDown (client: Socket)  {
+		const Game : GameDto = this.init_test("test", gameMod.soloGame);
+		// if (client.id === Game.p1.socket)
+			Game.p1.padleDown = true;
+		// if (client.id === Game.p2.socket)
+			Game.p2.padleDown = true;
+	}
+
+	private paddleStop (client: Socket)  {
+		const Game : GameDto = this.init_test("test", gameMod.soloGame);
+		// if (client.id === Game.p1.socket)
+			Game.p1.padleUp = false;
+			Game.p1.padleDown = false;
+		// if (client.id === Game.p2.socket)
+			Game.p2.padleUp = false;
+			Game.p2.padleDown = false;
+	}
+
+	private paddleCalculate(Game: GameDto) {
+		if (Game.p1.padleUp === true) {
+			if (Game.p1.padleY > 0) {
+				Game.p1.padleY -= Game.p1.speed;
+			}
+		}
+		if (Game.p1.padleDown === true) {
+			if (Game.p1.padleY < CanvasHeight - Game.p1.padleH) {
+				Game.p1.padleY += Game.p1.speed;
+			}
+		}
+		if (Game.p2.padleUp === true) {
+			if (Game.p2.padleY > 0) {
+				Game.p2.padleY -= Game.p2.speed;
+			}
+		}
+		if (Game.p2.padleDown === true) {
+			if (Game.p2.padleY < CanvasHeight - Game.p2.padleH) {
+				Game.p2.padleY += Game.p2.speed;
+			}
+		}
+	}
+	// public currentMatch = new GameDto;
+
+	// public paddleUp (client: Socket) {
+		
+	// 	// const Game: GameDto = this.init_game()
+	// 	if (Game)
 	// }
 
 	private gameLoop(client: Socket) {
-		const game: GameDto = this.getClientGame(client);
+		// const game: GameDto = this.init_game()
+		const Game : GameDto = this.init_test("test", gameMod.soloGame);
 		// setInterval(() => this.update(game), 1000/60;
-		requestAnimationFrame(() => this.update(game));
+		requestAnimationFrame(() => this.update(Game));
 	}
 }

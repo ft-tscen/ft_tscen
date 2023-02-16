@@ -6,6 +6,9 @@ export interface PlayerDto {
   padleY: number;
   padleW: number;
   padleH: number;
+  padleUp: boolean;
+  padleDown: boolean;
+  speed: number;
   score: number;
   socket: Socket;
 }

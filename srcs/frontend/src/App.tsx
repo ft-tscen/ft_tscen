@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import NavBar from "./components/NavBar";
 import Home from "./components/Home";
+import Game from "./components/game/Game";
 import { Route, Routes } from "react-router-dom";
 import { api } from "./axios/api";
 
@@ -29,6 +30,7 @@ function App() {
 			<NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 			<Routes>
 				<Route path="/" element={<Home isLoggedIn={loggedIn} />} />
+				<Route path="/Game" element={<Game/>} />
 			</Routes>
 		</>
 	);

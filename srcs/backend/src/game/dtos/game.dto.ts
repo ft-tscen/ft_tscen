@@ -8,10 +8,18 @@ export enum gameMod{
   rankGame,
 }
 
+export type FrontData = {
+  leftPaddle : number,
+  rightPaddle : number,
+  ballX : number,
+  ballY : number
+}
+
 export type GameDto = {
   roomName: string,
   ball: BallDto,
   p1: PlayerDto,
   p2: PlayerDto,
   gameMod: gameMod,
+  front: FrontData
 }
