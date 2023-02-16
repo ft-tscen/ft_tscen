@@ -29,21 +29,20 @@ export interface UserInfo {
   userMute: Set<string>;     // socket id
 }
 
-export interface ChatDto {
-  author: string;        // nickname
-  target: string;        // nickname or channel name
-  message: string;
+export interface SocketInputDto {
+  author?: string;        // nickname
+  target?: string;        // nickname or channel name
+  message?: string;
+  password?: string;
 }
 
-export interface MuteDto {
-  channel?: string;         // channel name
-  target: string;           // nickname
+export interface SocketOutputDto {
+  author?: string;        // nickname
+  target?: string;        // nickname or channel name
+  message?: string;
+  user?: User;
 }
 
-export interface ChannelDto {
-  name: string;             // channel name
-  password: string;
-}
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -104,9 +103,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @SubscribeMessage('channel-msg')
   handleChannelMsg(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() chat: ChatDto,
-  ) {
-    const { author, target } = chat;
+    @MessageBody() input: SocketInputDto,
+  ): SocketOutputDto {
+    const { author, target } = input;
     const { user } = this.users.get(this.sockets.get(author));
 
     if (this.channels.has(target)) {
@@ -114,42 +113,48 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       members.forEach((member) => {
         const { userMute } = this.users.get(member);
         if (!channelMute.has(author) && !userMute.has(author)) {
-          socket.to(member).emit('channel-msg', {user, ...chat});
+          socket.to(member).emit('channel-msg', {user, ...input});
         }
       })
     }
-    return {user, ...chat};
+    return {user, ...input};
   }
 
   @SubscribeMessage('channel-mute')
-  muteByChannel(@ConnectedSocket() socket: Socket, @MessageBody() { channel, target }: MuteDto) {
-    if (this.channels.has(channel)) {
-      const cn = this.channels.get(channel);
-      if (cn.owner === socket.id || cn.admins.has(socket.id)) {
-        cn.channelMute.add(this.sockets.get(target));
-        return true;
+  muteByChannel(@ConnectedSocket() socket: Socket, @MessageBody() input: SocketInputDto): SocketOutputDto {
+    const channelName = this.users.get(this.sockets.get(input.author)).channel;
+    const channel = this.channels.get(channelName);
+    if (channel.owner === socket.id || channel.admins.has(socket.id)) {
+      if (this.sockets.has(input.target) && channel.members.has(input.target)) {
+        channel.channelMute.add(this.sockets.get(input.target));
+        const output = {author: "server", target: input.target, message: `${input.target} is muted`};
+        socket.broadcast.to(channelName).emit('channel-mute', output);
+        return output;
       }
     }
-    return false;
+    return {author: "server", target: input.target, message: `fails to mute ${input.target}`};
   }
 
   @SubscribeMessage('channel-unmute')
-  unmuteByChannel(@ConnectedSocket() socket: Socket, @MessageBody() { channel, target }: MuteDto) {
-    if (this.channels.has(channel)) {
-      const cn = this.channels.get(channel);
-      if (cn.owner === socket.id || cn.admins.has(socket.id)) {
-        cn.channelMute.delete(this.sockets.get(target));
-        return true;
+  unmuteByChannel(@ConnectedSocket() socket: Socket, @MessageBody() input: SocketInputDto): SocketOutputDto {
+    const channelName = this.users.get(this.sockets.get(input.author)).channel;
+    const channel = this.channels.get(channelName);
+    if (channel.owner === socket.id || channel.admins.has(socket.id)) {
+      if (this.sockets.has(input.target) && channel.members.has(input.target)) {
+        channel.channelMute.delete(this.sockets.get(input.target));
+        const output = {author: "server", target: input.target, message: `${input.target} is unmuted`};
+        socket.broadcast.to(channelName).emit('channel-mute', output);
+        return output;
       }
     }
-    return false;
+    return {author: "server", target: input.target, message: `fails to unmute ${input.target}`};
   }
 
   @SubscribeMessage('direct-msg')
   handleDirectMsg(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() chat: ChatDto,
-  ) {
+    @MessageBody() chat: SocketInputDto,
+  ): SocketOutputDto {
     const { author, target } = chat;
     const { user } = this.users.get(this.sockets.get(author));
 
@@ -163,53 +168,21 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('direct-mute')
-  muteByUser(@ConnectedSocket() socket: Socket, @MessageBody() { target }: MuteDto) {
-    if (this.users.has(socket.id)) {
-      this.users.get(socket.id).userMute.add(this.sockets.get(target));
-      return true;
+  muteByUser(@ConnectedSocket() socket: Socket, @MessageBody() input: SocketInputDto): SocketOutputDto {
+    if (this.users.has(socket.id) && this.sockets.has(input.target)) {
+      this.users.get(socket.id).userMute.add(this.sockets.get(input.target));
+      return {author: "server", target: input.target, message: `${input.target} is muted`};
     }
-    return false;
+    return {author: "server", target: input.target, message: `fails to mute ${input.target}`};
   }
 
   @SubscribeMessage('direct-unmute')
-  unmuteByUser(@ConnectedSocket() socket: Socket, @MessageBody() { target }: MuteDto) {
-    if (this.users.has(socket.id)) {
-      this.users.get(socket.id).userMute.delete(this.sockets.get(target));
-      return true;
+  unmuteByUser(@ConnectedSocket() socket: Socket, @MessageBody() input: SocketInputDto): SocketOutputDto {
+    if (this.users.has(socket.id) && this.sockets.has(input.target)) {
+      this.users.get(socket.id).userMute.delete(this.sockets.get(input.target));
+      return {author: "server", target: input.target, message: `${input.target} is unmuted`};
     }
-    return false;
-  }
-
-  @SubscribeMessage('join-channel')
-  joinChannel(
-    @ConnectedSocket() socket: Socket,
-    @MessageBody() { name, password }: ChannelDto,
-  ) {
-    if (this.channels.has(name)) {
-      const channel = this.channels.get(name);
-      if (!channel.banList.has(socket.id) && channel.password === password) {
-        channel.members.add(socket.id);
-      }
-    } else {
-      const admins = new Set<string>();
-      const members = new Set<string>();
-      const banList = new Set<string>();
-      admins.add(socket.id);
-      members.add(socket.id);
-      this.channels.set(name, {name: name, owner: socket.id, admins, members, banList, private: false, password: '', channelMute: new Set<string>()})
-    }
-    const user = this.users.get(socket.id);
-    this.part(user.channel, socket.id);
-    user.channel = name;
-  }
-
-  @SubscribeMessage('leave-channel')
-  leaveChannel(
-    @ConnectedSocket() socket: Socket,
-  ) {
-    const user = this.users.get(socket.id);
-    this.part(user.channel, socket.id);
-    user.channel = socket.id;
+    return {author: "server", target: input.target, message: `fails to unmute ${input.target}`};
   }
 
   part(channelName: string, userSocket: string) {
@@ -227,12 +200,58 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           this.channels.delete(channelName);
         }
       }
+      return true;
     }
+    return false;
+  }
+
+  @SubscribeMessage('join-channel')
+  joinChannel(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto,
+  ): SocketOutputDto {
+    if (this.channels.has(input.target)) {
+      const channel = this.channels.get(input.target);
+      if (!channel.banList.has(socket.id) && channel.password === input.password) {
+        channel.members.add(socket.id);
+      } else {
+        return {author: "server", target: input.target, message: `fails to join channel: ${input.target}`};
+      }
+    } else {
+      const admins = new Set<string>();
+      const members = new Set<string>();
+      const banList = new Set<string>();
+      admins.add(socket.id);
+      members.add(socket.id);
+      this.channels.set(input.target, {name: input.target, owner: socket.id, admins, members, banList, private: false, password: '', channelMute: new Set<string>()})
+    }
+    const user = this.users.get(socket.id);
+    this.part(user.channel, socket.id);
+    user.channel = input.target;
+    const output = {author: "server", target: input.target, message: `join channel: ${input.target}`};
+    socket.broadcast.to(input.target).emit('join-channel', output);
+    return output;
+  }
+
+  @SubscribeMessage('leave-channel')
+  leaveChannel(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto,
+  ): SocketOutputDto {
+    const user = this.users.get(socket.id);
+    const leaved = this.part(user.channel, socket.id);
+    if (leaved) {
+      user.channel = socket.id;
+      const output = {author: "server", target: input.target, message: `leave channel: ${input.target}`};
+      socket.broadcast.to(input.target).emit('leave-channel', output);
+      return output;
+    }
+    return {author: "server", target: input.target, message: `fails to leave channel: ${input.target}`};
   }
 
   checkOwner(userSocket: string, channel: string) {
-    if (this.channels.has(channel)) {
-      const { owner, admins } = this.channels.get(channel);
+    if (this.sockets.has(userSocket) && this.channels.has(channel)) {
+      const { owner } = this.channels.get(channel);
       if (userSocket === owner ) {
         return true;
       }
@@ -241,7 +260,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   checkAdmin(userSocket: string, channel: string) {
-    if (this.channels.has(channel)) {
+    if (this.sockets.has(userSocket) && this.channels.has(channel)) {
       const { owner, admins } = this.channels.get(channel);
       if (userSocket === owner || admins.has(userSocket)) {
         return true;
@@ -250,62 +269,125 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     return false;
   }
 
-  authorizeUser(userSocket: string, channel: string, target: string) {
-    if (this.checkOwner(userSocket, channel)) {
-      this.channels.get(channel).admins.add(this.sockets.get(target));
+  @SubscribeMessage('authorize')
+  authorizeUser(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto): SocketOutputDto {
+    const channel = this.users.get(socket.id).channel;
+    if (this.checkOwner(socket.id, channel) && this.sockets.has(input.target)) {
+      this.channels.get(channel).admins.add(this.sockets.get(input.target));
+      const output = {author: "server", target: input.target, message: `${input.target} is admin now`};
+      socket.broadcast.to(channel).emit('authorize', output);
+      return output;
     }
+    return {author: "server", target: input.target, message: `fails to authorize ${input.target}`};
   }
 
-  unauthorizeUser(userSocket: string, channel: string, target: string) {
-    if (this.checkOwner(userSocket, channel)) {
-      this.channels.get(channel).admins.delete(this.sockets.get(target));
+  @SubscribeMessage('deauthorize')
+  unauthorizeUser(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto): SocketOutputDto {
+    const channel = this.users.get(socket.id).channel;
+    if (this.checkOwner(socket.id, channel) && this.sockets.has(input.target)) {
+      this.channels.get(channel).admins.add(this.sockets.get(input.target));
+      const output = {author: "server", target: input.target, message: `${input.target} is admin now`};
+      socket.broadcast.to(channel).emit('deauthorize', output);
+      return output;
     }
+    return {author: "server", target: input.target, message: `fails to deauthorize ${input.target}`};
   }
 
-  kickUser(userSocket: string, channel: string, target: string) {
+  @SubscribeMessage('kick')
+  kickUser(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto,userSocket: string, channel: string, target: string): SocketOutputDto {
     if (this.sockets.has(target)) {
       const targetSocket = this.sockets.get(target);
       if (this.checkAdmin(userSocket, channel) && !this.checkAdmin(targetSocket, channel)) {
         this.part(channel, targetSocket);
         this.users.get(targetSocket).channel = targetSocket;
-      }
-    }  
-  }
-
-  banUser(userSocket: string, channel: string, target: string) {
-    if (this.sockets.has(target)) {
-      const targetSocket = this.sockets.get(target);
-      if (this.checkAdmin(userSocket, channel) && !this.checkAdmin(targetSocket, channel)) {
-      this.channels.get(channel).banList.add(this.sockets.get(target));
+        const output = {author: "server", target: input.target, message: `${input.target} is kicked from channel`};
+        socket.broadcast.to(channel).emit('kick', output);
+        return output;
       }
     }
+    return {author: "server", target: input.target, message: `fails to kick ${input.target} from channel`};
   }
 
-  unbanUser(userSocket: string, channel: string, target: string) {
-    if (this.sockets.has(target)) {
-      const targetSocket = this.sockets.get(target);
-      if (this.checkAdmin(userSocket, channel) && !this.checkAdmin(targetSocket, channel)) {
-      this.channels.get(channel).banList.delete(this.sockets.get(target));
+  @SubscribeMessage('ban')
+  banUser(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto): SocketOutputDto {
+    const channel = this.users.get(socket.id).channel;
+    if (this.sockets.has(input.target)) {
+      const targetSocket = this.sockets.get(input.target);
+      if (this.checkAdmin(socket.id, channel) && !this.checkAdmin(targetSocket, channel)) {
+        this.channels.get(channel).banList.add(targetSocket);
+        const output = {author: "server", target: input.target, message: `${input.target} is banned`};
+        socket.broadcast.to(channel).emit('ban', output);
+        return output;
       }
     }
+    return {author: "server", target: input.target, message: `fails to ban ${input.target}`};
   }
 
-  setPassword(userSocket: string, channel: string, password: string) {
-    if (this.checkOwner(userSocket, channel)) {
-      this.channels.get(channel).password = password;
+  @SubscribeMessage('unban')
+  unbanUser(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto): SocketOutputDto {
+      const channel = this.users.get(socket.id).channel;
+      if (this.sockets.has(input.target)) {
+        const targetSocket = this.sockets.get(input.target);
+        if (this.checkAdmin(socket.id, channel) && !this.checkAdmin(targetSocket, channel)) {
+          this.channels.get(channel).banList.delete(targetSocket);
+          const output = {author: "server", target: input.target, message: `${input.target} is unbanned`};
+          socket.broadcast.to(channel).emit('unban', output);
+          return output;
+        }
+      }
+      return {author: "server", target: input.target, message: `fails to unban ${input.target}`};
+  }
+
+  @SubscribeMessage('password')
+  setPassword(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto): SocketOutputDto {
+    const channel = this.users.get(socket.id).channel;
+    if (this.checkOwner(socket.id, channel)) {
+      this.channels.get(channel).password = input.password;
+      const output = {author: "server", target: input.target, message: `password is set on ${input.target}`};
+      socket.broadcast.to(channel).emit('password', output);
+      return output;
     }
+    return {author: "server", target: input.target, message: `fails to set password on ${input.target}`};
   }
 
-  setPrivate(userSocket: string, channel: string) {
-    if (this.checkOwner(userSocket, channel)) {
+  @SubscribeMessage('private')
+  setPrivate(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto): SocketOutputDto {
+    const channel = this.users.get(socket.id).channel;
+    if (this.checkOwner(socket.id, channel)) {
       this.channels.get(channel).private = true;
+      const output = {author: "server", target: input.target, message: `${input.target} is set to private`};
+      socket.broadcast.to(channel).emit('private', output);
+      return output;
     }
+    return {author: "server", target: input.target, message: `fails to private ${input.target}`};
   }
 
-  unsetPrivate(userSocket: string, channel: string) {
-    if (this.checkOwner(userSocket, channel)) {
-      this.channels.get(channel).private = false;
-    }
+  @SubscribeMessage('deprivate')
+  unsetPrivate(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto): SocketOutputDto {
+      const channel = this.users.get(socket.id).channel;
+      if (this.checkOwner(socket.id, channel)) {
+        this.channels.get(channel).private = false;
+        const output = {author: "server", target: input.target, message: `${input.target} is set to deprivate`};
+        socket.broadcast.to(channel).emit('deprivate', output);
+        return output;
+      }
+      return {author: "server", target: input.target, message: `fails to deprivate ${input.target}`};
   }
 
 }
