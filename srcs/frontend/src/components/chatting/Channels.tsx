@@ -35,7 +35,7 @@ export function Channels() {
   );
 
 	return (
-		<Container className="mb-auto p-0 Scrollable HiddenScroll">
+		<Container className="d-flex flex-column mb-auto p-0" style={{ overflowY:"scroll" }}>
         {
             b.map((obj :{ name:string, num:number }, idx :number) => {
             return (

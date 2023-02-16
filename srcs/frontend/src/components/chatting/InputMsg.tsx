@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Button, Container, FloatingLabel, Form, InputGroup, Row } from "react-bootstrap";
+import { Button, Container, Form, InputGroup, Row } from "react-bootstrap";
 import { Message, SOCKET_EVENT } from "./types";
 import MySocket from "./MySocket";
 
@@ -17,11 +17,11 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
   };
 
 	return (
-		<Container className="w-100 p-0 m-0 mb-3">
-      <Row className="pt-3">
+		<>
+      <Row className="pt-3 justify-content-end">
         <hr style={{ color: "white" }}/>
       </Row>
-      <Row>
+      <Row className="justify-content-end">
         <form onSubmit={submitHandler}>
           <InputGroup>
             <Form.Control
@@ -36,6 +36,6 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
           </InputGroup>
         </form>
       </Row>
-    </Container>
+    </>
 	);
 }

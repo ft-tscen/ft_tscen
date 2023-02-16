@@ -21,7 +21,7 @@ export default function ChatPart() {
     }, [receivedMsg]);
 
     return (
-        <Container className="d-flex flex-column p-0 h-75">
+        <>
             <ChatMenuBar flag={flag} setFlag={setFlag}/>
             {
                 flag === SHOW_CHANNEL ? <Channels/> : <ChatRoom msgList={msgList}/>
@@ -29,6 +29,6 @@ export default function ChatPart() {
             {
                 flag === SHOW_CHATROOM ? <InputMsg setReceivedMsg={setReceivedMsg}/> : null
             }
-        </Container>
+        </>
     );
 }

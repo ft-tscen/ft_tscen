@@ -10,11 +10,11 @@ type HomeComponent = {
 function Home({ isLoggedIn }: HomeComponent) {
 	return (
 		<>
-			<Container className="p-0 m-0">
-				<Row className="w-100 m-0">
+			<Container fluid className="d-flex p-0" style={{flex:"1"}}>
+				<Row className="w-100" style={{margin:"0"}}>
 					<Col md={3}>여기는 뭐 프로필이었나?</Col>
-					<Col md={6} className="m-auto">
-						<Container>
+					<Col className="m-auto">
+						<>
 							<Row>
 								<Col className="d-flex justify-content-center">
 									<img src="./pong-logo.jpeg" alt="홈 이미지" />
@@ -34,9 +34,9 @@ function Home({ isLoggedIn }: HomeComponent) {
 									<Btn text="채팅하기" disable={isLoggedIn} />
 								</Col>
 							</Row>
-						</Container>
+						</>
 					</Col>
-					<Col md={3}>
+					<Col className="d-flex flex-column" md={3}>
 						<ChatPart/>
 					</Col>
 				</Row>

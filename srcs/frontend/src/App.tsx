@@ -26,7 +26,7 @@ function App() {
 		intraLogin();
 	}, [loggedIn]);
 	return (
-		<Container fluid className="vh-100 p-0">
+		<Container fluid className="d-flex flex-column vh-100 p-0">
 			<NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 			<Routes>
 				<Route path="/" element={<Home isLoggedIn={loggedIn} />} />

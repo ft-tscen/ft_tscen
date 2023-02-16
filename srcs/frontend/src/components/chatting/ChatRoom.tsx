@@ -15,7 +15,8 @@ export function ChatRoom({msgList} :{msgList :Message[]}) {
   return (
 		<Container
       className="mt-auto Scrollable"
-      ref={chatWindow}>
+      ref={chatWindow}
+      style={{flex:"1"}}>
       {
         msgList.map((msg :Message, idx :number) => {
           return (
