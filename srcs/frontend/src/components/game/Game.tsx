@@ -71,7 +71,7 @@ function Game() {
 	useEffect(()=> {
 		const canvas = canvasRef.current;
 		if (canvas) {
-			console.log("here");
+			console.log(ball.velocityX);
 			canvas.height = CanvasHeight;
 			canvas.width = CanvasWidth;
 			setCanvas(canvas);
@@ -217,7 +217,7 @@ function Game() {
 			if (paddleUp === true) {
 				////test/////
 				console.log("up");
-				console.log(ball.speed);
+				console.log(ball.velocityX);
 				if (leftUser.y > 0) {
 					leftUser.y -= leftUser.speed;
 				}
@@ -353,10 +353,10 @@ function Game() {
 			update();
 			rendertest();
 		}
-		requestAnimationFrame(gameLoop);
+		// requestAnimationFrame(gameLoop);
 	}
 
-	requestAnimationFrame(gameLoop);
+	setInterval(gameLoop, 1000/60);
 
 	return (
 		<div>
