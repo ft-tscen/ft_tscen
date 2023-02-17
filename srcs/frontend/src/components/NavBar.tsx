@@ -17,7 +17,7 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 
 	return (
 		<header>
-			<Navbar className="border">
+			<Navbar className="border" style={{ height: "10vmin" }}>
 				<Container>
 					<Navbar.Brand>
 						<Nav.Link onClick={() => navigate("/")} className="text-light">
@@ -40,7 +40,11 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 								</Button>
 							) : (
 								<>
-									<Button variant="outline-light" size="lg">
+									<Button
+										variant="outline-light"
+										size="lg"
+										onClick={() => navigate("/profile")}
+									>
 										프로필
 										{/* 프로필 컴포넌트 들어올 자리 */}
 									</Button>

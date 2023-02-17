@@ -1,6 +1,4 @@
-import { Col, Row } from "react-bootstrap";
-import { Container } from "react-bootstrap";
-// import style from "../css/Home.module.css";
+import { Container, Col, Row } from "react-bootstrap";
 import Btn from "./Btn";
 
 type HomeComponent = {
@@ -13,7 +11,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 			<Container>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<img src="./pong-logo.jpeg" alt="홈 이미지" />
+						<img src="./pong-logo.jpeg" alt="홈 이미지" width="90%" />
 					</Col>
 				</Row>
 				<Row>
@@ -36,10 +34,4 @@ function Home({ isLoggedIn }: HomeComponent) {
 	);
 }
 
-// <div className={style.black_background}>
-// 	<img className={style.img} src="./pong-logo.jpeg" alt="홈 이미지" />
-// </div>
-// <div className={style.buttonDiv}>
-// 	<GameBtn />
-// </div>
 export default Home;
