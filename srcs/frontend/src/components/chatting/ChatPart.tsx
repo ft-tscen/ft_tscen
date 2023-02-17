@@ -1,4 +1,3 @@
-import { Container } from "react-bootstrap";
 import { ChatMenuBar } from "./ChatMenuBar";
 import { Channels } from "./Channels";
 import { Message, SHOW_CHANNEL, SHOW_CHATROOM, SOCKET_EVENT } from "./types"
@@ -11,7 +10,7 @@ export default function ChatPart() {
     let [msgList, setMsgList] :[msgList :Message[], setMsgList:React.Dispatch<React.SetStateAction<Message[]>>] = useState<Message[]>([]);
     let [flag, setFlag] : [flag :boolean, setFlage :React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(SHOW_CHATROOM);
     let [receivedMsg, setReceivedMsg] :[receivedMsg :Message|undefined, setReceivedMsg:React.Dispatch<React.SetStateAction<Message|undefined>>] = useState<Message>();
-  
+    
     MySocket.instance.on(SOCKET_EVENT.RECEIVE, setReceivedMsg);
 
     useEffect(() => {
@@ -20,13 +19,15 @@ export default function ChatPart() {
         }
     }, [receivedMsg]);
 
-    return (
-        <Container className="d-flex flex-column w-100 h-100 p-0 m-0">
+	return (
+        <>
             <ChatMenuBar flag={flag} setFlag={setFlag}/>
             {
                 flag === SHOW_CHANNEL ? <Channels/> : <ChatRoom msgList={msgList}/>
             }
-            <InputMsg setReceivedMsg={setReceivedMsg}/>
-        </Container>
-    );
+            {
+                flag === SHOW_CHATROOM ? <InputMsg setReceivedMsg={setReceivedMsg}/> : null
+            }
+        </>
+	);
 }

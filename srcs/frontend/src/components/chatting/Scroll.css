@@ -1,0 +1,7 @@
+.Scrollable {
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+}
+.Scrollable::-webkit-scrollbar {
+    display: none;
+}

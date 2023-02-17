@@ -1,28 +1,30 @@
 import { useEffect, useRef } from "react";
-import { Row } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import { Message } from "./types";
 import { Chat } from "./Chat";
+import "./Scroll.css";
 
 export function ChatRoom({msgList} :{msgList :Message[]}) {
-  const chatWindow = useRef<HTMLDivElement>(null);
+    const chatWindow = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (chatWindow.current) {
-      chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
-    }
-  }, [msgList]);
+    useEffect(() => {
+        if (chatWindow.current) {
+            chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
+        }
+    }, [msgList]);
 
-  return (
-		<Row
-      className="w-100 m-0 mt-auto"
-      ref={chatWindow}>
-      {
-        msgList.map((msg :Message, idx :number) => {
-          return (
-            <Chat msg={msg} key={idx}/>
-          );
-        })
-      }
-		</Row>
-	);
+    return (
+        <Container
+            className="m-0 mt-auto p-0 Scrollable"
+            style={{ height:"77vmin" }}
+            ref={chatWindow}>
+            {
+                msgList.map((msg :Message, idx :number) => {
+                    return (
+                        <Chat msg={msg} key={idx}/>
+                    );
+                })
+            }
+        </Container>
+    );
 }

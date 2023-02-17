@@ -1,23 +1,41 @@
 import { useState, useEffect } from "react";
 import NavBar from "./components/NavBar";
-import Home from "./components/Home";
+import Layout from "./components/Layout";
 import { Route, Routes } from "react-router-dom";
 import { api } from "./axios/api";
 
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
-	const [intra, setIntra] = useState("");
+	let [userData, setUserData] = useState({
+		intraID: "",
+		name: "",
+		nickName: "",
+		phone: "",
+		verified: false,
+	});
 
 	const intraLogin = async () => {
 		try {
 			const res = await api.get("/user/me");
 			const { user } = res.data;
+			const data = {
+				intraID: user.intra,
+				name: user.usual_full_name,
+				nickName: user.nickname,
+				phone: user.phone,
+				verified: user.verified,
+			};
 			setLoggedIn(true);
-			setIntra(user.intra);
-			console.log(user.intra);
+			setUserData(data);
 		} catch (e) {
 			setLoggedIn(false);
-			setIntra("-");
+			setUserData({
+				intraID: "",
+				name: "",
+				nickName: "",
+				phone: "",
+				verified: false,
+			});
 		}
 	};
 
@@ -28,7 +46,16 @@ function App() {
 		<>
 			<NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 			<Routes>
-				<Route path="/" element={<Home isLoggedIn={loggedIn} />} />
+				<Route
+					path="/*"
+					element={
+						<Layout
+							isLoggedIn={loggedIn}
+							userData={userData}
+							setUserData={setUserData}
+						/>
+					}
+				/>
 			</Routes>
 		</>
 	);

@@ -1,5 +1,4 @@
-import { Button, Container, Row } from "react-bootstrap";
-import style from "../css/Home.module.css";
+import { Button } from "react-bootstrap";
 
 type BtnProps = {
 	text: string;
