@@ -114,6 +114,7 @@ function Game() {
 				color: "WHITE",
 			})
 		}
+
 		socketa.emit('test');
 		socketa.on('update', (da: dataType) => {
 			setData({
@@ -134,11 +135,11 @@ function Game() {
 		// 		// setRightScore(rScore);
 		// 	}
 		// })
-		setRerender(rerender);
+
 		// socket.on('endGame', () => {
 		// 	killSockets(socket);
 		// })
-	}, [rerender]);
+	}, []);
 
 	// function killSockets(socketi : any) {
 	// 	socket.off('endGame');
@@ -163,86 +164,78 @@ function Game() {
 		}
 	}, [ctx])
 
-	const [paddleUp, setPaddleUp] = useState<boolean>(false);
-	const [paddleDown, setPaddleDown] = useState<boolean>(false);
+	let [paddleUp, setPaddleUp] = useState<boolean>(false);
+	let [paddleDown, setPaddleDown] = useState<boolean>(false);
 
 	document.addEventListener('keydown', (e) => {
-		if (ready) {
-			var code = e.code;
+		var code = e.code;
 
-			if (code === 'KeyS' && paddleDown === false) {
-				setPaddleDown(true);
-			}
-			else if (code === 'KeyW' && paddleUp === false) {
-				setPaddleUp(true);
-			}
+		if (code === 'KeyS' && paddleDown === false) {
+			setPaddleDown(true);
+		}
+		else if (code === 'KeyW' && paddleUp === false) {
+			setPaddleUp(true);
 		}
 	}, {once:true});
 
 	document.addEventListener('keyup', (e) => {
-		if (ready) {
-			var code = e.code;
+		var code = e.code;
 
-			if (code === 'KeyS' && paddleDown === true) {
-				setPaddleDown(false);
-			}
-			else if (code === 'KeyW' && paddleUp === true) {
-				setPaddleUp(false);
-			}
+		if (code === 'KeyS' && paddleDown === true) {
+			setPaddleDown(false);
+		}
+		else if (code === 'KeyW' && paddleUp === true) {
+			setPaddleUp(false);
 		}
 	}, {once:true});
 
 	useEffect(() => {
-		if (ready) {
 			if (paddleUp === true) {
 				////test/////
 				// if (leftUser.y > 0) {
 				// 	leftUser.y -= leftUser.speed;
 				// }
 				/////socket////
-				socket.emit('PaddleUp');
+				socketa.emit('PaddleUp');
 			}
 			if (paddleDown === true) {
 				////test/////
 				// if (leftUser.y < CanvasHeight - RightUser.height) {
 				// 	leftUser.y += leftUser.speed;
 				// }
-				/////socket////
-				socket.emit('PaddleDown');
+				/////socketa////
+				socketa.emit('PaddleDown');
 			}
-			// // socket //
+			// // socketa //
 			if (paddleDown === false && paddleUp === false) {
-				socket.emit('PaddleStop');
+				socketa.emit('PaddleStop');
 			}
-		}
 	}, [paddleDown, paddleUp]);
 
 	useEffect(() => {
-		if (ready) {
 			if (paddleUp === true) {
 				////test/////
-				// console.log("up");
+				 console.log("up");
 				// console.log(ball.velocityX);
 				// if (leftUser.y > 0) {
 				// 	leftUser.y -= leftUser.speed;
 				// }
-				/////socket////
-				socket.emit('PaddleUp');
+				/////socketa////
+				socketa.emit('PaddleUp');
 			}
 			if (paddleDown === true) {
 				////test/////
-				// console.log("down");
+				 console.log("down");
 				// if (leftUser.y < CanvasHeight - RightUser.height) {
 				// 	leftUser.y += leftUser.speed;
 				// }
-				/////socket////
-				socket.emit('PaddleDown');
+				/////socketa////
+				socketa.emit('PaddleDown');
 			}
-			// // socket //
+			// // socketa //
 			if (paddleDown === false && paddleUp === false) {
-				socket.emit('PaddleStop');
+				socketa.emit('PaddleStop');
 			}
-		}
 	}, [paddleDown, paddleUp]);
 
 	useEffect(() => {
@@ -293,8 +286,8 @@ function Game() {
 			drawText(lScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
 			drawText(rScore.toString(),3*CanvasWidth/4,CanvasHeight/5,"WHITE");
 			drawNet();
-			drawRect(leftUser.x,leftUser.y,leftUser.width, leftUser.height, leftUser.color);
-			drawRect(RightUser.x,RightUser.y,RightUser.width,RightUser.height,RightUser.color);
+			drawRect(leftUser.x,data.leftPaddle,leftUser.width, leftUser.height, leftUser.color);
+			drawRect(RightUser.x,data.rightPaddle,RightUser.width,RightUser.height,RightUser.color);
 			drawCircle(data.ballX,data.ballY,ball.radius,ball.color);
 		}
 	}

@@ -10,7 +10,7 @@ const CanvasWidth = 600;
 const CanvasHeight = 400;
 @Injectable()
 export class GameService {
-  private init_test(p1: Socket, roomName: string, GameMod: gameMod): GameDto {
+    init_test(p1: Socket, roomName: string, GameMod: gameMod): GameDto {
     const params: GameDto = <GameDto>{
       roomName: roomName,
       ball: {
@@ -18,8 +18,8 @@ export class GameService {
         y: CanvasHeight / 2,
         radius: 5,
         speed: 5,
-        velocityX: 5,
-        velocityY: 5,
+        velocityX: 10,
+        velocityY: 10,
       },
       p1: {
         name: 'user',
@@ -69,8 +69,8 @@ export class GameService {
         y: CanvasHeight / 2,
         radius: 5,
         speed: 5,
-        velocityX: 5,
-        velocityY: 5,
+        velocityX: 10,
+        velocityY: 10,
       },
       p1: {
         name: p1.data.user.name,
@@ -130,7 +130,7 @@ export class GameService {
     const ball_bottom = GameDto.ball.y + GameDto.ball.radius;
     const ball_left = GameDto.ball.x - GameDto.ball.radius;
     const ball_right = GameDto.ball.x + GameDto.ball.radius;
-
+    //ball.right > player.left && ball.top < player.bottom && ball.left < player.right && ball.bottom > player.top;
     return (
       ball_right > player_left &&
       ball_top < player_bottom &&
@@ -159,6 +159,13 @@ export class GameService {
       (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
     const player =
       Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? Game.p1 : Game.p2;
+    //  if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height)
+    //	ball.velocityY = -ball.velocityY;
+    if (
+      Game.ball.y + Game.ball.radius < 0 ||
+      Game.ball.y + Game.ball.radius > CanvasHeight
+    )
+      Game.ball.velocityY = -Game.ball.velocityY;
     if (this.collision(Game, player)) {
       let collidePoint = Game.ball.y - (player.padleY + player.padleH / 2);
       collidePoint = collidePoint / (player.padleH / 2);
@@ -177,24 +184,24 @@ export class GameService {
     Game.p1.socket.emit('update', Game.front);
   }
 
-  paddleUp(client: Socket) {
-    const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
+  paddleUp(client: Socket, Game: GameDto) {
+    //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
     // if (client.id === Game.p1.socket)
     Game.p1.padleUp = true;
     // if (client.id === Game.p2.socket)
     Game.p2.padleUp = true;
   }
 
-  paddleDown(client: Socket) {
-    const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
+  paddleDown(client: Socket, Game: GameDto) {
+    //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
     // if (client.id === Game.p1.socket)
     Game.p1.padleDown = true;
     // if (client.id === Game.p2.socket)
     Game.p2.padleDown = true;
   }
 
-  paddleStop(client: Socket) {
-    const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
+  paddleStop(client: Socket, Game: GameDto) {
+    //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
     // if (client.id === Game.p1.socket)
     Game.p1.padleUp = false;
     Game.p1.padleDown = false;
@@ -206,6 +213,7 @@ export class GameService {
   private paddleCalculate(Game: GameDto) {
     if (Game.p1.padleUp === true) {
       if (Game.p1.padleY > 0) {
+        console.log('UPUPUPUP');
         Game.p1.padleY -= Game.p1.speed;
       }
     }
@@ -233,9 +241,9 @@ export class GameService {
   //   if (Game)
   // }
 
-  gameLoop(client: Socket) {
+  gameLoop(Game: GameDto) {
     // const game: GameDto = this.init_game()
-    const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
+    //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
     const interval = setInterval(() => {
       this.update(Game);
     }, 1000 / 30);

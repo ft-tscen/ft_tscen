@@ -12,7 +12,7 @@ import {
 } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { GameDto } from './dtos/game.dto';
+import { GameDto, gameMod } from './dtos/game.dto';
 import { GameService } from './game.service';
 
 class gameInfo {
@@ -22,6 +22,8 @@ class gameInfo {
 
 let createdRooms: string[] = [];
 const gameInfos: gameInfo[] = [];
+const gameDtoByRoomName = new Map<string, GameDto>();
+const RoomNameBySocket = new Map<string, string>();
 
 @ApiResponse({
   status: 200,
@@ -71,35 +73,41 @@ export class GamesGateway
   @SubscribeMessage('test')
   handleTest(@ConnectedSocket() socket: Socket) {
     this.logger.log(`${socket.id}: test success!`);
-
-    this.gameService.gameLoop(socket);
+    const Game: GameDto = this.gameService.init_test(
+      socket,
+      'test',
+      gameMod.soloGame,
+    );
+    gameDtoByRoomName[Game.roomName] = Game;
+    RoomNameBySocket[socket.id] = Game.roomName;
+    this.gameService.gameLoop(gameDtoByRoomName[Game.roomName]);
 
     socket.emit('test', `${socket.id}: test success!`);
   }
 
-  //  @SubscribeMessage('up')
-  //  handleUp(
-  //    @ConnectedSocket() socket: Socket
-  //  ) {
-  //
-  //
-  //  }
+  @SubscribeMessage('PaddleUp')
+  handlePaddleUp(@ConnectedSocket() socket: Socket) {
+    const na = RoomNameBySocket[socket.id];
+    const dto: GameDto = gameDtoByRoomName[na];
+    dto.p1.padleUp = true;
+    this.logger.log('up');
+  }
 
-  //  @SubscribeMessage('down')
-  //  handleDown(
-  //    @ConnectedSocket() socket: Socket
-  //  ) {
-  //
-  //
-  //  }
+  @SubscribeMessage('PaddleDown')
+  handlePaddleDown(@ConnectedSocket() socket: Socket) {
+    const na = RoomNameBySocket[socket.id];
+    const dto: GameDto = gameDtoByRoomName[na];
+    dto.p1.padleDown = true;
+    this.logger.log('down');
+  }
 
-  //  @SubscribeMessage('stop')
-  //  handleStop(
-  //    @ConnectedSocket() socket: Socket
-  //  ) {
-  //
-  //
-  //  }
+  @SubscribeMessage('PaddleStop')
+  handlePaddleStop(@ConnectedSocket() socket: Socket) {
+    const na = RoomNameBySocket[socket.id];
+    const dto: GameDto = gameDtoByRoomName[na];
+    dto.p1.padleUp = false;
+    dto.p1.padleDown = false;
+  }
 
   @SubscribeMessage('room-list')
   handleRoomList() {
