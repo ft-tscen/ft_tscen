@@ -13,15 +13,15 @@ import {
 import { Namespace, Socket } from 'socket.io';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GameDto } from './dtos/game.dto';
-import { GameService } from './game.service'
+import { GameService } from './game.service';
 
 class gameInfo {
-	roomName: string;
-	gameDto: GameDto;
+  roomName: string;
+  gameDto: GameDto;
 }
 
 let createdRooms: string[] = [];
-let gameInfos: gameInfo[] = [];
+const gameInfos: gameInfo[] = [];
 
 @ApiResponse({
   status: 200,
@@ -29,15 +29,15 @@ let gameInfos: gameInfo[] = [];
 })
 @ApiResponse({ status: 403, description: 'Forbidden.' })
 @WebSocketGateway({
-	namespace: 'game',
-	cors: {
-		origin: ['http://localhost:3000'],
-	},
+  namespace: 'game',
+  cors: {
+    origin: ['http://localhost:3000'],
+  },
 })
 export class GamesGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-//  constructor (private gameService: GameService, private gameDto: GameDto) {}
+  constructor(private gameService: GameService) {}
   private logger = new Logger('Game Gateway');
 
   @WebSocketServer() nsp: Namespace;
@@ -63,38 +63,43 @@ export class GamesGateway
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-    this.logger.log(`${socket.id} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`);
+    this.logger.log(
+      `${socket.id} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,
+    );
   }
 
   @SubscribeMessage('test')
   handleTest(@ConnectedSocket() socket: Socket) {
     this.logger.log(`${socket.id}: test success!`);
+
+    this.gameService.gameLoop(socket);
+
     socket.emit('test', `${socket.id}: test success!`);
   }
 
-//  @SubscribeMessage('up')
-//  handleUp(
-//    @ConnectedSocket() socket: Socket
-//  ) {
-//
-//
-//  }
+  //  @SubscribeMessage('up')
+  //  handleUp(
+  //    @ConnectedSocket() socket: Socket
+  //  ) {
+  //
+  //
+  //  }
 
-//  @SubscribeMessage('down')
-//  handleDown(
-//    @ConnectedSocket() socket: Socket
-//  ) {
-//
-//
-//  }
+  //  @SubscribeMessage('down')
+  //  handleDown(
+  //    @ConnectedSocket() socket: Socket
+  //  ) {
+  //
+  //
+  //  }
 
-//  @SubscribeMessage('stop')
-//  handleStop(
-//    @ConnectedSocket() socket: Socket
-//  ) {
-//
-//
-//  }
+  //  @SubscribeMessage('stop')
+  //  handleStop(
+  //    @ConnectedSocket() socket: Socket
+  //  ) {
+  //
+  //
+  //  }
 
   @SubscribeMessage('room-list')
   handleRoomList() {
@@ -103,12 +108,10 @@ export class GamesGateway
 
   @SubscribeMessage('ready-game')
   handleStartGame() {
-
-   // if (모든 플레이어 준비 완료시)
-   //   this->gameService->gameStart();
-   // else
-   //   ready_flag = true;
-
+    // if (모든 플레이어 준비 완료시)
+    //   this->gameService->gameStart();
+    // else
+    //   ready_flag = true;
   }
 
   @SubscribeMessage('create-room')

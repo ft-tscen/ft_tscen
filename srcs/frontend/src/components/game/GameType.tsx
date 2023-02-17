@@ -26,10 +26,10 @@ type ballType = {
 }
 
 type dataType = {
-	left_pladdle_y: number,
-	right_pladdle_y:number,
-	ball_x: number,
-	ball_y: number,
+  leftPaddle : number,
+  rightPaddle : number,
+  ballX : number,
+  ballY : number
 }
 
 export type { userType, netType, ballType, dataType }

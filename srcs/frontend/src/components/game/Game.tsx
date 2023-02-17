@@ -2,7 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 
 import { userType, netType, ballType, dataType } from './GameType';
 
-import { socket } from "../../index"
+import { io } from "socket.io-client"
+
+const socketa = io("http://localhost:3001/game");
 
 function Game() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -68,10 +70,10 @@ function Game() {
 		color : "WHITE"
 	})
 
-	const [data, setData] = useState<dataType>();
+	let [data, setData] = useState<dataType>();
 
 	useEffect(()=> {
-		// setSocket(socket);
+		setSocket(socketa);
 		const canvas = canvasRef.current;
 		if (canvas) {
 			// console.log(ball.velocityX);
@@ -112,18 +114,27 @@ function Game() {
 				color: "WHITE",
 			})
 		}
-
+		socketa.emit('test');
+		socketa.on('update', (da: dataType) => {
+			setData({
+				leftPaddle : da.leftPaddle,
+				rightPaddle : da.rightPaddle,
+				ballX : da.ballX,
+				ballY : da.ballY
+			})
+			//console.log('call');
+		})
 		// socket.on('scoreUpdate', (res: boolean) => {
 		// 	if (res == true) {
 		// 		lScore++;
 		// 		// setLeftScore(lScore);
-		// 	} 
+		// 	}
 		// 	else {
 		// 		rScore++;
 		// 		// setRightScore(rScore);
 		// 	}
 		// })
-		setRerender(!rerender);
+		setRerender(rerender);
 		// socket.on('endGame', () => {
 		// 	killSockets(socket);
 		// })
@@ -158,7 +169,7 @@ function Game() {
 	document.addEventListener('keydown', (e) => {
 		if (ready) {
 			var code = e.code;
-		
+
 			if (code === 'KeyS' && paddleDown === false) {
 				setPaddleDown(true);
 			}
@@ -167,11 +178,11 @@ function Game() {
 			}
 		}
 	}, {once:true});
-	
+
 	document.addEventListener('keyup', (e) => {
 		if (ready) {
 			var code = e.code;
-		
+
 			if (code === 'KeyS' && paddleDown === true) {
 				setPaddleDown(false);
 			}
@@ -235,9 +246,12 @@ function Game() {
 	}, [paddleDown, paddleUp]);
 
 	useEffect(() => {
+		//console.log("!!!!!");
 		if (canvas && ctx)
-			if (data)
+			if (data) {
 				render(data);
+				console.log("!!!!!");
+			}
 	}, [data])
 
 	function drawRect(x: number, y:number, w:number, h:number, color:string) {
@@ -271,8 +285,9 @@ function Game() {
 		}
 	}
 
-	function render(data: dataType){
+	function render(data: dataType) {
 		if (ctx) {
+
 			ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 			drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
 			drawText(lScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
@@ -280,7 +295,7 @@ function Game() {
 			drawNet();
 			drawRect(leftUser.x,leftUser.y,leftUser.width, leftUser.height, leftUser.color);
 			drawRect(RightUser.x,RightUser.y,RightUser.width,RightUser.height,RightUser.color);
-			drawCircle(data.ball_x,data.ball_y,ball.radius,ball.color);
+			drawCircle(data.ballX,data.ballY,ball.radius,ball.color);
 		}
 	}
 
