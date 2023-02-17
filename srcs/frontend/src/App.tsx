@@ -3,7 +3,6 @@ import NavBar from "./components/NavBar";
 import Home from "./components/Home";
 import { Route, Routes } from "react-router-dom";
 import { api } from "./axios/api";
-import { Container } from "react-bootstrap";
 
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
@@ -26,12 +25,12 @@ function App() {
 		intraLogin();
 	}, [loggedIn]);
 	return (
-		<Container fluid className="d-flex flex-column vh-100 p-0">
+		<>
 			<NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 			<Routes>
 				<Route path="/" element={<Home isLoggedIn={loggedIn} />} />
 			</Routes>
-		</Container>
+		</>
 	);
 }
 

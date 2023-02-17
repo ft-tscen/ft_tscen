@@ -18,10 +18,10 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
 
 	return (
 		<>
-      <Row className="pt-3 justify-content-end">
+      <Row className="w-100 m-0 pt-3">
         <hr style={{ color: "white" }}/>
       </Row>
-      <Row className="justify-content-end">
+      <Row className="w-100 m-0 pb-3">
         <form onSubmit={submitHandler}>
           <InputGroup>
             <Form.Control

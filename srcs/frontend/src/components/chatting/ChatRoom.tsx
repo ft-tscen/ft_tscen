@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Container } from "react-bootstrap";
+import { Row } from "react-bootstrap";
 import { Message } from "./types";
 import { Chat } from "./Chat";
 
@@ -13,10 +13,9 @@ export function ChatRoom({msgList} :{msgList :Message[]}) {
   }, [msgList]);
 
   return (
-		<Container
-      className="mt-auto Scrollable"
-      ref={chatWindow}
-      style={{flex:"1"}}>
+		<Row
+      className="w-100 m-0 mt-auto"
+      ref={chatWindow}>
       {
         msgList.map((msg :Message, idx :number) => {
           return (
@@ -24,6 +23,6 @@ export function ChatRoom({msgList} :{msgList :Message[]}) {
           );
         })
       }
-		</Container>
+		</Row>
 	);
 }

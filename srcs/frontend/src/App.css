@@ -1,8 +1,5 @@
 .Scrollable {
 	overflow-y: scroll;
-}
-
-.HiddenScroll{
     -ms-overflow-style: none;
 }
 ::-webkit-scrollbar {

@@ -1,4 +1,4 @@
-import { Container, Button, OverlayTrigger, Popover } from "react-bootstrap";
+import { Row, Button, OverlayTrigger, Popover } from "react-bootstrap";
 
 export function Channels() {
 	let b : { name:string, num:number }[] = [];
@@ -35,20 +35,20 @@ export function Channels() {
   );
 
 	return (
-		<Container className="d-flex flex-column mb-auto p-0" style={{ overflowY:"scroll" }}>
+		<Row className="mb-auto px-3 overflow-auto">
         {
             b.map((obj :{ name:string, num:number }, idx :number) => {
             return (
                 <OverlayTrigger trigger={["focus"]} placement="left" overlay={popover} key={idx}>
-                <Button
-                    className="w-100"
-                    variant="outline-light"
-                    size="lg">{obj.name}
-                </Button>
+                    <Button
+                        className="w-100"
+                        variant="outline-light"
+                        size="lg">{obj.name}
+                    </Button>
                 </OverlayTrigger>
             );
             })
         }
-        </Container>
+        </Row>
 	);
 }
