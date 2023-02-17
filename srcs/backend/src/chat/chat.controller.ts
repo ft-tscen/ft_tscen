@@ -7,6 +7,6 @@ export class ChatController {
 
   @Get('/rooms')
   getRoomList() {
-    return ;
+    return;
   }
 }
