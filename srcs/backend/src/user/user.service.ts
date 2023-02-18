@@ -6,15 +6,17 @@ import {
   UpdateUserDto,
   UpdateUserOutput,
 } from './dtos/user.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import Avatar from './entities/avatar.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Avatar) private readonly avatars: Repository<Avatar>,
   ) {}
 
   async getMe(intra: string): Promise<getMeOutput> {
@@ -97,5 +99,26 @@ export class UserService {
     } catch (error) {
       return { ok: false, error };
     }
+  }
+
+  async uploadAvatar(data: Buffer, filename: string) {
+    const newFile = await this.avatars.save(
+      this.avatars.create({ filename, data }),
+    );
+    return newFile;
+  }
+
+  async getAvatarById(id: number) {
+    const file = await this.avatars.findOne({ where: { id } });
+    if (!file) {
+      throw new NotFoundException();
+    }
+    return file;
+  }
+
+  async addAvatar(userId: number, imageBuffer: Buffer, filename: string) {
+    const avatar = await this.uploadAvatar(imageBuffer, filename);
+    await this.users.update(userId, { avatarId: avatar.id });
+    return avatar;
   }
 }
