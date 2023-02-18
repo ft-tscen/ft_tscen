@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Container } from "react-bootstrap";
 import { Message } from "./types";
 import { Chat } from "./Chat";
-import "./Scroll.css";
+import "./Effect.css";
 
 export function ChatRoom({msgList} :{msgList :Message[]}) {
     const chatWindow = useRef<HTMLDivElement>(null);
@@ -16,7 +16,7 @@ export function ChatRoom({msgList} :{msgList :Message[]}) {
     return (
         <Container
             className="m-0 mt-auto p-0 Scrollable"
-            style={{ height:"77vmin" }}
+            style={{ height:"75vmin" }}
             ref={chatWindow}>
             {
                 msgList.map((msg :Message, idx :number) => {
