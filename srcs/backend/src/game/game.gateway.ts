@@ -195,10 +195,12 @@ export class GamesGateway
     //socket.emit('test', `${socket.id}: test success!`);
   }
 
-//  @SubscribeMessage('end-game')
-//  handleEndGame(@ConnectedSocket() socket: Socket) {
-//    if ()
-//  }
+  @SubscribeMessage('end-game')
+  handleEndGame(@ConnectedSocket() socket: Socket) {
+	const roomName = RoomNameBySocket[socket.id];
+	gameRooms[roomName] = undefined;
+    RoomNameBySocket[socket.id] = undefined;
+  }
 
   @SubscribeMessage('create-room')
   handleCreateRoom(

@@ -142,6 +142,7 @@ function Game({ mod }: gameComponent) {
 				else
 					ctx.fillText("p2 win", CanvasWidth/2, CanvasHeight/2);
 				killSockets(socketa);
+				socketa.emit('end-game');
 			}
 		})
 	}, []);
