@@ -75,7 +75,7 @@ export class GameService {
         velocityY: 10,
       },
       p1: {
-        name: p1.data.user.name,
+        name: p1.id,  // 에러나서 임시로 고침
         padleX: 5,
         padleY: (CanvasHeight - 100) / 2,
         padleW: CanvasWidth / 60,
@@ -87,7 +87,7 @@ export class GameService {
         socket: p1,
       },
       p2: {
-        name: p2.data.user.name,
+        name: p2.id,  // 에러나서 임시로 고침
         padleX: CanvasWidth - 15,
         padleY: (CanvasHeight - 100) / 2,
         padleW: CanvasWidth / 60,
@@ -109,7 +109,7 @@ export class GameService {
     return params;
   }
 
-  
+
 
   // private async startMatch(p1: Socket, p2: Socket, roomName: string, GameMod: gameMod{
   //   const params: GameDto = this.init_game(player1, player2, "test", 0);

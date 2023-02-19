@@ -69,7 +69,7 @@ function Profile({ isLoggedIn, userData, setUserData }: ProfileComponent) {
 	const handleSubmit = async () => {
 		if (isDuplicated === "same" || isDuplicated === "false") {
 			try {
-				const res = await api.patch("http://localhost:3001/user/update", {
+				const res = await api.patch(`http://${process.env.REACT_APP_INTRA_SERVER_IP}:3001/user/update`, {
 					nickname: nick_name,
 					phone: phone_number,
 					verified: isCertificated,

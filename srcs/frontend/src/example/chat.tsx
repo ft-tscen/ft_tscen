@@ -8,7 +8,7 @@ import {
 } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3001/chat", { withCredentials: true });
+const socket = io(`http://${process.env.REACT_APP_INTRA_SERVER_IP}:3001/chat`, { withCredentials: true });
 
 console.log("");
 interface IChat {

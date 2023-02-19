@@ -15,7 +15,7 @@ type gameComponent = {
 	mod: gameMod;
 };
 
-const socketa = io("http://localhost:3001/game");
+const socketa = io(`http://${process.env.REACT_APP_INTRA_SERVER_IP}:3001/game`);
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -176,8 +176,9 @@ function Game({ mod }: gameComponent) {
 				ctx.font = "40px serif";
 				ctx.textAlign = "center";
 				ctx.fillText("Waiting for...", CanvasWidth/2, CanvasHeight/2);
-				socketa.emit('ready-rank');
-				socketa.on('matching', ()=> {})
+				socketa.emit('matching');
+				//socketa.on('matching', ()=> {})
+				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
 			// socketa.emit('ready', (res: boolean) => {});
 			// setReady(true);

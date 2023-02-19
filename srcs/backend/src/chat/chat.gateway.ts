@@ -9,7 +9,7 @@ import {
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: ['http://localhost:3000'],
+    origin: [`http://${process.env.INTRA_SERVER_IP}:3000`],
     credentials: true,
   },
 })

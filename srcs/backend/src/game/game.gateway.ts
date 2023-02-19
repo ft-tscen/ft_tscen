@@ -38,7 +38,7 @@ let waitingSocket: Socket = undefined;
 @WebSocketGateway({
   namespace: 'game',
   cors: {
-    origin: ['http://localhost:3000'],
+    origin: [`http://${process.env.INTRA_SERVER_IP}:3000`],
   },
 })
 export class GamesGateway
@@ -123,6 +123,7 @@ export class GamesGateway
 
   @SubscribeMessage('matching')
   handleMatching(@ConnectedSocket() socket: Socket) {
+	this.logger.log('matching');
     if (waitingSocket) {
 		const roomName = waitingSocket.id + socket.id;
 		const Game: GameDto = this.gameService.init_game(
@@ -145,6 +146,7 @@ export class GamesGateway
 		socket.join(roomName); // room 입장
 
 		this.nsp.to(roomName).emit('matching');  // room에 있는 모든 소켓에게 전송
+		waitingSocket = undefined;
 		//socket.emit('matching');
 	}
 	else {
