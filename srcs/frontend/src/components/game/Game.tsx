@@ -155,23 +155,31 @@ function Game({ mod }: gameComponent) {
 
 	useEffect(() => {
 		if (canvas && ctx) {
-			ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
-			drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
-			ctx.fillStyle = "WHITE";
-			ctx.font = "40px serif";
-			ctx.textAlign = "center";
-			ctx.fillText("Please Press 'R'", CanvasWidth/2, CanvasHeight/2);
-			document.addEventListener('keydown', (e) => {
+			if (mod === gameMod.soloGame) {
+				ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
+				drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
+				ctx.fillStyle = "WHITE";
+				ctx.font = "40px serif";
+				ctx.textAlign = "center";
+				ctx.fillText("Please Press 'R'", CanvasWidth/2, CanvasHeight/2);
+				document.addEventListener('keydown', (e) => {
 				if (e.code === 'KeyR') {
-					if (mod === gameMod.soloGame)
-						socketa.emit('ready-solo');
-					if (mod === gameMod.rankGame) {
-						socketa.emit('ready-rank');
-						socketa.on('matching', ()=> {});
-					}
-					// socketa.emit('ready', (res: boolean) => {});
+					socketa.emit('ready-solo');
 				}
-			});
+				});
+			}
+			if (mod === gameMod.rankGame) {
+				console.log("aa");
+				ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
+				drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
+				ctx.fillStyle = "WHITE";
+				ctx.font = "40px serif";
+				ctx.textAlign = "center";
+				ctx.fillText("Waiting for...", CanvasWidth/2, CanvasHeight/2);
+				socketa.emit('ready-rank');
+				socketa.on('matching', ()=> {})
+			}
+			// socketa.emit('ready', (res: boolean) => {});
 			// setReady(true);
 		}
 	}, [ctx])
