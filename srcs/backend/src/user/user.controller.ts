@@ -6,11 +6,28 @@ import {
   UpdateUserOutput,
 } from './dtos/user.dto';
 import { UserService } from './user.service';
-import { Body, Controller, Get, Patch, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Query,
+  UseGuards,
+  Post,
+  UseInterceptors,
+  UploadedFile,
+  ParseIntPipe,
+  Param,
+  Res,
+  StreamableFile,
+} from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
 import { AuthUser } from 'src/auth/authUser.decorator';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Readable } from 'stream';
+import { Response } from 'express';
 
 @ApiTags('user')
 @Controller('user')
@@ -73,5 +90,43 @@ export class UserController {
     @Body() updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
     return await this.userService.updateUser(user.id, updateData);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'post avatar to user',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  async addAvatar(
+    @AuthUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.userService.addAvatar(user.id, file.buffer, file.originalname);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'get avatar by id',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Get('avatar/:id')
+  async getAvatarById(
+    @Param('id', ParseIntPipe) id: number,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const file = await this.userService.getAvatarById(id);
+
+    const stream = Readable.from(file.data);
+
+    response.set({
+      'Content-Disposition': `inline; filename="${file.filename}"`,
+      'Content-Type': 'image',
+    });
+
+    return new StreamableFile(stream);
   }
 }

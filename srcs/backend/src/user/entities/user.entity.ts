@@ -1,5 +1,13 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+} from 'typeorm';
+import Avatar from './avatar.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -21,6 +29,12 @@ export class User extends BaseEntity {
   @Column({ nullable: true, select: false })
   code?: string;
 
+  @JoinColumn({ name: 'avatarId' })
+  @OneToOne(() => Avatar, { nullable: true })
+  public avatar?: Avatar;
+
+  @Column({ nullable: true })
+  public avatarId?: number;
   @ManyToMany(() => User)
   @JoinTable()
   friends: User[];
