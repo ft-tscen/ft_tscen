@@ -1,19 +1,18 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
+import { ChannelType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "./types";
+import MySocket from "./MySocket";
 import "./Effect.css"
 
-export function Channel({obj} :{obj:{ name:string, password:string|undefined }}) {
+export function Channel({obj, enterChannel} :{obj: ChannelType, enterChannel : (dto: SocketOutputDto) => void}) {
     let [visible, setVisible] :[visible :boolean, setVisible:React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(false);
     let name :string = (obj.password ? `🔒 ${obj.name} 🔒` : obj.name);
     const pwInputRef = useRef<HTMLInputElement>(null);
 
     const toJoinTheGame = () => {
-        if (obj.password === undefined || obj.password === pwInputRef.current!.value) {
-            console.log("To Join the Game")
-        }
-        else {
-            console.log("Wrong Password")
-        }
+        const dto :SocketInputDto = {target: obj.name, password: pwInputRef.current?.value === undefined ? "" : pwInputRef.current?.value};
+
+        MySocket.instance.emit(SOCKET_EVENT.JOIN, dto, enterChannel);
         offVisible();
         pwInputRef.current!.value = "";
     }

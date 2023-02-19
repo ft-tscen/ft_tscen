@@ -1,9 +1,10 @@
 import { Card, Row, Image } from "react-bootstrap";
 import { Button } from "react-bootstrap";
+import MySocket from "./MySocket";
 import { SocketOutputDto } from "./types";
 
 export function Chat({msg} :{ msg :SocketOutputDto }) {
-    if (msg.author === msg.target) {
+    if (msg.author === MySocket.instance.name) {
         return (
             <Row className="m-0 p-0 pb-1 h-auto justify-content-end">
                 <Card className="d-flex h-auto w-75 p-0">
@@ -34,9 +35,9 @@ export function Chat({msg} :{ msg :SocketOutputDto }) {
                 <Card className="d-flex h-auto w-75 p-0">
                     <Card.Header>{msg.author}</Card.Header>
                     <Card.Text className="px-2"> {msg.message}</Card.Text>
-                    {
+                    {/* {
                         msg.target && <Button variant="outline-dark" onClick={joinGame}>참여하기</Button>
-                    }
+                    } */}
                 </Card>
             </Row>
         );

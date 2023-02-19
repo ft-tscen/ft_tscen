@@ -1,20 +1,25 @@
+import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { Channel } from "./Channel";
+import { ChannelType, SocketOutputDto, SOCKET_EVENT } from "./types";
 import "./Effect.css";
+import MySocket from "./MySocket";
 
-export function Channels() {
-	let b : { name:string, password:string|undefined }[] = [];
-	for (let i :number = 1; i <= 35; ++i) {
-        let pw :string|undefined = (i % 2 === 0 ? `${i}` : undefined);
-        b.push({name :`${i}번 채널`, password :pw});
-	}
+type channelListType = [ channelList: ChannelType[], setChannelList: React.Dispatch<React.SetStateAction<ChannelType[]>> ];
+
+export function Channels({enterChannel} : { enterChannel : (dto: SocketOutputDto) => void }) {
+    let [channelList, setChannelList] : channelListType = useState<ChannelType[]>([]);
+
+    useEffect(() => {
+        MySocket.instance.emit_func(SOCKET_EVENT.GET_CHANNEL, setChannelList);
+    }, []);
 
 	return (
 		<Container className="m-0 p-0 mb-auto Scrollable" style={{ height:"81vmin" }}>
         {
-            b.map((obj :{ name:string, password:string|undefined }, idx :number) => {
+            channelList.map((obj :ChannelType, idx :number) => {
                 return (
-                    <Channel obj={obj}/>
+                    <Channel obj={obj} enterChannel={enterChannel}/>
                 );
             })
         }

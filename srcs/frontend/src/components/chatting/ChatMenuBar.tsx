@@ -1,15 +1,18 @@
 import { Container, Button, Col, Row } from "react-bootstrap";
-import { ENTER_CHANNEL, LEAVE_CHANNEL, SHOW_OTHER, SHOW_CHATROOM } from "./types"
+import { ENTER_CHANNEL, LEAVE_CHANNEL, SHOW_OTHER, SHOW_CHATROOM, SocketOutputDto, SOCKET_EVENT } from "./types"
+import MySocket from "./MySocket";
 
 const CHANNEL : string = "Channel";
 const GAMEROOM : string = "GameRoom";
 const CHATROOM : string = "Chatting";
 
-export function ChatMenuBar({flag, setFlag, enterChannelFlag, setEnterChannelFlag}
-    :{flag :boolean, setFlag :React.Dispatch<React.SetStateAction<boolean>>, enterChannelFlag :boolean, setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>}) {
+export function ChatMenuBar({flag, setFlag, enterChannelFlag, setEnterChannelFlag, setReceivedMsg}
+    :{flag :boolean, setFlag :React.Dispatch<React.SetStateAction<boolean>>, enterChannelFlag :boolean,
+        setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>, setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>}) {
     const exitChannel = () => {
-        console.log("채널 나가기");
-        setEnterChannelFlag(LEAVE_CHANNEL)
+        MySocket.instance.emit(SOCKET_EVENT.LEAVE, {author: MySocket.instance.name, target: MySocket.instance.enteredChannelName}, setReceivedMsg);
+        MySocket.instance.enteredChannelName = undefined;
+        setEnterChannelFlag(LEAVE_CHANNEL);
     }
     return (
         <Container className="pt-3 px-0" style={{ height:"8vmin" }}>

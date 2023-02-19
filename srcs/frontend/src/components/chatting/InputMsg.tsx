@@ -6,12 +6,14 @@ import MySocket from "./MySocket";
 export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>}) {
     const chatInputRef = useRef<HTMLInputElement>(null);
 
+    // parseInt((Math.random() * 100).toString())
+
     const submitHandler = (event :React.FormEvent<HTMLElement>) => {
         event.preventDefault();
         if (chatInputRef.current!.value !== "") {
-            let text :string;
-            let target:string;
+            let text :string|undefined = chatInputRef.current!.value;
             let words :string[] = chatInputRef.current!.value.split(" ");
+            const enteredMSG : SocketInputDto = { author: MySocket.instance.name, target: MySocket.instance.enteredChannelName, message :text};
             switch (words.at(0)) {
                 case "/HELP":
                     text = HELP;
@@ -24,11 +26,15 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                         setReceivedMsg({ author: "server", message :WRONGINPUT });
                         break;
                     }
-                    // MySocket.instance.emit(SOCKET_EVENT.CHANNEL, enteredMSG);
+                    enteredMSG.target = words[1];
+                    MySocket.instance.emit(SOCKET_EVENT.JOIN, enteredMSG, (dto :SocketOutputDto) => {
+                        MySocket.instance.enteredChannelName = dto.target;
+                        setReceivedMsg(dto);
+                    });
                     break;
                 case "/DM":
                     if (words.length >= 3) {
-                        target = words[1];
+                        enteredMSG.target = words[1];
                         text = chatInputRef.current!.value.slice(words[0].length + words[1].length + 2);
                     }
                     else {
@@ -43,7 +49,7 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                         break;
                     }
                     else {
-                        target = words[1];
+                        enteredMSG.target = words[1];
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.INVITE, enteredMSG);
                     break;
@@ -53,13 +59,13 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                         break;
                     }
                     else {
-                        target = words[1];
+                        enteredMSG.target = words[1];
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.PROFILE, enteredMSG);
                     break;
                 case "/BLOCK":
                     if (words.length === 2) {
-                        target = words[1];
+                        enteredMSG.target = words[1];
                     }
                     else {
                         setReceivedMsg({ author: "server", message :WRONGINPUT });
@@ -84,7 +90,7 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                     break;
                 case "/EMPOWER":
                     if (words.length === 2) {
-                        target = words[1];
+                        enteredMSG.target = words[1];
                     }
                     else {
                         setReceivedMsg({ author: "server", message :WRONGINPUT });
@@ -94,7 +100,7 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                     break;
                 case "/BAN":
                     if (words.length === 2) {
-                        target = words[1];
+                        enteredMSG.target = words[1];
                     }
                     else {
                         setReceivedMsg({ author: "server", message :WRONGINPUT });
@@ -104,7 +110,7 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                     break;
                 case "/MUTE":
                     if (words.length === 2) {
-                        target = words[1];
+                        enteredMSG.target = words[1];
                     }
                     else {
                         setReceivedMsg({ author: "server", message :WRONGINPUT });
@@ -113,10 +119,9 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                     // MySocket.instance.emit(SOCKET_EVENT.MUTE, enteredMSG);
                     break;
                 default:
-                    text = chatInputRef.current!.value;
-                    const enteredMSG : SocketInputDto = { author: MySocket.instance.name, message :text};
-                    MySocket.instance.emit(SOCKET_EVENT.SEND, enteredMSG, setReceivedMsg);
-                    setReceivedMsg({ author: MySocket.instance.name, target: MySocket.instance.name , message :chatInputRef.current!.value});
+                    console.log(enteredMSG);
+                    MySocket.instance.emit(SOCKET_EVENT.MSG, enteredMSG, setReceivedMsg);
+                    // setReceivedMsg({ author: MySocket.instance.name, target: MySocket.instance.name , message :chatInputRef.current!.value});
                     // setReceivedMsg({ author: "haha", message :chatInputRef.current!.value});
                     break;
             }

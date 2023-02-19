@@ -1,6 +1,6 @@
 import { ChatMenuBar } from "./ChatMenuBar";
 import { GameRooms } from "./GameRooms";
-import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketInputDto, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, SOCKET_EVENT, STARTMSG } from "./types"
+import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, STARTMSG, SOCKET_EVENT } from "./types"
 import { useEffect, useState } from "react";
 import { ChatRoom } from "./ChatRoom";
 import MySocket from "./MySocket";
@@ -9,11 +9,21 @@ import { Channels } from "./Channels";
 
 export default function ChatPart() {
     let [msgList, setMsgList] :[msgList :SocketOutputDto[], setMsgList:React.Dispatch<React.SetStateAction<SocketOutputDto[]>>] = useState<SocketOutputDto[]>([STARTMSG]);
-    let [receivedMsg, setReceivedMsg] :[receivedMsg :SocketInputDto|undefined, setReceivedMsg:React.Dispatch<React.SetStateAction<SocketInputDto|undefined>>] = useState<SocketInputDto>();
+    let [receivedMsg, setReceivedMsg] :[receivedMsg :SocketOutputDto|undefined, setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>] = useState<SocketOutputDto>();
     let [flag, setFlag] : [flag :boolean, setFlage :React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(SHOW_CHATROOM);
-    let [enterChannelFlag, setEnterChannelFlag] : [enterChannelFlag :boolean, setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(ENTER_CHANNEL);
+    let [enterChannelFlag, setEnterChannelFlag] : [enterChannelFlag :boolean, setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(LEAVE_CHANNEL);
 
-    MySocket.instance.on(SOCKET_EVENT.RECEIVE, setReceivedMsg);
+    // MySocket.instance.name = "unknown";
+
+    const enterChannel = (dto :SocketOutputDto) => {
+        setEnterChannelFlag(ENTER_CHANNEL);
+        MySocket.instance.enteredChannelName = dto.target;
+        setReceivedMsg(dto);
+    }
+
+    useEffect(() => {
+        MySocket.instance.enteredChannelName === undefined ? setEnterChannelFlag(LEAVE_CHANNEL) : setEnterChannelFlag(ENTER_CHANNEL);
+    }, [MySocket.instance.enteredChannelName]);
 
     useEffect(() => {
         if (receivedMsg) {
@@ -23,11 +33,11 @@ export default function ChatPart() {
 
 	return (
         <>
-            <ChatMenuBar flag={flag} setFlag={setFlag} enterChannelFlag={enterChannelFlag} setEnterChannelFlag={setEnterChannelFlag}/>
+            <ChatMenuBar flag={flag} setFlag={setFlag} enterChannelFlag={enterChannelFlag} setEnterChannelFlag={setEnterChannelFlag} setReceivedMsg={setReceivedMsg}/>
             {
                 flag === SHOW_OTHER
-                ? (enterChannelFlag === ENTER_CHANNEL ? <GameRooms/> : <Channels/>)
-                : <ChatRoom msgList={msgList}/>
+                ? (enterChannelFlag === ENTER_CHANNEL ? <GameRooms/> : <Channels enterChannel={enterChannel}/>)
+                : <ChatRoom msgList={msgList} setReceivedMsg={setReceivedMsg}/>
             }
             {
                 flag === SHOW_CHATROOM ? <InputMsg setReceivedMsg={setReceivedMsg}/> : null

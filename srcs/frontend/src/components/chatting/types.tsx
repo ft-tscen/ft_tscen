@@ -5,25 +5,31 @@ export interface SocketInputDto {
     target?: string; // nickname or channel name
     message?: string;
     password?: string;
-  }
+}
   
-  export interface SocketOutputDto {
+export interface SocketOutputDto {
     author?: string; // nickname
     target?: string; // nickname or channel name
     message?: string;
     // user?: User;
-  }
+}
 
+export interface ChannelType {
+    name: string;
+    hidden: boolean;
+    password: boolean;
+}
 export type InputEvent = React.FormEvent<HTMLFormElement>;
 
 export const SERVER_PORT :number = 3001;
 
 export const SOCKET_EVENT = {
-    JOIN: "JOIN",
+    MSG: "channel-msg",
+    GET_CHANNEL: "channel-list",
+    JOIN: "join-channel",
+    LEAVE: "leave-channel",
     DOSCONNECT: "disconnect",
     CHANGE_NICKNAME: "CHANGE_NICKNAME",
-    SEND: "SEND",
-    RECEIVE: "RECEIVE"
 }
 
 export const SHOW_CHATROOM :boolean = true;
