@@ -90,7 +90,7 @@ export class GamesGateway
     const na = RoomNameBySocket[socket.id];
     const dto: GameDto = gameDtoByRoomName[na];
     dto.p1.padleUp = true;
-    this.logger.log('up');
+    //this.logger.log('up');
   }
 
   @SubscribeMessage('PaddleDown')
@@ -98,7 +98,7 @@ export class GamesGateway
     const na = RoomNameBySocket[socket.id];
     const dto: GameDto = gameDtoByRoomName[na];
     dto.p1.padleDown = true;
-    this.logger.log('down');
+    //this.logger.log('down');
   }
 
   @SubscribeMessage('PaddleStop')
@@ -116,21 +116,19 @@ export class GamesGateway
 
   @SubscribeMessage('ready-game')
   handleStartGame(@ConnectedSocket() socket: Socket) {
+    if (RoomNameBySocket[socket.id])
+      return;
     this.logger.log(`${socket.id}: test success!`);
     const Game: GameDto = this.gameService.init_test(
       socket,
-      'test',
+      'roomName',
       gameMod.soloGame,
     );
     gameDtoByRoomName[Game.roomName] = Game;
     RoomNameBySocket[socket.id] = Game.roomName;
     this.gameService.gameLoop(gameDtoByRoomName[Game.roomName]);
 
-    socket.emit('test', `${socket.id}: test success!`); 
-    // if (모든 플레이어 준비 완료시)
-    //   this->gameService->gameStart();
-    // else
-    //   ready_flag = true;
+    //socket.emit('test', `${socket.id}: test success!`);
   }
 
   @SubscribeMessage('create-room')
