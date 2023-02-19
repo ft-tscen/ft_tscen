@@ -118,13 +118,25 @@ function Game() {
 			})
 		})
 
-		socketa.on('endGame', () => {
-			killSockets(socketa);
+		socketa.on('end-game', (res: boolean) => {
+			const ctx = canvas?.getContext("2d");
+			if (ctx) {
+				ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
+				drawRect(0, 0, CanvasWidth, CanvasHeight, "BALCK");
+				ctx.fillStyle = "WHITE";
+				ctx.font = "40px serif";
+				ctx.textAlign = "center";
+				if (res)
+					ctx.fillText("p1 win", CanvasWidth/2, CanvasHeight/2);
+				else
+					ctx.fillText("p2 win", CanvasWidth/2, CanvasHeight/2);
+				killSockets(socketa);
+			}
 		})
 	}, []);
 
 	function killSockets(socket : any) {
-		socket.off('endGame');
+		socket.off('end-game');
 		socket.off('update');
 		// socket.off('setData');
 	}
@@ -229,6 +241,7 @@ function Game() {
 
 	function render(data: dataType) {
 		if (ctx) {
+			console.log("%");
 			ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 			drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
 			drawText(data.leftScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
