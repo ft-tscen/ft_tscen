@@ -102,7 +102,18 @@ export class ChatGateway
 
   @SubscribeMessage('channel-list')
   handleChannelList() {
-    return Array.from(this.channels.keys());
+    const channelList = [];
+
+    this.channels.forEach((channel) => {
+      const channelObj = {
+        name: channel.name,
+        hidden: channel.private,
+        password: channel.password !== ""
+      }
+      channelList.push(channelObj);
+    })
+    console.log("received!");
+    return channelList;
   }
 
   @SubscribeMessage('channel-msg')
@@ -110,8 +121,9 @@ export class ChatGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
+    console.log(input);
     const { author, target } = input;
-    const { user } = this.users.get(this.sockets.get(author));
+    //const { user } = this.users.get(this.sockets.get(author));
 
     if (author !== target) {
       if (this.channels.has(target)) {
@@ -126,12 +138,13 @@ export class ChatGateway
             if (userMute.has(author) && now < userMute.get(author)) {
               return
             }
-            socket.to(member).emit('channel-msg', { user, ...input });
+            socket.to(member).emit('channel-msg', { ...input });
           }
         });
       }
     }
-    return { user, ...input };
+    console.log("send back");
+    return { ...input };
   }
 
   @SubscribeMessage('channel-mute')
@@ -199,18 +212,18 @@ export class ChatGateway
     @MessageBody() chat: SocketInputDto,
   ): SocketOutputDto {
     const { author, target } = chat;
-    const { user } = this.users.get(this.sockets.get(author));
+    //const { user } = this.users.get(this.sockets.get(author));
 
     if (author !== target) {
       if (this.sockets.has(target)) {
         const { userMute } = this.users.get(this.sockets.get(target));
         const now = new Date().getTime();
         if (!(userMute.has(author) && now < userMute.get(author))) {
-          socket.to(author).emit('direct-msg', { user, ...chat });
+          socket.to(author).emit('direct-msg', { ...chat });
         }
       }
     }
-    return { user, ...chat };
+    return { ...chat };
   }
 
   @SubscribeMessage('direct-mute')
