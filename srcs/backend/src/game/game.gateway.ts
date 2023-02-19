@@ -115,7 +115,18 @@ export class GamesGateway
   }
 
   @SubscribeMessage('ready-game')
-  handleStartGame() {
+  handleStartGame(@ConnectedSocket() socket: Socket) {
+    this.logger.log(`${socket.id}: test success!`);
+    const Game: GameDto = this.gameService.init_test(
+      socket,
+      'test',
+      gameMod.soloGame,
+    );
+    gameDtoByRoomName[Game.roomName] = Game;
+    RoomNameBySocket[socket.id] = Game.roomName;
+    this.gameService.gameLoop(gameDtoByRoomName[Game.roomName]);
+
+    socket.emit('test', `${socket.id}: test success!`); 
     // if (모든 플레이어 준비 완료시)
     //   this->gameService->gameStart();
     // else

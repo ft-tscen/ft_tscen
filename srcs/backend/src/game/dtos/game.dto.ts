@@ -12,7 +12,9 @@ export type FrontData = {
   leftPaddle : number,
   rightPaddle : number,
   ballX : number,
-  ballY : number
+  ballY : number,
+  leftScore: number,
+  rightScore: number,
 }
 
 export type GameDto = {

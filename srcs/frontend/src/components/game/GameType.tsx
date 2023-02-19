@@ -29,7 +29,9 @@ type dataType = {
   leftPaddle : number,
   rightPaddle : number,
   ballX : number,
-  ballY : number
+  ballY : number,
+  leftScore: number,
+  rightScore: number,
 }
 
 export type { userType, netType, ballType, dataType }

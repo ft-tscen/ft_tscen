@@ -17,7 +17,7 @@ export class GameService {
         x: CanvasWidth / 2,
         y: CanvasHeight / 2,
         radius: 5,
-        speed: 5,
+        speed: 10,
         velocityX: 10,
         velocityY: 10,
       },
@@ -30,7 +30,7 @@ export class GameService {
         score: 0,
         padleUp: false,
         padleDown: false,
-        speed: CanvasHeight / 300,
+        speed: CanvasHeight / 50,
         socket: p1,
       },
       p2: {
@@ -42,7 +42,7 @@ export class GameService {
         score: 0,
         padleUp: false,
         padleDown: false,
-        speed: CanvasHeight / 300,
+        speed: CanvasHeight / 50,
         // socket: p2,
       },
       gameMod: GameMod,
@@ -116,8 +116,12 @@ export class GameService {
   private resetBall(GameDto: GameDto) {
     GameDto.ball.x = CanvasWidth / 2;
     GameDto.ball.y = CanvasHeight / 2;
-    GameDto.ball.speed = 5;
-    GameDto.ball.velocityX = -GameDto.ball.velocityX;
+    GameDto.ball.speed = 10;
+    if (GameDto.ball.velocityX > 0)
+      GameDto.ball.velocityX = -10;
+    else
+      GameDto.ball.velocityX = 10;
+    GameDto.ball.velocityY = 10;
   }
 
   private collision(GameDto: GameDto, player: PlayerDto): boolean {
@@ -130,7 +134,6 @@ export class GameService {
     const ball_bottom = GameDto.ball.y + GameDto.ball.radius;
     const ball_left = GameDto.ball.x - GameDto.ball.radius;
     const ball_right = GameDto.ball.x + GameDto.ball.radius;
-    //ball.right > player.left && ball.top < player.bottom && ball.left < player.right && ball.bottom > player.top;
     return (
       ball_right > player_left &&
       ball_top < player_bottom &&
@@ -169,8 +172,8 @@ export class GameService {
     if (this.collision(Game, player)) {
       let collidePoint = Game.ball.y - (player.padleY + player.padleH / 2);
       collidePoint = collidePoint / (player.padleH / 2);
-      const angleRad = (Math.PI / 4) * collidePoint;
-      const direction =
+      let angleRad = (Math.PI / 4) * collidePoint;
+      let direction =
         Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? 1 : -1;
       Game.ball.velocityX = direction * Game.ball.speed * Math.cos(angleRad);
       Game.ball.velocityY = Game.ball.speed * Math.sin(angleRad);
@@ -180,6 +183,8 @@ export class GameService {
     Game.front.rightPaddle = Game.p2.padleY;
     Game.front.ballX = Game.ball.x;
     Game.front.ballY = Game.ball.y;
+    Game.front.leftScore = Game.p1.score;
+    Game.front.rightScore = Game.p2.score;
     // render 호출하는 socket 추가
     Game.p1.socket.emit('update', Game.front);
   }
@@ -213,7 +218,6 @@ export class GameService {
   private paddleCalculate(Game: GameDto) {
     if (Game.p1.padleUp === true) {
       if (Game.p1.padleY > 0) {
-        console.log('UPUPUPUP');
         Game.p1.padleY -= Game.p1.speed;
       }
     }
@@ -233,6 +237,7 @@ export class GameService {
       }
     }
   }
+
   // public currentMatch = new GameDto;
 
   // public paddleUp (client: Socket) {

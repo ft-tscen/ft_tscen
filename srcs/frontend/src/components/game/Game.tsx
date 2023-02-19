@@ -11,28 +11,21 @@ function Game() {
 	let CanvasWidth = 600;
 	let CanvasHeight = 400;
 
-	const [canvas, setCanvas] = useState<any>();
-	const [ctx, setCtx] = useState<any>();
-	const [rerender, setRerender] = useState(true);
 	// const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
 	// const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+	const [canvas, setCanvas] = useState<any>();
+	const [ctx, setCtx] = useState<any>();
+
+	// const [rerender, setRerender] = useState(true);
 	// const [startGame, setStartGame] = useState<boolean>(false);
-	const [ready, setReady] = useState<boolean>(false);
+	const [ready, setReady] = useState<any>();
 	const [init, setInit] = useState<boolean>(false);
 
-	const [gameMod, setGameMod] = useState(0);
+	const [gameMod, setGameMod] = useState<number>(0);
 	const [socket, setSocket] = useState<any>([]);
-	// const [leftScore, setLeftScore] = useState(0);
-	// const [rightScore, setRightScore] = useState(0);
 
 	const [leftName, setLeftName] = useState<string>("user");
 	const [rightName, setRightName] = useState<string>("com");
-
-	let lName:string;
-	let rName:string;
-
-	let lScore = 0;
-	let rScore = 0;
 
 	const [leftUser, setLeftUser] = useState<userType>({
 		x: 5,
@@ -76,7 +69,6 @@ function Game() {
 		setSocket(socketa);
 		const canvas = canvasRef.current;
 		if (canvas) {
-			// console.log(ball.velocityX);
 			canvas.height = CanvasHeight;
 			canvas.width = CanvasWidth;
 			setCanvas(canvas);
@@ -115,49 +107,44 @@ function Game() {
 			})
 		}
 
-		socketa.emit('test');
 		socketa.on('update', (da: dataType) => {
 			setData({
 				leftPaddle : da.leftPaddle,
 				rightPaddle : da.rightPaddle,
 				ballX : da.ballX,
-				ballY : da.ballY
+				ballY : da.ballY,
+				leftScore : da.leftScore,
+				rightScore : da.rightScore,
 			})
-			//console.log('call');
 		})
-		// socket.on('scoreUpdate', (res: boolean) => {
-		// 	if (res == true) {
-		// 		lScore++;
-		// 		// setLeftScore(lScore);
-		// 	}
-		// 	else {
-		// 		rScore++;
-		// 		// setRightScore(rScore);
-		// 	}
-		// })
 
-		// socket.on('endGame', () => {
-		// 	killSockets(socket);
-		// })
+		socketa.on('endGame', () => {
+			killSockets(socketa);
+		})
 	}, []);
 
-	// function killSockets(socketi : any) {
-	// 	socket.off('endGame');
-	// 	socket.off('scoreUpdate');
-	// 	// socket.off('setData');
-	// }
+	function killSockets(socket : any) {
+		socket.off('endGame');
+		socket.off('update');
+		// socket.off('setData');
+	}
 
 	useEffect(() => {
 		if (canvas && ctx) {
-			ctx.fillStyle = "BLACK";
+			ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
+			drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
+			ctx.fillStyle = "WHITE";
 			ctx.font = "40px serif";
 			ctx.textAlign = "center";
 			ctx.fillText("Please Press 'R'", CanvasWidth/2, CanvasHeight/2);
 			document.addEventListener('keydown', (e) => {
 				if (e.code === 'KeyR') {
-					console.log("press R");
-					setReady(true);
-					socket.emit('ready', (res: boolean) => {});
+					console.log(ready);
+					if (ready !== false) {
+						setReady(false);
+						socketa.emit('ready-game');
+					}
+					// socketa.emit('ready', (res: boolean) => {});
 				}
 			});
 			// setReady(true);
@@ -190,60 +177,22 @@ function Game() {
 	}, {once:true});
 
 	useEffect(() => {
+		// game시작 했을 때만 적용되게
 			if (paddleUp === true) {
-				////test/////
-				// if (leftUser.y > 0) {
-				// 	leftUser.y -= leftUser.speed;
-				// }
-				/////socket////
 				socketa.emit('PaddleUp');
 			}
 			if (paddleDown === true) {
-				////test/////
-				// if (leftUser.y < CanvasHeight - RightUser.height) {
-				// 	leftUser.y += leftUser.speed;
-				// }
-				/////socketa////
 				socketa.emit('PaddleDown');
 			}
-			// // socketa //
 			if (paddleDown === false && paddleUp === false) {
 				socketa.emit('PaddleStop');
 			}
 	}, [paddleDown, paddleUp]);
 
 	useEffect(() => {
-			if (paddleUp === true) {
-				////test/////
-				 console.log("up");
-				// console.log(ball.velocityX);
-				// if (leftUser.y > 0) {
-				// 	leftUser.y -= leftUser.speed;
-				// }
-				/////socketa////
-				socketa.emit('PaddleUp');
-			}
-			if (paddleDown === true) {
-				////test/////
-				 console.log("down");
-				// if (leftUser.y < CanvasHeight - RightUser.height) {
-				// 	leftUser.y += leftUser.speed;
-				// }
-				/////socketa////
-				socketa.emit('PaddleDown');
-			}
-			// // socketa //
-			if (paddleDown === false && paddleUp === false) {
-				socketa.emit('PaddleStop');
-			}
-	}, [paddleDown, paddleUp]);
-
-	useEffect(() => {
-		//console.log("!!!!!");
 		if (canvas && ctx)
 			if (data) {
 				render(data);
-				console.log("!!!!!");
 			}
 	}, [data])
 
@@ -280,11 +229,10 @@ function Game() {
 
 	function render(data: dataType) {
 		if (ctx) {
-
 			ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 			drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
-			drawText(lScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
-			drawText(rScore.toString(),3*CanvasWidth/4,CanvasHeight/5,"WHITE");
+			drawText(data.leftScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
+			drawText(data.rightScore.toString(),3*CanvasWidth/4,CanvasHeight/5,"WHITE");
 			drawNet();
 			drawRect(leftUser.x,data.leftPaddle,leftUser.width, leftUser.height, leftUser.color);
 			drawRect(RightUser.x,data.rightPaddle,RightUser.width,RightUser.height,RightUser.color);
