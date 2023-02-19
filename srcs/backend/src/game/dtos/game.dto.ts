@@ -23,5 +23,6 @@ export type GameDto = {
   p1: PlayerDto,
   p2: PlayerDto,
   gameMod: gameMod,
-  front: FrontData
+  front: FrontData,
+  interval: NodeJS.Timer,
 }

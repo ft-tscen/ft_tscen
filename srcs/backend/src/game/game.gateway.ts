@@ -105,6 +105,8 @@ export class GamesGateway
   handlePaddleStop(@ConnectedSocket() socket: Socket) {
     const na = RoomNameBySocket[socket.id];
     const dto: GameDto = gameDtoByRoomName[na];
+	if (!dto)
+		return;
     dto.p1.padleUp = false;
     dto.p1.padleDown = false;
   }
@@ -116,7 +118,7 @@ export class GamesGateway
 
   @SubscribeMessage('ready-game')
   handleStartGame(@ConnectedSocket() socket: Socket) {
-    if (RoomNameBySocket[socket.id])
+    if (RoomNameBySocket[socket.id])  // 여기 조건문 달아서 중복 호출 막음
       return;
     this.logger.log(`${socket.id}: test success!`);
     const Game: GameDto = this.gameService.init_test(
@@ -130,6 +132,11 @@ export class GamesGateway
 
     //socket.emit('test', `${socket.id}: test success!`);
   }
+
+//  @SubscribeMessage('end-game')
+//  handleEndGame(@ConnectedSocket() socket: Socket) {
+//    if ()
+//  }
 
   @SubscribeMessage('create-room')
   handleCreateRoom(

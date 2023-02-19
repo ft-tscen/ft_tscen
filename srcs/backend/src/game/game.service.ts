@@ -8,6 +8,8 @@ import { PlayerDto } from './dtos/player.dto';
 
 const CanvasWidth = 600;
 const CanvasHeight = 400;
+const VictoryScore = 3;
+
 @Injectable()
 export class GameService {
     init_test(p1: Socket, roomName: string, GameMod: gameMod): GameDto {
@@ -151,6 +153,18 @@ export class GameService {
       Game.p1.score++;
       this.resetBall(Game);
     }
+    if (Game.p1.score >= VictoryScore) {
+		Game.p1.socket.emit('end-game', true);
+		//Game.p2.socket.emit('end-game', false);
+		clearInterval(Game.interval);
+		return ;
+	}
+    else if (Game.p2.score >= VictoryScore) {
+		//Game.p2.socket.emit('end-game', true);
+		Game.p1.socket.emit('end-game', false);
+		clearInterval(Game.interval);
+		return ;
+	}
     // 패들 계산
     this.paddleCalculate(Game);
     // 공 계산
@@ -249,7 +263,7 @@ export class GameService {
   gameLoop(Game: GameDto) {
     // const game: GameDto = this.init_game()
     //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
-    const interval = setInterval(() => {
+    Game.interval = setInterval(() => {
       this.update(Game);
     }, 1000 / 30);
     //requestAnimationFrame(() => this.update(Game));
