@@ -15,15 +15,20 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { GameDto, gameMod } from './dtos/game.dto';
 import { GameService } from './game.service';
 
-class gameInfo {
-  roomName: string;
+class GameRoom {
+  p1Ready: boolean;
+  p2Ready: boolean;
   gameDto: GameDto;
 }
 
 let createdRooms: string[] = [];
-const gameInfos: gameInfo[] = [];
+
+const gameRooms = new Map<string, GameRoom>();
 const gameDtoByRoomName = new Map<string, GameDto>();
 const RoomNameBySocket = new Map<string, string>();
+
+//const gameQueue: MyQueue = new MyQueue();
+let waitingSocket: Socket = undefined;
 
 @ApiResponse({
   status: 200,
@@ -116,11 +121,65 @@ export class GamesGateway
     return createdRooms;
   }
 
-  @SubscribeMessage('ready-game')
-  handleStartGame(@ConnectedSocket() socket: Socket) {
+  @SubscribeMessage('matching')
+  handleMatching(@ConnectedSocket() socket: Socket) {
+    if (waitingSocket) {
+		const roomName = waitingSocket.id + socket.id;
+		const Game: GameDto = this.gameService.init_game(
+			waitingSocket,  // p1
+			socket,  // p2
+			roomName, // roomName
+			gameMod.rankGame, // game mod
+		);
+
+		gameRooms[roomName] = <GameRoom> {
+			p1Ready: false,
+			p2Ready: false,
+			gameDto: Game
+		}
+
+		RoomNameBySocket[waitingSocket.id] = roomName;
+		RoomNameBySocket[socket.id] = roomName;
+
+		waitingSocket.join(roomName);  // room 입장
+		socket.join(roomName); // room 입장
+
+		this.nsp.to(roomName).emit('matching');  // room에 있는 모든 소켓에게 전송
+		//socket.emit('matching');
+	}
+	else {
+		waitingSocket = socket;
+	}
+  }
+
+  @SubscribeMessage('ready-rank')
+  handleReadyRank(@ConnectedSocket() socket: Socket) {
     if (RoomNameBySocket[socket.id])  // 여기 조건문 달아서 중복 호출 막음
       return;
-    this.logger.log(`${socket.id}: test success!`);
+    this.logger.log(`Ready !!!`);
+	const roomName = RoomNameBySocket[socket.id];
+	const gameRoom: GameRoom = gameRooms[roomName];
+	if (socket.id === gameRoom.gameDto.p1.socket.id) {
+		gameRoom.p1Ready = true;
+	}
+	else {
+		gameRoom.p2Ready = true;
+	}
+
+	if (gameRoom.p1Ready === true && gameRoom.p2Ready == true) {
+		this.gameService.gameLoop(gameRoom.gameDto);
+	}
+    //socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
+    //createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
+
+    //socket.emit('test', `${socket.id}: test success!`);
+  }
+
+  @SubscribeMessage('ready-solo')
+  handleReadySolo(@ConnectedSocket() socket: Socket) {
+    if (RoomNameBySocket[socket.id])  // 여기 조건문 달아서 중복 호출 막음
+      return;
+    this.logger.log(`Ready !!!`);
     const Game: GameDto = this.gameService.init_test(
       socket,
       'roomName',
@@ -128,8 +187,11 @@ export class GamesGateway
     );
     gameDtoByRoomName[Game.roomName] = Game;
     RoomNameBySocket[socket.id] = Game.roomName;
-    this.gameService.gameLoop(gameDtoByRoomName[Game.roomName]);
 
+    //socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
+    //createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
+
+    this.gameService.gameLoop(gameDtoByRoomName[Game.roomName]);
     //socket.emit('test', `${socket.id}: test success!`);
   }
 

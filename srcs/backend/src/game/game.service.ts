@@ -58,7 +58,7 @@ export class GameService {
     return params;
   }
 
-  private init_game(
+  init_game(
     p1: Socket,
     p2: Socket,
     roomName: string,
@@ -155,13 +155,15 @@ export class GameService {
     }
     if (Game.p1.score >= VictoryScore) {
 		Game.p1.socket.emit('end-game', true);
-		//Game.p2.socket.emit('end-game', false);
+		if (Game.p2.socket)
+			Game.p2.socket.emit('end-game', false);
 		clearInterval(Game.interval);
 		return ;
 	}
     else if (Game.p2.score >= VictoryScore) {
-		//Game.p2.socket.emit('end-game', true);
 		Game.p1.socket.emit('end-game', false);
+		if (Game.p2.socket)
+			Game.p2.socket.emit('end-game', true);
 		clearInterval(Game.interval);
 		return ;
 	}
