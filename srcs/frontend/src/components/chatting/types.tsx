@@ -1,16 +1,22 @@
 import React from "react";
 
-export interface Message {
-    name :string,
-    target? :string,
-    text :string,
-	time? :string,
-    type? :string,
-};
+export interface SocketInputDto {
+    author?: string; // nickname
+    target?: string; // nickname or channel name
+    message?: string;
+    password?: string;
+  }
+  
+  export interface SocketOutputDto {
+    author?: string; // nickname
+    target?: string; // nickname or channel name
+    message?: string;
+    // user?: User;
+  }
 
 export type InputEvent = React.FormEvent<HTMLFormElement>;
 
-export const SERVER_PORT :number = 2222;
+export const SERVER_PORT :number = 3001;
 
 export const SOCKET_EVENT = {
     JOIN: "JOIN",
@@ -26,21 +32,20 @@ export const SHOW_OTHER :boolean = false;
 export const ENTER_CHANNEL :boolean = true;
 export const LEAVE_CHANNEL :boolean = false;
 
-const CHANNEL :string = "채널 생성\n/CHANNEL <public/private/protected> (<비밀번호>) <채널 이름>"
+const CHANNEL :string = "채널 생성\n/CHANNEL <채널 이름>"
 const DM :string = "다이렉트 메세지\n/DM <유저 이름> <보낼 메세지>";
 const INVITE :string = "게임 초대\n/INVITE <유저 이름/닉네임>";
 const PROFILE :string = "유저 프로필\n/PROFILE <유저 이름/닉네임>";
+const BLOCK :string = "개인유저 채팅 숨김\n/BLOCK <유저 이름/닉네임>"
 
-const ROOMSTATE :string = "채널 상태 변경\n/ROOMSTATE <public/private/protected> (<비밀번호>)"
-const PASSWORD :string = "패스워드 설정\n/PASSWORD <비밀번호>";
-const HANDOVER :string = "방장 넘겨주기\n/HANDOVER <유저 이름/닉네임>"
-const BAN :string = "유저 강퇴\n/BAN <유저 이름> <시간(초)>";
-const MUTE :string = "유저 채팅 숨김\n/MUTE <유저 이름> <시간(초)>";
+const ROOMSTATE :string = "채널 상태 변경\n/ROOMSTATE (-h[private]) (-p[protected] <비밀번호>)"
+const EMPOWER :string = "ADMIN 권한 주기\n/EMPOWER <유저 이름/닉네임>"
+const BAN :string = "유저 강퇴\n/BAN <유저 이름/닉네임>";
+const MUTE :string = "채널유저 채팅 숨김\n/MUTE <유저 이름/닉네임>";
 
 export const WRONGINPUT :string = "잘못된 입력입니다.";
-export const HELP :string = `----------------------- 명령어 목록 ------------------------
+export const HELP :string = `-------------------------- 명령어 목록 ---------------------------
 꺽쇠기호(\'<\', \'>\')속 지정된 문자열에 White Space는 문자가 아닙니다.
-채널의 비밀번호는 채널상태가 private, protected일때만 입력합니다.
 
 ${CHANNEL}
 
@@ -50,21 +55,26 @@ ${INVITE}
 
 ${PROFILE}
 
----------------------- 채널 주인 명령어 ---------------------
+${BLOCK}
+
+---------------------- CHANNEL OWNER 명령어 ---------------------
 
 ${ROOMSTATE}
 
-${PASSWORD}
+${EMPOWER}
 
-${HANDOVER}
+${BAN}
+
+${MUTE}
+
+---------------------- CHANNEL ADMIN 명령어 ---------------------
 
 ${BAN}
 
 ${MUTE}
 `;
 
-export const STARTMSG : Message = {
-    name :"server",
-    text :"반갑습니다!\n사용법 확인은 \"/HELP\"를 입력해주세요.",
-    time :new Date().toLocaleTimeString('en-US'),
+export const STARTMSG : SocketOutputDto = {
+    author :"server",
+    message :"반갑습니다!\n사용법 확인은 \"/HELP\"를 입력해주세요.",
 }

@@ -47,7 +47,7 @@ function Layout({ isLoggedIn, userData, setUserData }: LayoutComponent) {
 						{/* 정보 컴포넌트 들어올 자리 */}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
-					<Col xs={3}>
+					<Col xs={3} className="border">
 						<ChatPart/>
 					</Col>
 				</Row>

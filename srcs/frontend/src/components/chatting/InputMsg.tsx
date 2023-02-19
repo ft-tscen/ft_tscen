@@ -1,9 +1,9 @@
 import { useRef } from "react";
 import { Button, Container, Form, InputGroup, Row } from "react-bootstrap";
-import { HELP, WRONGINPUT, Message, SOCKET_EVENT } from "./types";
+import { HELP, WRONGINPUT, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "./types";
 import MySocket from "./MySocket";
 
-export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.SetStateAction<Message|undefined>>}) {
+export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>}) {
     const chatInputRef = useRef<HTMLInputElement>(null);
 
     const submitHandler = (event :React.FormEvent<HTMLElement>) => {
@@ -16,50 +16,30 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                 case "/HELP":
                     text = HELP;
                     words.length !== 1
-                    ? setReceivedMsg({ name: "server", text :WRONGINPUT })
-                    : setReceivedMsg({ name: "server", text :text });
-                    // MySocket.instance.emit(SOCKET_EVENT.HELP, enteredMSG);
+                    ? setReceivedMsg({ author: "server", message :WRONGINPUT })
+                    : setReceivedMsg({ author: "server", message :text });
                     break;
                 case "/CHANNEL":
-                    if (words.length === 3) {
-                        let type :string = words[1];
-                        if (type !== "public") {
-                            setReceivedMsg({ name: "server", text :WRONGINPUT })
-                        }
-                        else {
-                            target = words[2];
-                        }
-                    }
-                    else if (words.length === 4) {
-                        let type :string = words[1];
-                        if (type === "public") {
-                            setReceivedMsg({ name: "server", text :WRONGINPUT })
-                        }
-                        else {
-                            // 비밀번호 = words[2];
-                            target = words[3];
-                        }
-                    }
-                    else {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
+                    if (words.length !== 2) {
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
                         break;
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.CHANNEL, enteredMSG);
                     break;
                 case "/DM":
-                    if (words.length < 3) {
+                    if (words.length >= 3) {
                         target = words[1];
                         text = chatInputRef.current!.value.slice(words[0].length + words[1].length + 2);
                     }
                     else {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
                         break;
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.DM, enteredMSG);
                     break;
                 case "/INVITE":
                     if (words.length !== 2) {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
                         break;
                     }
                     else {
@@ -69,7 +49,7 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                     break;
                 case "/PROFILE":
                     if (words.length !== 2) {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
                         break;
                     }
                     else {
@@ -77,67 +57,67 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.PROFILE, enteredMSG);
                     break;
-                case "/ROOMSTATE":
-                    if (words.length === 2 || words[1] === "public") {
-                        // 비밀번호 = undefined;
-                    }
-                    else if (words.length === 3 || words[1] !== "public") {
-                        // 비밀번호 = words[2];
-                    }
-                    else {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
-                        break;
-                    }
-                    // MySocket.instance.emit(SOCKET_EVENT.ROOMSTATE, enteredMSG);
-                    break;
-                case "/PASSWORD":
-                    if (words.length === 2) {
-                        // 비밀번호 = words[1];
-                    }
-                    else {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
-                        break;
-                    }
-                    // MySocket.instance.emit(SOCKET_EVENT.PASSWORD, enteredMSG);
-                    break;
-                case "/HANDOVER":
+                case "/BLOCK":
                     if (words.length === 2) {
                         target = words[1];
                     }
                     else {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
+                        break;
+                    }
+                    // MySocket.instance.emit(SOCKET_EVENT.BLOCK, enteredMSG);
+                    break;
+                case "/ROOMSTATE":
+                    let pw :number = words.indexOf("-p");
+                    let hide :number = words.indexOf("-h");
+                    if(pw !== -1) {
+                        // words[pw + 1] && password = words[pw + 1];
+                        // MySocket.instance.emit(SOCKET_EVENT.PASSWORD, enteredMSG);
+                    }
+                    if (hide !== -1) {
+                        // MySocket.instance.emit(SOCKET_EVENT.HIDEROOM, enteredMSG);
+                    }
+                    if (pw === -1 && hide === -1) {
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
+                        break;
+                    }
+                    break;
+                case "/EMPOWER":
+                    if (words.length === 2) {
+                        target = words[1];
+                    }
+                    else {
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
                         break;
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.HANDOVER, enteredMSG);
                     break;
                 case "/BAN":
-                    if (words.length === 3 && !isNaN(Number(words[2]))) {
+                    if (words.length === 2) {
                         target = words[1];
-                        // sec = Number(words[2]);
                     }
                     else {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
                         break;
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.BAN, enteredMSG);
                     break;
                 case "/MUTE":
-                    if (words.length === 3 && !isNaN(Number(words[2]))) {
+                    if (words.length === 2) {
                         target = words[1];
-                        // sec = Number(words[2]);
                     }
                     else {
-                        setReceivedMsg({ name: "server", text :WRONGINPUT });
+                        setReceivedMsg({ author: "server", message :WRONGINPUT });
                         break;
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.MUTE, enteredMSG);
                     break;
                 default:
                     text = chatInputRef.current!.value;
-                    const enteredMSG : Message = { name: MySocket.instance.name, text :text, time :new Date().toLocaleTimeString('en-US')};
-                    MySocket.instance.emit(SOCKET_EVENT.SEND, enteredMSG);
-                    setReceivedMsg({ name: "me", text :chatInputRef.current!.value, time :new Date().toLocaleTimeString('en-US')});
-                    // setReceivedMsg({ name: "haha", text :chatInputRef.current!.value, time :new Date().toLocaleTimeString('en-US'), type :"invite"});
+                    const enteredMSG : SocketInputDto = { author: MySocket.instance.name, message :text};
+                    MySocket.instance.emit(SOCKET_EVENT.SEND, enteredMSG, setReceivedMsg);
+                    setReceivedMsg({ author: MySocket.instance.name, target: MySocket.instance.name , message :chatInputRef.current!.value});
+                    // setReceivedMsg({ author: "haha", message :chatInputRef.current!.value});
                     break;
             }
             chatInputRef.current!.value = "";
@@ -145,7 +125,7 @@ export function InputMsg({setReceivedMsg} :{setReceivedMsg:React.Dispatch<React.
     };
 
     return (
-        <Container className="p-0 m-0 pt-3" style={{ height:"7vmin" }}>
+        <Container className="p-0 m-0 pt-3" style={{ height:"6vmin" }}>
             <Row>
                 <hr style={{ color: "white" }}/>
             </Row>

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Container } from "react-bootstrap";
-import { Message } from "./types";
+import { SocketOutputDto } from "./types";
 import { Chat } from "./Chat";
 import "./Effect.css";
 
-export function ChatRoom({msgList} :{msgList :Message[]}) {
+export function ChatRoom({msgList} :{msgList :SocketOutputDto[]}) {
     const chatWindow = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -19,7 +19,7 @@ export function ChatRoom({msgList} :{msgList :Message[]}) {
             style={{ height:"75vmin" }}
             ref={chatWindow}>
             {
-                msgList.map((msg :Message, idx :number) => {
+                msgList.map((msg :SocketOutputDto, idx :number) => {
                     return (
                         <Chat msg={msg} key={idx}/>
                     );

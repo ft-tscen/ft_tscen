@@ -1,12 +1,16 @@
 import { Container, Button, Col, Row } from "react-bootstrap";
-import { ENTER_CHANNEL, SHOW_OTHER, SHOW_CHATROOM } from "./types"
+import { ENTER_CHANNEL, LEAVE_CHANNEL, SHOW_OTHER, SHOW_CHATROOM } from "./types"
 
 const CHANNEL : string = "Channel";
 const GAMEROOM : string = "GameRoom";
 const CHATROOM : string = "Chatting";
 
-export function ChatMenuBar({flag, setFlag, enterChannelFlag}
-    :{flag :boolean, setFlag :React.Dispatch<React.SetStateAction<boolean>>, enterChannelFlag :boolean}) {
+export function ChatMenuBar({flag, setFlag, enterChannelFlag, setEnterChannelFlag}
+    :{flag :boolean, setFlag :React.Dispatch<React.SetStateAction<boolean>>, enterChannelFlag :boolean, setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>}) {
+    const exitChannel = () => {
+        console.log("채널 나가기");
+        setEnterChannelFlag(LEAVE_CHANNEL)
+    }
     return (
         <Container className="pt-3 px-0" style={{ height:"8vmin" }}>
             <Row className="px-3 text-center align-items-center">
@@ -19,7 +23,14 @@ export function ChatMenuBar({flag, setFlag, enterChannelFlag}
                         }
                     </h4>
                 </Col>
-                <Col md={4} className="p-0">
+                <Col md={6} className="p-0">
+                    {
+                        enterChannelFlag === ENTER_CHANNEL &&   <Button
+                                                                    variant="outline-light"
+                                                                    size="lg"
+                                                                    onClick={exitChannel}>나가기
+                                                                </Button>
+                    }
                     <Button
                         variant="outline-light"
                         size="lg"

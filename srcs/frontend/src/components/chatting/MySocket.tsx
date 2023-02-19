@@ -8,12 +8,12 @@ export default class MySocket {
 	public name :string = "Unknown";
 
     private constructor() {
-        this.socket = io(`http://localhost:${SERVER_PORT}`, {
+        this.socket = io(`http://localhost:${SERVER_PORT}/chat`, {
             transports: ['websocket']
           });
     }
 
-    public emit(type :string, info :any) {
+    public emit(type :string, info :any, func :any) {
         this.socket.emit(type, info);
     }
     public on(type :string, func :any) {

@@ -6,7 +6,7 @@ export function Channels() {
 	let b : { name:string, password:string|undefined }[] = [];
 	for (let i :number = 1; i <= 35; ++i) {
         let pw :string|undefined = (i % 2 === 0 ? `${i}` : undefined);
-        b.push({name :`${i}번 방`, password :pw});
+        b.push({name :`${i}번 채널`, password :pw});
 	}
 
 	return (
