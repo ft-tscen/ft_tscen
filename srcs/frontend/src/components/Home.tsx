@@ -25,11 +25,10 @@ function Home({ isLoggedIn }: HomeComponent) {
 			// 방만들기 이동
 			;
 		} else if (mode === gameMod.rankGame) {
-			// 로딩 창으로 이동
-			;
+			navigate('/rankGame');
 		}
 		else if (mode === gameMod.soloGame) {
-			navigate('/Game');
+			navigate('/soloGame');
 		}
 	}
 
@@ -43,7 +42,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 				</Row>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<Btn text="경쟁전" disable={isLoggedIn} />
+						<Btn text="ㅁㅁㅁ" disable={isLoggedIn} />
 						{/* 채팅 컴포넌트 들어올 자리 */}
 					</Col>
 				</Row>
@@ -52,8 +51,11 @@ function Home({ isLoggedIn }: HomeComponent) {
 				</Row>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<Btn text="경쟁전" disable={isLoggedIn} />
-						{/* 채팅 컴포넌트 들어올 자리 */}
+						<Button variant="outline-light" disabled={!isLoggedIn}
+							style={{ width: "100px", height: "50px",}}
+							onClick={() => gameModHandle(gameMod.rankGame)}>
+								경쟁전
+						</Button>
 					</Col>
 				</Row>
 					<p> </p>
@@ -61,7 +63,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button variant="outline-light" disabled={!isLoggedIn}
 							style={{ width: "100px", height: "50px",}}
-							onClick={() => gameModHandle(2)}>
+							onClick={() => gameModHandle(gameMod.soloGame)}>
 								혼자하기
 						</Button>
 					</Col>

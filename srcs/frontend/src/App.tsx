@@ -6,6 +6,13 @@ import Layout from "./components/Layout";
 import { Route, Routes } from "react-router-dom";
 import { api } from "./axios/api";
 
+enum gameMod{
+	normalGame,
+	passwordGame,
+	soloGame,
+	rankGame,
+}
+
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	let [userData, setUserData] = useState({
@@ -49,7 +56,8 @@ function App() {
 			<NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 			<Routes>
 				<Route path="/" element={<Home isLoggedIn={loggedIn} />} />
-				<Route path="/Game" element={<Game/>} />
+				<Route path="/soloGame" element={<Game mod={gameMod.soloGame} />} />
+				<Route path="/rankGame" element={<Game mod={gameMod.rankGame} />} />
 			</Routes>
 		</>
 	);

@@ -4,9 +4,20 @@ import { userType, netType, ballType, dataType } from './GameType';
 
 import { io } from "socket.io-client"
 
+enum gameMod{
+	normalGame,
+	passwordGame,
+	soloGame,
+	rankGame,
+}
+
+type gameComponent = {
+	mod: gameMod;
+};
+
 const socketa = io("http://localhost:3001/game");
 
-function Game() {
+function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	let CanvasWidth = 600;
 	let CanvasHeight = 400;
@@ -21,7 +32,7 @@ function Game() {
 	const [ready, setReady] = useState<any>();
 	const [init, setInit] = useState<boolean>(false);
 
-	const [gameMod, setGameMod] = useState<number>(0);
+	// const [gameMod, setGameMod] = useState<number>(0);
 	const [socket, setSocket] = useState<any>([]);
 
 	const [leftName, setLeftName] = useState<string>("user");
@@ -151,10 +162,11 @@ function Game() {
 			ctx.fillText("Please Press 'R'", CanvasWidth/2, CanvasHeight/2);
 			document.addEventListener('keydown', (e) => {
 				if (e.code === 'KeyR') {
-					console.log(ready);
-					if (ready !== false) {
-						setReady(false);
-						socketa.emit('ready-game');
+					if (mod === gameMod.soloGame)
+						socketa.emit('ready-solo');
+					if (mod === gameMod.rankGame) {
+						socketa.emit('ready-rank');
+						socketa.on('matching', ()=> {});
 					}
 					// socketa.emit('ready', (res: boolean) => {});
 				}

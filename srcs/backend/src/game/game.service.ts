@@ -81,6 +81,9 @@ export class GameService {
         padleW: CanvasWidth / 60,
         padleH: CanvasHeight / 4,
         score: 0,
+        padleUp: false,
+        padleDown: false,
+        speed: CanvasHeight / 50,
         socket: p1,
       },
       p2: {
@@ -90,6 +93,9 @@ export class GameService {
         padleW: CanvasWidth / 60,
         padleH: CanvasHeight / 4,
         score: 0,
+        padleUp: false,
+        padleDown: false,
+        speed: CanvasHeight / 50,
         socket: p2,
       },
       gameMod: GameMod,
@@ -102,6 +108,8 @@ export class GameService {
     };
     return params;
   }
+
+  
 
   // private async startMatch(p1: Socket, p2: Socket, roomName: string, GameMod: gameMod{
   //   const params: GameDto = this.init_game(player1, player2, "test", 0);
@@ -155,14 +163,16 @@ export class GameService {
     }
     if (Game.p1.score >= VictoryScore) {
 		Game.p1.socket.emit('end-game', true);
-		if (Game.p2.socket)
+    if (Game.p2.socket)
 			Game.p2.socket.emit('end-game', false);
+		//Game.p2.socket.emit('end-game', false);
 		clearInterval(Game.interval);
 		return ;
 	}
     else if (Game.p2.score >= VictoryScore) {
+		//Game.p2.socket.emit('end-game', true);
 		Game.p1.socket.emit('end-game', false);
-		if (Game.p2.socket)
+    if (Game.p2.socket)
 			Game.p2.socket.emit('end-game', true);
 		clearInterval(Game.interval);
 		return ;
