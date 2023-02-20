@@ -7,17 +7,35 @@ import MySocket from "./MySocket";
 import { InputMsg } from "./InputMsg";
 import { Channels } from "./Channels";
 
-export default function ChatPart() {
-    let [msgList, setMsgList] :[msgList :SocketOutputDto[], setMsgList:React.Dispatch<React.SetStateAction<SocketOutputDto[]>>] = useState<SocketOutputDto[]>([STARTMSG]);
-    let [receivedMsg, setReceivedMsg] :[receivedMsg :SocketOutputDto|undefined, setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>] = useState<SocketOutputDto>();
-    let [flag, setFlag] : [flag :boolean, setFlage :React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(SHOW_CHATROOM);
-    let [enterChannelFlag, setEnterChannelFlag] : [enterChannelFlag :boolean, setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(LEAVE_CHANNEL);
+type MstList = [
+    msgList :SocketOutputDto[],
+    setMsgList:React.Dispatch<React.SetStateAction<SocketOutputDto[]>> 
+];
+type ReceivedMsg = [
+    receivedMsg :SocketOutputDto|undefined,
+    setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>
+];
+type Flag = [
+    flag :boolean,
+    setFlage :React.Dispatch<React.SetStateAction<boolean>>
+];
+type EnterChannelFlag = [
+    enterChannelFlag :boolean,
+    setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>
+]
 
-    // MySocket.instance.name = "unknown";
+export default function ChatPart() {
+    let [msgList, setMsgList] :MstList = useState<SocketOutputDto[]>([STARTMSG]);
+    let [receivedMsg, setReceivedMsg] :ReceivedMsg = useState<SocketOutputDto>();
+    let [flag, setFlag] : Flag = useState<boolean>(SHOW_CHATROOM);
+    let [enterChannelFlag, setEnterChannelFlag] :EnterChannelFlag = useState<boolean>(LEAVE_CHANNEL);
 
     const enterChannel = (dto :SocketOutputDto) => {
-        setEnterChannelFlag(ENTER_CHANNEL);
         MySocket.instance.enteredChannelName = dto.target;
+        setReceivedMsg(dto);
+    }
+    const enterGame = (dto :SocketOutputDto) => {
+        MySocket.instance.enteredGameName = dto.target;
         setReceivedMsg(dto);
     }
 
@@ -36,11 +54,11 @@ export default function ChatPart() {
             <ChatMenuBar flag={flag} setFlag={setFlag} enterChannelFlag={enterChannelFlag} setEnterChannelFlag={setEnterChannelFlag} setReceivedMsg={setReceivedMsg}/>
             {
                 flag === SHOW_OTHER
-                ? (enterChannelFlag === ENTER_CHANNEL ? <GameRooms/> : <Channels enterChannel={enterChannel}/>)
-                : <ChatRoom msgList={msgList} setReceivedMsg={setReceivedMsg}/>
+                ? (enterChannelFlag === ENTER_CHANNEL ? <GameRooms enterGame={enterGame}/> : <Channels enterChannel={enterChannel}/>)
+                : <ChatRoom msgList={msgList} setReceivedMsg={setReceivedMsg} enterGame={enterGame}/>
             }
             {
-                flag === SHOW_CHATROOM ? <InputMsg setReceivedMsg={setReceivedMsg}/> : null
+                flag === SHOW_CHATROOM ? <InputMsg setReceivedMsg={setReceivedMsg} enterChannel={enterChannel}/> : null
             }
         </>
 	);

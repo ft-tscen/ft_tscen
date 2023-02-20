@@ -1,29 +1,46 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
+import { GameRoomType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "./types";
 import "./Effect.css"
+import MySocket from "./MySocket";
 
-export function GameRoom({obj} :{obj:{ name:string, password:string|undefined }}) {
-    let [visible, setVisible] :[visible :boolean, setVisible:React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(false);
+type ArgsType = {
+    obj :GameRoomType,
+    enterGame : (dto: SocketOutputDto) => void
+}
+
+type Visible = [
+    visible :boolean,
+    setVisible:React.Dispatch<React.SetStateAction<boolean>>
+];
+
+export function GameRoom({obj, enterGame} :ArgsType) {
+    let [visible, setVisible] :Visible = useState<boolean>(false);
+    
     let name :string = (obj.password ? `🔒 ${obj.name} 🔒` : obj.name);
     const pwInputRef = useRef<HTMLInputElement>(null);
 
     const toWatchTheGame = () => {
-        if (obj.password === undefined || obj.password === pwInputRef.current!.value) {
-            console.log("To Watch the Game")
+        let pw :string|undefined = pwInputRef.current!.value;
+        let dto :SocketInputDto = {
+            author :MySocket.instance.name,
+            target :obj.name,
+            password :pw
         }
-        else {
-            console.log("Wrong Password")
-        }
+        
+        MySocket.instance.emit(SOCKET_EVENT.WATCH_GAME, dto, enterGame);
         offVisible();
         pwInputRef.current!.value = "";
     }
     const toJoinTheGame = () => {
-        if (obj.password === undefined || obj.password === pwInputRef.current!.value) {
-            console.log("To Join the Game")
+        let pw :string|undefined = pwInputRef.current!.value;
+        let dto :SocketInputDto = {
+            author :MySocket.instance.name,
+            target :obj.name,
+            password :pw
         }
-        else {
-            console.log("Wrong Password")
-        }
+        
+        MySocket.instance.emit(SOCKET_EVENT.ENTER_GAME, dto, enterGame);
         offVisible();
         pwInputRef.current!.value = "";
     }

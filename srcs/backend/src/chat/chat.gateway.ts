@@ -219,7 +219,7 @@ export class ChatGateway
         const { userMute } = this.users.get(this.sockets.get(target));
         const now = new Date().getTime();
         if (!(userMute.has(author) && now < userMute.get(author))) {
-          socket.to(author).emit('direct-msg', { ...chat });
+          socket.to(this.sockets.get(target)).emit('direct-msg', { ...chat }); // author -> this.sockets.get(target)
         }
       }
     }
@@ -250,7 +250,7 @@ export class ChatGateway
     };
   }
 
-  @SubscribeMessage('direct-unmute')
+  @SubscribeMessage('direct-unmute') // 서버에서 처리하는게 나을듯(따로 보내줄 명령어 안만들고)
   unmuteByUser(
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
@@ -306,7 +306,7 @@ export class ChatGateway
       } else {
         return {
           author: 'server',
-          target: input.target,
+          target: input.target, // 여기서 undefine을 넣었으면 좋겠음.
           message: `fails to join channel: ${input.target}`,
         };
       }
@@ -336,7 +336,7 @@ export class ChatGateway
       target: input.target,
       message: `join channel: ${input.target}`,
     };
-    socket.broadcast.to(input.target).emit('join-channel', output);
+    socket.broadcast.to(input.target).emit('notice', output); // join-channel -> notice[방식이 이게 맞는지 모르겠음.]
     return output;
   }
 
@@ -354,7 +354,7 @@ export class ChatGateway
         target: input.target,
         message: `leave channel: ${input.target}`,
       };
-      socket.broadcast.to(input.target).emit('leave-channel', output);
+      socket.broadcast.to(input.target).emit('notice', output); // leave-channel -> notice
       return output;
     }
     return {
@@ -399,7 +399,7 @@ export class ChatGateway
           target: input.target,
           message: `${input.target} is admin now`,
         };
-        socket.broadcast.to(channel).emit('authorize', output);
+        socket.broadcast.to(channel).emit('notice', output);// authorize -> notice
         return output;
       }
     }
@@ -489,7 +489,7 @@ export class ChatGateway
             target: input.target,
             message: `${input.target} is banned`,
           };
-          socket.broadcast.to(channel).emit('ban', output);
+          socket.broadcast.to(channel).emit('notice', output); // ban을 notice로 바꾸면 어떤지.
           return output;
         }
       }
@@ -501,6 +501,7 @@ export class ChatGateway
     };
   }
 
+ // 서버에서 처리하는게 나을듯(따로 보내줄 명령어 안만들고)
   unbanUser(socket: Socket, input: SocketInputDto) {
     const channel = this.users.get(socket.id).channel;
 
@@ -542,7 +543,7 @@ export class ChatGateway
         target: input.target,
         message: `password is set on ${input.target}`,
       };
-      socket.broadcast.to(channel).emit('password', output);
+      socket.broadcast.to(channel).emit('password', output); // password를 notice로 바꾸면 어떤지.
       return output;
     }
     return {
@@ -565,7 +566,7 @@ export class ChatGateway
         target: input.target,
         message: `${input.target} is set to private`,
       };
-      socket.broadcast.to(channel).emit('private', output);
+      socket.broadcast.to(channel).emit('private', output); // private를 notice로 바꾸면 어떤지.
       return output;
     }
     return {
@@ -588,7 +589,7 @@ export class ChatGateway
         target: input.target,
         message: `${input.target} is set to deprivate`,
       };
-      socket.broadcast.to(channel).emit('deprivate', output);
+      socket.broadcast.to(channel).emit('deprivate', output); // deprivate를 notice로 바꾸면 어떤지.
       return output;
     }
     return {

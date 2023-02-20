@@ -7,6 +7,7 @@ export default class MySocket {
 
 	public name :string = "Unknown" + parseInt((Math.random() * 100).toString()).toString();
     public enteredChannelName :string|undefined;
+    public enteredGameName :string|undefined;
 
     private constructor() {
         this.socket = io(`http://localhost:${SERVER_PORT}/chat`, {

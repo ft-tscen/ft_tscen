@@ -6,9 +6,15 @@ const CHANNEL : string = "Channel";
 const GAMEROOM : string = "GameRoom";
 const CHATROOM : string = "Chatting";
 
-export function ChatMenuBar({flag, setFlag, enterChannelFlag, setEnterChannelFlag, setReceivedMsg}
-    :{flag :boolean, setFlag :React.Dispatch<React.SetStateAction<boolean>>, enterChannelFlag :boolean,
-        setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>, setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>}) {
+type Flags = {
+    flag :boolean,
+    setFlag :React.Dispatch<React.SetStateAction<boolean>>,
+    enterChannelFlag :boolean,
+    setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>,
+    setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>
+};
+
+export function ChatMenuBar({flag, setFlag, enterChannelFlag, setEnterChannelFlag, setReceivedMsg} :Flags) {
     const exitChannel = () => {
         MySocket.instance.emit(SOCKET_EVENT.LEAVE, {author: MySocket.instance.name, target: MySocket.instance.enteredChannelName}, setReceivedMsg);
         MySocket.instance.enteredChannelName = undefined;

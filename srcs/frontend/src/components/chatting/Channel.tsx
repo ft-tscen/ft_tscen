@@ -4,13 +4,27 @@ import { ChannelType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "./ty
 import MySocket from "./MySocket";
 import "./Effect.css"
 
-export function Channel({obj, enterChannel} :{obj: ChannelType, enterChannel : (dto: SocketOutputDto) => void}) {
-    let [visible, setVisible] :[visible :boolean, setVisible:React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(false);
+type ArgsType = {
+    obj: ChannelType,
+    enterChannel : (dto: SocketOutputDto) => void
+};
+type Visible = [
+    visible :boolean,
+    setVisible:React.Dispatch<React.SetStateAction<boolean>>
+];
+
+export function Channel({obj, enterChannel} :ArgsType) {
+    let [visible, setVisible] :Visible = useState<boolean>(false);
     let name :string = (obj.password ? `🔒 ${obj.name} 🔒` : obj.name);
     const pwInputRef = useRef<HTMLInputElement>(null);
 
     const toJoinTheGame = () => {
-        const dto :SocketInputDto = {target: obj.name, password: pwInputRef.current?.value === undefined ? "" : pwInputRef.current?.value};
+        let pw :string|undefined = pwInputRef.current?.value;
+        const dto :SocketInputDto = {
+            author: MySocket.instance.name,
+            target: obj.name,
+            password: pw
+        };
 
         MySocket.instance.emit(SOCKET_EVENT.JOIN, dto, enterChannel);
         offVisible();

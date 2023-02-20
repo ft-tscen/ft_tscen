@@ -11,6 +11,7 @@ export interface SocketOutputDto {
     author?: string; // nickname
     target?: string; // nickname or channel name
     message?: string;
+    type?: string;
     // user?: User;
 }
 
@@ -19,17 +20,33 @@ export interface ChannelType {
     hidden: boolean;
     password: boolean;
 }
+
+export interface GameRoomType {
+    name: string;
+    password: boolean;
+}
+
 export type InputEvent = React.FormEvent<HTMLFormElement>;
 
 export const SERVER_PORT :number = 3001;
 
 export const SOCKET_EVENT = {
     MSG: "channel-msg",
+    DM: "direct-msg",
     GET_CHANNEL: "channel-list",
     JOIN: "join-channel",
+    EMPOWER: "authorize",
     LEAVE: "leave-channel",
-    DOSCONNECT: "disconnect",
-    CHANGE_NICKNAME: "CHANGE_NICKNAME",
+    SET_PW: "password",
+    HIDE: "private",
+    SHOW: "deprivate",
+    BAN: "ban",
+    MUTE: "mute",
+    BLOCK: "direct-mute",
+    INVITE: "invite-game",
+    NOTICE: "notice",
+    ENTER_GAME: "enter-game",
+    WATCH_GAME: "watch-gaem",
 }
 
 export const SHOW_CHATROOM :boolean = true;

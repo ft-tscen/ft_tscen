@@ -5,7 +5,10 @@ import { ChannelType, SocketOutputDto, SOCKET_EVENT } from "./types";
 import "./Effect.css";
 import MySocket from "./MySocket";
 
-type channelListType = [ channelList: ChannelType[], setChannelList: React.Dispatch<React.SetStateAction<ChannelType[]>> ];
+type channelListType = [
+    channelList: ChannelType[],
+    setChannelList: React.Dispatch<React.SetStateAction<ChannelType[]>>
+];
 
 export function Channels({enterChannel} : { enterChannel : (dto: SocketOutputDto) => void }) {
     let [channelList, setChannelList] : channelListType = useState<ChannelType[]>([]);
@@ -19,7 +22,7 @@ export function Channels({enterChannel} : { enterChannel : (dto: SocketOutputDto
         {
             channelList.map((obj :ChannelType, idx :number) => {
                 return (
-                    <Channel obj={obj} enterChannel={enterChannel}/>
+                    <Channel key={idx} obj={obj} enterChannel={enterChannel}/>
                 );
             })
         }
