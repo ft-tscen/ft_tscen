@@ -45,7 +45,6 @@ export class GameService {
         padleUp: false,
         padleDown: false,
         speed: CanvasHeight / 50,
-        // socket: p2,
       },
       gameMod: GameMod,
       front: {

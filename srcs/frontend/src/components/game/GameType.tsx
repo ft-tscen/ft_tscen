@@ -5,7 +5,6 @@ export enum gameMod{
 	rankGame,
 }
 
-
 type userType = {
 	x : number,
 	y : number,

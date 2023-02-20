@@ -5,7 +5,7 @@ import { Route, Routes } from "react-router-dom";
 import { api } from "./axios/api";
 
 function App() {
-	const [loggedIn, setLoggedIn] = useState(false);
+	const [loggedIn, setLoggedIn] = useState(true);
 	let [userData, setUserData] = useState({
 		intraID: "",
 		name: "",

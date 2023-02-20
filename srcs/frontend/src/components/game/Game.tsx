@@ -3,6 +3,9 @@ import { useEffect, useState, useRef } from 'react';
 import { userType, netType, ballType, dataType } from './GameType';
 
 import { io } from "socket.io-client"
+import EndPage from './PageEnd';
+import ReadyPage from './PageReady';
+import WaitPage from './PageWait';
 
 enum gameMod{
 	normalGame,
@@ -28,12 +31,14 @@ function Game({ mod }: gameComponent) {
 	const [ctx, setCtx] = useState<any>();
 
 	// const [rerender, setRerender] = useState(true);
-	// const [startGame, setStartGame] = useState<boolean>(false);
-	const [ready, setReady] = useState<any>();
-	const [init, setInit] = useState<boolean>(false);
+	const [startGame, setStartGame] = useState<boolean>(false);
+	// const [ready, setReady] = useState<any>();
+	// const [init, setInit] = useState<boolean>(false);
 
 	// const [gameMod, setGameMod] = useState<number>(0);
 	const [socket, setSocket] = useState<any>([]);
+
+	let [data, setData] = useState<dataType>();
 
 	const [leftName, setLeftName] = useState<string>("user");
 	const [rightName, setRightName] = useState<string>("com");
@@ -73,8 +78,6 @@ function Game({ mod }: gameComponent) {
 		speed : 7,
 		color : "WHITE"
 	})
-
-	let [data, setData] = useState<dataType>();
 
 	useEffect(()=> {
 		setSocket(socketa);
@@ -118,29 +121,30 @@ function Game({ mod }: gameComponent) {
 			})
 		}
 
-		socketa.on('update', (da: dataType) => {
+		socketa.on('update', (data: dataType) => {
 			setData({
-				leftPaddle : da.leftPaddle,
-				rightPaddle : da.rightPaddle,
-				ballX : da.ballX,
-				ballY : da.ballY,
-				leftScore : da.leftScore,
-				rightScore : da.rightScore,
+				leftPaddle : data.leftPaddle,
+				rightPaddle : data.rightPaddle,
+				ballX : data.ballX,
+				ballY : data.ballY,
+				leftScore : data.leftScore,
+				rightScore : data.rightScore,
 			})
 		})
 
 		socketa.on('end-game', (res: boolean) => {
 			const ctx = canvas?.getContext("2d");
 			if (ctx) {
-				ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
-				drawRect(0, 0, CanvasWidth, CanvasHeight, "BALCK");
-				ctx.fillStyle = "WHITE";
-				ctx.font = "40px serif";
-				ctx.textAlign = "center";
-				if (res)
-					ctx.fillText("p1 win", CanvasWidth/2, CanvasHeight/2);
-				else
-					ctx.fillText("p2 win", CanvasWidth/2, CanvasHeight/2);
+				// ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
+				// drawRect(0, 0, CanvasWidth, CanvasHeight, "BALCK");
+				// ctx.fillStyle = "WHITE";
+				// ctx.font = "40px serif";
+				// ctx.textAlign = "center";
+				// if (res)
+				// 	ctx.fillText("p1 win", CanvasWidth/2, CanvasHeight/2);
+				// else
+				// 	ctx.fillText("p2 win", CanvasWidth/2, CanvasHeight/2);
+				EndPage(ctx, CanvasWidth, CanvasHeight, res);
 				killSockets(socketa);
 				socketa.emit('end-game');
 			}
@@ -156,26 +160,28 @@ function Game({ mod }: gameComponent) {
 	useEffect(() => {
 		if (canvas && ctx) {
 			if (mod === gameMod.soloGame) {
-				ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
-				drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
-				ctx.fillStyle = "WHITE";
-				ctx.font = "40px serif";
-				ctx.textAlign = "center";
-				ctx.fillText("Please Press 'R'", CanvasWidth/2, CanvasHeight/2);
+				// ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
+				// drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
+				// ctx.fillStyle = "WHITE";
+				// ctx.font = "40px serif";
+				// ctx.textAlign = "center";
+				// ctx.fillText("Please Press 'R'", CanvasWidth/2, CanvasHeight/2);
+				ReadyPage(ctx, CanvasWidth, CanvasHeight);
 				document.addEventListener('keydown', (e) => {
 				if (e.code === 'KeyR') {
 					socketa.emit('ready-solo');
+					setStartGame(true);
 				}
 				});
 			}
 			if (mod === gameMod.rankGame) {
-				console.log("aa");
-				ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
-				drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
-				ctx.fillStyle = "WHITE";
-				ctx.font = "40px serif";
-				ctx.textAlign = "center";
-				ctx.fillText("Waiting for...", CanvasWidth/2, CanvasHeight/2);
+				// ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
+				// drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
+				// ctx.fillStyle = "WHITE";
+				// ctx.font = "40px serif";
+				// ctx.textAlign = "center";
+				// ctx.fillText("Waiting for...", CanvasWidth/2, CanvasHeight/2);
+				WaitPage(ctx, CanvasWidth, CanvasHeight);
 				socketa.emit('matching');
 				//socketa.on('matching', ()=> {})
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
@@ -189,29 +195,34 @@ function Game({ mod }: gameComponent) {
 	let [paddleDown, setPaddleDown] = useState<boolean>(false);
 
 	document.addEventListener('keydown', (e) => {
-		var code = e.code;
-
-		if (code === 'KeyS' && paddleDown === false) {
-			setPaddleDown(true);
-		}
-		else if (code === 'KeyW' && paddleUp === false) {
-			setPaddleUp(true);
+		if (startGame) {
+			var code = e.code;
+	
+			if (code === 'KeyS' && paddleDown === false) {
+				setPaddleDown(true);
+			}
+			else if (code === 'KeyW' && paddleUp === false) {
+				setPaddleUp(true);
+			}
 		}
 	}, {once:true});
 
 	document.addEventListener('keyup', (e) => {
-		var code = e.code;
-
-		if (code === 'KeyS' && paddleDown === true) {
-			setPaddleDown(false);
-		}
-		else if (code === 'KeyW' && paddleUp === true) {
-			setPaddleUp(false);
+		if (startGame) {
+			var code = e.code;
+	
+			if (code === 'KeyS' && paddleDown === true) {
+				setPaddleDown(false);
+			}
+			else if (code === 'KeyW' && paddleUp === true) {
+				setPaddleUp(false);
+			}
 		}
 	}, {once:true});
 
 	useEffect(() => {
 		// game시작 했을 때만 적용되게
+		if (startGame) {
 			if (paddleUp === true) {
 				socketa.emit('PaddleUp');
 			}
@@ -221,6 +232,7 @@ function Game({ mod }: gameComponent) {
 			if (paddleDown === false && paddleUp === false) {
 				socketa.emit('PaddleStop');
 			}
+		}
 	}, [paddleDown, paddleUp]);
 
 	useEffect(() => {
@@ -256,14 +268,14 @@ function Game({ mod }: gameComponent) {
 	function drawText(text:string, x:number, y:number, color:string) {
 		if (ctx) {
 			ctx.fillStyle = color;
-			ctx.font = "75px serif";
+			const fontSize = (CanvasWidth/8).toString();
+			ctx.font = fontSize + "px serif";
 			ctx.fillText(text, x, y);
 		}
 	}
 
 	function render(data: dataType) {
 		if (ctx) {
-			console.log("%");
 			ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 			drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
 			drawText(data.leftScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
