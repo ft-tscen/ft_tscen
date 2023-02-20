@@ -6,13 +6,7 @@ import { io } from "socket.io-client"
 import EndPage from './PageEnd';
 import ReadyPage from './PageReady';
 import WaitPage from './PageWait';
-
-enum gameMod{
-	normalGame,
-	passwordGame,
-	soloGame,
-	rankGame,
-}
+import { gameMod } from './GameType';
 
 type gameComponent = {
 	mod: gameMod;
@@ -30,13 +24,7 @@ function Game({ mod }: gameComponent) {
 	const [canvas, setCanvas] = useState<any>();
 	const [ctx, setCtx] = useState<any>();
 
-	// const [rerender, setRerender] = useState(true);
 	const [startGame, setStartGame] = useState<boolean>(false);
-	// const [ready, setReady] = useState<any>();
-	// const [init, setInit] = useState<boolean>(false);
-
-	// const [gameMod, setGameMod] = useState<number>(0);
-	const [socket, setSocket] = useState<any>([]);
 
 	let [data, setData] = useState<dataType>();
 
@@ -80,7 +68,6 @@ function Game({ mod }: gameComponent) {
 	})
 
 	useEffect(()=> {
-		setSocket(socketa);
 		const canvas = canvasRef.current;
 		if (canvas) {
 			canvas.height = CanvasHeight;
@@ -120,52 +107,13 @@ function Game({ mod }: gameComponent) {
 				color: "WHITE",
 			})
 		}
-
-		socketa.on('update', (data: dataType) => {
-			setData({
-				leftPaddle : data.leftPaddle,
-				rightPaddle : data.rightPaddle,
-				ballX : data.ballX,
-				ballY : data.ballY,
-				leftScore : data.leftScore,
-				rightScore : data.rightScore,
-			})
-		})
-
-		socketa.on('end-game', (res: boolean) => {
-			const ctx = canvas?.getContext("2d");
-			if (ctx) {
-				// ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
-				// drawRect(0, 0, CanvasWidth, CanvasHeight, "BALCK");
-				// ctx.fillStyle = "WHITE";
-				// ctx.font = "40px serif";
-				// ctx.textAlign = "center";
-				// if (res)
-				// 	ctx.fillText("p1 win", CanvasWidth/2, CanvasHeight/2);
-				// else
-				// 	ctx.fillText("p2 win", CanvasWidth/2, CanvasHeight/2);
-				EndPage(ctx, CanvasWidth, CanvasHeight, res);
-				killSockets(socketa);
-				socketa.emit('end-game');
-			}
-		})
 	}, []);
 
-	function killSockets(socket : any) {
-		socket.off('end-game');
-		socket.off('update');
-		// socket.off('setData');
-	}
+///////////////////// socket 관련 이벤트 /////////////////////////////////
 
 	useEffect(() => {
 		if (canvas && ctx) {
 			if (mod === gameMod.soloGame) {
-				// ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
-				// drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
-				// ctx.fillStyle = "WHITE";
-				// ctx.font = "40px serif";
-				// ctx.textAlign = "center";
-				// ctx.fillText("Please Press 'R'", CanvasWidth/2, CanvasHeight/2);
 				ReadyPage(ctx, CanvasWidth, CanvasHeight);
 				document.addEventListener('keydown', (e) => {
 				if (e.code === 'KeyR') {
@@ -175,21 +123,50 @@ function Game({ mod }: gameComponent) {
 				});
 			}
 			if (mod === gameMod.rankGame) {
-				// ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
-				// drawRect(0, 0, CanvasWidth, CanvasHeight, "BLACK");
-				// ctx.fillStyle = "WHITE";
-				// ctx.font = "40px serif";
-				// ctx.textAlign = "center";
-				// ctx.fillText("Waiting for...", CanvasWidth/2, CanvasHeight/2);
 				WaitPage(ctx, CanvasWidth, CanvasHeight);
 				socketa.emit('matching');
 				//socketa.on('matching', ()=> {})
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
-			// socketa.emit('ready', (res: boolean) => {});
-			// setReady(true);
+
+			socketa.on('update', (data: dataType) => {
+				setData({
+					leftPaddle : data.leftPaddle,
+					rightPaddle : data.rightPaddle,
+					ballX : data.ballX,
+					ballY : data.ballY,
+					leftScore : data.leftScore,
+					rightScore : data.rightScore,
+				})
+			})
+
+			socketa.on('end-game', (res: boolean) => {
+				const ctx = canvas?.getContext("2d");
+				if (ctx) {
+					// ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
+					// drawRect(0, 0, CanvasWidth, CanvasHeight, "BALCK");
+					// ctx.fillStyle = "WHITE";
+					// ctx.font = "40px serif";
+					// ctx.textAlign = "center";
+					// if (res)
+					// 	ctx.fillText("p1 win", CanvasWidth/2, CanvasHeight/2);
+					// else
+					// 	ctx.fillText("p2 win", CanvasWidth/2, CanvasHeight/2);
+					EndPage(ctx, CanvasWidth, CanvasHeight, res);
+					killSockets(socketa);
+					socketa.emit('end-game');
+				}
+			})
 		}
 	}, [ctx])
+
+	function killSockets(socket : any) {
+		socket.off('end-game');
+		socket.off('update');
+		// socket.off('setData');
+	}
+
+//////////////////////////paddle 관련 이벤트////////////////////////////
 
 	let [paddleUp, setPaddleUp] = useState<boolean>(false);
 	let [paddleDown, setPaddleDown] = useState<boolean>(false);
@@ -235,12 +212,7 @@ function Game({ mod }: gameComponent) {
 		}
 	}, [paddleDown, paddleUp]);
 
-	useEffect(() => {
-		if (canvas && ctx)
-			if (data) {
-				render(data);
-			}
-	}, [data])
+//////////////////////////canvas draw Function//////////////////////////////////
 
 	function drawRect(x: number, y:number, w:number, h:number, color:string) {
 		if (ctx) {
@@ -273,6 +245,16 @@ function Game({ mod }: gameComponent) {
 			ctx.fillText(text, x, y);
 		}
 	}
+
+
+///////////////////////////////render Event/////////////////////////////////////
+
+	useEffect(() => {
+		if (canvas && ctx)
+			if (data) {
+				render(data);
+			}
+	}, [data])
 
 	function render(data: dataType) {
 		if (ctx) {

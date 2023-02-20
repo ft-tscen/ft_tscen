@@ -1,4 +1,4 @@
-const ReadyPage = (ctx: CanvasRenderingContext2D, CanvasWidth: number, CanvasHeight: number) => {
+function ReadyPage (ctx: CanvasRenderingContext2D, CanvasWidth: number, CanvasHeight: number)  {
 	ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 	ctx.fillStyle = "BLACK";
 	ctx.fillRect(0, 0, CanvasWidth, CanvasHeight);

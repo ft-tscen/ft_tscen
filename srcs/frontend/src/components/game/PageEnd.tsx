@@ -1,4 +1,4 @@
-const EndPage = (ctx: CanvasRenderingContext2D, CanvasWidth: number, CanvasHeight: number, res: boolean) => {
+function EndPage (ctx: CanvasRenderingContext2D, CanvasWidth: number, CanvasHeight: number, res: boolean) {
 	ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 	ctx.fillStyle = "BLACK";
 	ctx.fillRect(0, 0, CanvasWidth, CanvasHeight);
