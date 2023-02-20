@@ -1,17 +1,8 @@
 import { useState, useEffect } from "react";
 import NavBar from "./components/NavBar";
-import Home from "./components/Home";
-import Game from "./components/game/Game";
 import Layout from "./components/Layout";
 import { Route, Routes } from "react-router-dom";
 import { api } from "./axios/api";
-
-enum gameMod{
-	normalGame,
-	passwordGame,
-	soloGame,
-	rankGame,
-}
 
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
@@ -55,9 +46,16 @@ function App() {
 		<>
 			<NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 			<Routes>
-				<Route path="/" element={<Home isLoggedIn={loggedIn} />} />
-				<Route path="/soloGame" element={<Game mod={gameMod.soloGame} />} />
-				<Route path="/rankGame" element={<Game mod={gameMod.rankGame} />} />
+				<Route
+					path="/*"
+					element={
+						<Layout
+							isLoggedIn={loggedIn}
+							userData={userData}
+							setUserData={setUserData}
+						/>
+					}
+				/>
 			</Routes>
 		</>
 	);

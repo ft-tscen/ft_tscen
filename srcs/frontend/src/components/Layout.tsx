@@ -3,6 +3,8 @@ import { Container } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import Home from "./Home";
 import Profile from "./Profile";
+import Game from "./game/Game"
+import { gameMod } from "./game/GameType";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -36,6 +38,10 @@ function Layout({ isLoggedIn, userData, setUserData }: LayoutComponent) {
 					setUserData={setUserData}
 				/>
 			);
+		else if (param === "soloGame")
+			return ( <Game mod={gameMod.soloGame} /> );
+		else if (param === "rankGame")
+			return ( <Game mod={gameMod.rankGame} /> );
 	};
 	return (
 		<>

@@ -1,3 +1,11 @@
+export enum gameMod{
+	normalGame,
+	passwordGame,
+	soloGame,
+	rankGame,
+}
+
+
 type userType = {
 	x : number,
 	y : number,
