@@ -32,7 +32,7 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 								<Button
 									variant="outline-light"
 									size="lg"
-									onClick={() =>
+									onClick={() => 
 										(window.location.href = "http://localhost:3001/login")
 									}
 								>로그인

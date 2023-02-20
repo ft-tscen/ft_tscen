@@ -1,9 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Container } from "react-bootstrap";
-import { SocketOutputDto, SOCKET_EVENT } from "./types";
+import { SocketOutputDto } from "./types";
 import { Chat } from "./Chat";
 import "./Effect.css";
-import MySocket from "./MySocket";
 
 type ArgsType = {
     msgList :SocketOutputDto[],
