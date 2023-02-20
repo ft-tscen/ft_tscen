@@ -14,8 +14,9 @@ export function GameRooms({enterGame} : { enterGame : (dto: SocketOutputDto) => 
     let [gameRoomList, setGameRoomList] : GameRoomListType = useState<GameRoomType[]>([]);
 
     useEffect(() => {
-        MySocket.instance.emit_func(SOCKET_EVENT.GET_CHANNEL, setGameRoomList);
+        MySocket.instance.emit_func(SOCKET_EVENT.GET_GAMEROOM, setGameRoomList);
     }, []);
+
 	return (
 		<Container className="m-0 p-0 mb-auto Scrollable" style={{ height:"81vmin" }}>
         {

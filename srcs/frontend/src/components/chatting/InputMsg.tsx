@@ -16,7 +16,7 @@ export function InputMsg({setReceivedMsg, enterChannel} :ArgsType) {
         if (chatInputRef.current!.value !== "") {
             let text :string|undefined = chatInputRef.current!.value;
             let words :string[] = chatInputRef.current!.value.split(" ");
-            const enteredMSG : SocketInputDto = { author: MySocket.instance.name, target: MySocket.instance.enteredChannelName, message :text};
+            const enteredMSG : SocketInputDto = { author: MySocket.instance.name, target: MySocket.instance.enteredChannelName, message :text, password :''};
             switch (words.at(0)) {
                 case "/HELP":
                     text = HELP;
@@ -42,7 +42,7 @@ export function InputMsg({setReceivedMsg, enterChannel} :ArgsType) {
                     enteredMSG.message = text;
                     MySocket.instance.emit(SOCKET_EVENT.DM, enteredMSG, setReceivedMsg);
                     break;
-                case "/INVITE":
+                case "/INVITE": // 보류
                     if (words.length !== 2) {
                         setReceivedMsg({ author: "server", message :`${text} :${WRONGINPUT}` });
                         break;
@@ -52,7 +52,7 @@ export function InputMsg({setReceivedMsg, enterChannel} :ArgsType) {
                     }
                     // MySocket.instance.emit(SOCKET_EVENT.INVITE, enteredMSG);
                     break;
-                case "/PROFILE":
+                case "/PROFILE": // 보류
                     if (words.length !== 2) {
                         setReceivedMsg({ author: "server", message :`${text} :${WRONGINPUT}` });
                         break;

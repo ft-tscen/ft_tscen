@@ -19,7 +19,8 @@ export function Channel({obj, enterChannel} :ArgsType) {
     const pwInputRef = useRef<HTMLInputElement>(null);
 
     const toJoinTheGame = () => {
-        let pw :string|undefined = pwInputRef.current?.value;
+        let pw :string = pwInputRef.current?.value === undefined ? '' : pwInputRef.current?.value;
+        console.log(pw);
         const dto :SocketInputDto = {
             author: MySocket.instance.name,
             target: obj.name,

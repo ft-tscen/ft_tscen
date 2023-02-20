@@ -34,6 +34,7 @@ export const SOCKET_EVENT = {
     MSG: "channel-msg",
     DM: "direct-msg",
     GET_CHANNEL: "channel-list",
+    GET_GAMEROOM: "gameroom-list",
     JOIN: "join-channel",
     EMPOWER: "authorize",
     LEAVE: "leave-channel",
@@ -68,7 +69,7 @@ const MUTE :string = "채널유저 채팅 숨김\n/MUTE <유저 이름/닉네임
 
 export const WRONGINPUT :string = "잘못된 입력입니다.";
 export const HELP :string = `-------------------------- 명령어 목록 ---------------------------
-꺽쇠기호(\'<\', \'>\')속 지정된 문자열에 White Space는 문자가 아닙니다.
+꺽쇠기호('<', '>')속 지정된 문자열에 White Space는 문자가 아닙니다.
 
 ${CHANNEL}
 

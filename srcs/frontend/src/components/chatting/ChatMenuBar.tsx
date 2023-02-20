@@ -1,6 +1,5 @@
 import { Container, Button, Col, Row } from "react-bootstrap";
-import { ENTER_CHANNEL, LEAVE_CHANNEL, SHOW_OTHER, SHOW_CHATROOM, SocketOutputDto, SOCKET_EVENT } from "./types"
-import MySocket from "./MySocket";
+import { ENTER_CHANNEL, SHOW_OTHER, SHOW_CHATROOM } from "./types"
 
 const CHANNEL : string = "Channel";
 const GAMEROOM : string = "GameRoom";
@@ -10,16 +9,10 @@ type Flags = {
     flag :boolean,
     setFlag :React.Dispatch<React.SetStateAction<boolean>>,
     enterChannelFlag :boolean,
-    setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>,
-    setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>
+    exitChannel: () => void,
 };
 
-export function ChatMenuBar({flag, setFlag, enterChannelFlag, setEnterChannelFlag, setReceivedMsg} :Flags) {
-    const exitChannel = () => {
-        MySocket.instance.emit(SOCKET_EVENT.LEAVE, {author: MySocket.instance.name, target: MySocket.instance.enteredChannelName}, setReceivedMsg);
-        MySocket.instance.enteredChannelName = undefined;
-        setEnterChannelFlag(LEAVE_CHANNEL);
-    }
+export function ChatMenuBar({flag, setFlag, enterChannelFlag, exitChannel} :Flags) {
     return (
         <Container className="pt-3 px-0" style={{ height:"8vmin" }}>
             <Row className="px-3 text-center align-items-center">

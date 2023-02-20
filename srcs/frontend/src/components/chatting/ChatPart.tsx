@@ -38,6 +38,11 @@ export default function ChatPart() {
         MySocket.instance.enteredGameName = dto.target;
         setReceivedMsg(dto);
     }
+    const exitChannel = () => {
+        MySocket.instance.emit(SOCKET_EVENT.LEAVE, {author: MySocket.instance.name, target: MySocket.instance.enteredChannelName}, setReceivedMsg);
+        MySocket.instance.enteredChannelName = undefined;
+        setEnterChannelFlag(LEAVE_CHANNEL);
+    }
 
     useEffect(() => {
         MySocket.instance.enteredChannelName === undefined ? setEnterChannelFlag(LEAVE_CHANNEL) : setEnterChannelFlag(ENTER_CHANNEL);
@@ -49,16 +54,39 @@ export default function ChatPart() {
         }
     }, [receivedMsg]);
 
+    useEffect(() => {
+        const setDMMsg = (dto :SocketOutputDto) => {
+            dto.type = SOCKET_EVENT.DM;
+            setReceivedMsg(dto)};
+        const setInviteMsg = (dto :SocketOutputDto) => {
+            dto.type = SOCKET_EVENT.INVITE;
+            setReceivedMsg(dto)};
+
+        MySocket.instance.on(SOCKET_EVENT.MSG, setReceivedMsg);
+        MySocket.instance.on(SOCKET_EVENT.DM, setDMMsg);
+        MySocket.instance.on(SOCKET_EVENT.INVITE, setInviteMsg);
+        MySocket.instance.on(SOCKET_EVENT.NOTICE, setReceivedMsg);
+        return ()=>{
+            MySocket.instance.off(SOCKET_EVENT.MSG, setReceivedMsg);
+            MySocket.instance.off(SOCKET_EVENT.DM, setDMMsg);
+            MySocket.instance.off(SOCKET_EVENT.INVITE, setInviteMsg);
+            MySocket.instance.off(SOCKET_EVENT.NOTICE, setReceivedMsg);
+        };
+    }, []);
+
 	return (
         <>
-            <ChatMenuBar flag={flag} setFlag={setFlag} enterChannelFlag={enterChannelFlag} setEnterChannelFlag={setEnterChannelFlag} setReceivedMsg={setReceivedMsg}/>
+            <ChatMenuBar
+                flag={flag} setFlag={setFlag} 
+                enterChannelFlag={enterChannelFlag}
+                exitChannel={exitChannel}/>
             {
                 flag === SHOW_OTHER
                 ? (enterChannelFlag === ENTER_CHANNEL ? <GameRooms enterGame={enterGame}/> : <Channels enterChannel={enterChannel}/>)
-                : <ChatRoom msgList={msgList} setReceivedMsg={setReceivedMsg} enterGame={enterGame}/>
+                : <ChatRoom msgList={msgList} enterGame={enterGame}/>
             }
             {
-                flag === SHOW_CHATROOM ? <InputMsg setReceivedMsg={setReceivedMsg} enterChannel={enterChannel}/> : null
+                flag === SHOW_CHATROOM && <InputMsg setReceivedMsg={setReceivedMsg} enterChannel={enterChannel}/>
             }
         </>
 	);
