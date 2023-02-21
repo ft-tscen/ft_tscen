@@ -23,7 +23,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  app.enableCors({ origin: `http://${process.env.INTRA_SERVER_IP}:3000`, credentials: true });
+  app.enableCors({ origin: `http://${process.env.NESTJS_HOST}:3000`, credentials: true });
   await app.listen(parseInt(process.env.NESTJS_PORT) || 3001);
 }
 bootstrap();

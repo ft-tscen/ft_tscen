@@ -38,7 +38,7 @@ let waitingSocket: Socket = undefined;
 @WebSocketGateway({
   namespace: 'game',
   cors: {
-    origin: [`http://${process.env.INTRA_SERVER_IP}:3000`],
+    origin: [`http://${process.env.NESTJS_HOST}:3000`],
   },
 })
 export class GamesGateway

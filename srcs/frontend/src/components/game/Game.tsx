@@ -12,7 +12,7 @@ type gameComponent = {
 	mod: gameMod;
 };
 
-const socketa = io(`http://${process.env.REACT_APP_INTRA_SERVER_IP}:3001/game`);
+const socketa = io(`http://${process.env.REACT_APP_NESTJS_HOST}:3001/game`);
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -174,7 +174,7 @@ function Game({ mod }: gameComponent) {
 	document.addEventListener('keydown', (e) => {
 		if (startGame) {
 			var code = e.code;
-	
+
 			if (code === 'KeyS' && paddleDown === false) {
 				setPaddleDown(true);
 			}
@@ -187,7 +187,7 @@ function Game({ mod }: gameComponent) {
 	document.addEventListener('keyup', (e) => {
 		if (startGame) {
 			var code = e.code;
-	
+
 			if (code === 'KeyS' && paddleDown === true) {
 				setPaddleDown(false);
 			}
