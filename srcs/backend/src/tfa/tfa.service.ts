@@ -15,7 +15,10 @@ export class TfaService {
     private readonly userService: UserService,
   ) {}
 
-  async sendSMS(user: User, phone: string): Promise<SendSMSOutput> {
+  async sendSMS(
+    session: Record<string, any>,
+    phone: string,
+  ): Promise<SendSMSOutput> {
     try {
       const messageService = new SolapiMessageService(
         this.options.apiKey,
@@ -25,7 +28,7 @@ export class TfaService {
       const code = Math.round(Math.random() * 1000000)
         .toString()
         .padStart(6, '0');
-      await this.userService.updateUser(user.id, { phone, code });
+      await this.userService.updateUser(session, { phone, code });
       messageService.sendOne({
         to: phone,
         from: this.options.sender,
@@ -37,14 +40,14 @@ export class TfaService {
     }
   }
 
-  async verifyUser(user: User, code: string) {
+  async verifyUser(session: Record<string, any>, code: string) {
     try {
       const userCode = await this.users.findOne({
-        where: { id: user.id },
+        where: { id: session.user.id },
         select: ['code'],
       });
       if (userCode.code === code) {
-        await this.userService.updateUser(user.id, { verified: true });
+        await this.userService.updateUser(session, { verified: true });
         return { ok: true };
       }
       return { ok: false, error: 'Incorrect verification code' };
