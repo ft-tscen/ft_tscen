@@ -46,7 +46,6 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 										onClick={() => navigate("/profile")}
 									>
 										프로필
-										{/* 프로필 컴포넌트 들어올 자리 */}
 									</Button>
 									<Button variant="outline-light" size="lg" onClick={logOut}>
 										로그아웃
