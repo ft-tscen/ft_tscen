@@ -3,6 +3,7 @@ import { Socket } from 'socket.io';
 import type { GameDto } from './dtos/game.dto';
 import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
+import { GameRoom } from './game.gateway';
 
 //  Dto에 필요한 변수 : score, ball_x, ball_velocityX, ball_y, ball_velocityY, left_padle_y, right_padle_y, roomName
 
@@ -214,6 +215,71 @@ export class GameService {
     Game.p1.socket.emit('update', Game.front);
   }
 
+  private update_v2(gameRoom: GameRoom) {
+	const Game: GameDto = gameRoom.gameDto;
+    // ready 확인 추가 자리 //
+    if (Game.ball.x - Game.ball.radius < 0) {
+      Game.p2.score++;
+      this.resetBall(Game);
+    } else if (Game.ball.x + Game.ball.radius > CanvasWidth) {
+      Game.p1.score++;
+      this.resetBall(Game);
+    }
+    if (Game.p1.score >= VictoryScore) {
+		Game.p1.socket.emit('end-game', true);
+    if (Game.p2.socket)
+			Game.p2.socket.emit('end-game', false);
+		//Game.p2.socket.emit('end-game', false);
+		clearInterval(Game.interval);
+		return ;
+	}
+    else if (Game.p2.score >= VictoryScore) {
+		//Game.p2.socket.emit('end-game', true);
+		Game.p1.socket.emit('end-game', false);
+    if (Game.p2.socket)
+			Game.p2.socket.emit('end-game', true);
+		clearInterval(Game.interval);
+		return ;
+	}
+    // 패들 계산
+    this.paddleCalculate(Game);
+    // 공 계산
+    Game.ball.x += Game.ball.velocityX;
+    Game.ball.y += Game.ball.velocityY;
+    // soloMod
+    // if (Game.gameMod === gameMod.soloGame)
+    Game.p2.padleY +=
+      (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
+    const player =
+      Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? Game.p1 : Game.p2;
+    //  if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height)
+    //	ball.velocityY = -ball.velocityY;
+    if (
+      Game.ball.y + Game.ball.radius < 0 ||
+      Game.ball.y + Game.ball.radius > CanvasHeight
+    )
+      Game.ball.velocityY = -Game.ball.velocityY;
+    if (this.collision(Game, player)) {
+      let collidePoint = Game.ball.y - (player.padleY + player.padleH / 2);
+      collidePoint = collidePoint / (player.padleH / 2);
+      let angleRad = (Math.PI / 4) * collidePoint;
+      let direction =
+        Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? 1 : -1;
+      Game.ball.velocityX = direction * Game.ball.speed * Math.cos(angleRad);
+      Game.ball.velocityY = Game.ball.speed * Math.sin(angleRad);
+      Game.ball.speed += 1;
+    }
+    Game.front.leftPaddle = Game.p1.padleY;
+    Game.front.rightPaddle = Game.p2.padleY;
+    Game.front.ballX = Game.ball.x;
+    Game.front.ballY = Game.ball.y;
+    Game.front.leftScore = Game.p1.score;
+    Game.front.rightScore = Game.p2.score;
+    // render 호출하는 socket 추가
+    //Game.p1.socket.emit('update', Game.front);
+	gameRoom.nsp.to(gameRoom.roomName).emit('update', Game.front);
+  }
+
   paddleUp(client: Socket, Game: GameDto) {
     //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
     // if (client.id === Game.p1.socket)
@@ -263,63 +329,15 @@ export class GameService {
     }
   }
 
-  // public currentMatch = new GameDto;
-
-  // public paddleUp (client: Socket) {
-
-  //   // const Game: GameDto = this.init_game()
-  //   if (Game)
-  // }
-
   gameLoop(Game: GameDto) {
-    // const game: GameDto = this.init_game()
-    //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
     Game.interval = setInterval(() => {
       this.update(Game);
     }, 1000 / 30);
-    //requestAnimationFrame(() => this.update(Game));
   }
 
-  //  ========================================================
-
-  //caculatePadle(gameDto: GameDto) {
-  //  if (left_padle_up == true)
-  //    left_padle_y += 2
-  //    if (최대 높이를 초과했으면) 최대 높이로 초기화
-  //  if (right_padle_up == true)
-  //    right_padle_y += 2
-  //    if (최대 높이를 초과했으면) 최대 높이로 초기화
-
-  //  if (left_padle_down == true)
-  //    left_padle_y += 2
-  //    if (최소 높이 미만이면) 최소 높이로 초기화
-  //  if (right_padle_down == true)
-  //    right_padle_y += 2
-  //    if (최소 높이 미만이면) 최소 높이로 초기화
-  //}
-
-  //gameLoop(gameDto: GameDto) {
-
-  //  if (공이 왼쪽 끝에 도달하였는지)
-  //    left player 점수 추가
-  //    if 최대 점수면 게임 끝
-  // else if (공이 오른쪽 끝에 도달하였는지)
-  //    right player 점수 추가
-  //    if 최대 점수면 게임 끝
-
-  //  calculate padle()
-
-  //  ball_x += ball_velocityX;
-  //  ball_y += ball_velocityY;
-
-  //  if (공이 천장에 닿으면)
-
-  //  else if (공이 바닥에 닿으면)
-
-  //  if (공이 패들과 충돌 감지됨)
-  //    충돌 알고리즘
-
-  //  socket.broadcast.to(roomName).emit('update', GameDto);
-
-  //}
+  gameLoop_v2(Game: GameRoom) {
+    Game.gameDto.interval = setInterval(() => {
+      this.update_v2(Game);
+    }, 1000 / 30);
+  }
 }

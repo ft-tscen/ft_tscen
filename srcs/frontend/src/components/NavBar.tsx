@@ -33,7 +33,7 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 									variant="outline-light"
 									size="lg"
 									onClick={() =>
-										(window.location.href = `http://${process.env.REACT_APP_NESTJS_HOST}:3001/login`)
+										(window.location.href = `http://localhost:3001/login`)
 									}
 								>
 									로그인

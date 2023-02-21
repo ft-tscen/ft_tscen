@@ -28,7 +28,7 @@ import { GameModule } from './game/game.module';
       baseUrl: process.env.NESTJS_42API_BASE,
       uid: process.env.NESTJS_UID,
       secret: process.env.NESTJS_SECRET,
-      redirect: `http://${process.env.NESTJS_HOST}:${process.env.NESTJS_PORT}/login/redirect`,
+      redirect: `http://localhost:${process.env.NESTJS_PORT}/login/redirect`,
     }),
     TfaModule.forRoot({
       apiKey: process.env.NESTJS_SOLAPI_API,

@@ -15,7 +15,9 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { GameDto, gameMod } from './dtos/game.dto';
 import { GameService } from './game.service';
 
-class GameRoom {
+export class GameRoom {
+  nsp: Namespace;
+  roomName: string;
   p1Ready: boolean;
   p2Ready: boolean;
   gameDto: GameDto;
@@ -38,7 +40,7 @@ let waitingSocket: Socket = undefined;
 @WebSocketGateway({
   namespace: 'game',
   cors: {
-    origin: [`http://${process.env.NESTJS_HOST}:3000`],
+    origin: [`http://localhost:3000`],
   },
 })
 export class GamesGateway
@@ -91,29 +93,41 @@ export class GamesGateway
   }
 
   @SubscribeMessage('PaddleUp')
-  handlePaddleUp(@ConnectedSocket() socket: Socket) {
+  handlePaddleUp(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
     const na = RoomNameBySocket[socket.id];
     const dto: GameDto = gameDtoByRoomName[na];
-    dto.p1.padleUp = true;
+    if (is_p1)
+		dto.p1.padleUp = true;
+	else
+		dto.p2.padleUp = true;
     //this.logger.log('up');
   }
 
   @SubscribeMessage('PaddleDown')
-  handlePaddleDown(@ConnectedSocket() socket: Socket) {
+  handlePaddleDown(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
     const na = RoomNameBySocket[socket.id];
     const dto: GameDto = gameDtoByRoomName[na];
-    dto.p1.padleDown = true;
+	if (is_p1)
+    	dto.p1.padleDown = true;
+	else
+    	dto.p2.padleDown = true;
     //this.logger.log('down');
   }
 
   @SubscribeMessage('PaddleStop')
-  handlePaddleStop(@ConnectedSocket() socket: Socket) {
+  handlePaddleStop(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
     const na = RoomNameBySocket[socket.id];
     const dto: GameDto = gameDtoByRoomName[na];
 	if (!dto)
 		return;
-    dto.p1.padleUp = false;
-    dto.p1.padleDown = false;
+	if (is_p1) {
+		dto.p1.padleUp = false;
+		dto.p1.padleDown = false;
+	}
+	else {
+		dto.p2.padleUp = false;
+		dto.p2.padleDown = false;
+	}
   }
 
   @SubscribeMessage('room-list')
@@ -123,8 +137,10 @@ export class GamesGateway
 
   @SubscribeMessage('matching')
   handleMatching(@ConnectedSocket() socket: Socket) {
-	this.logger.log('matching');
+	//this.logger.log('matching');
     if (waitingSocket) {
+		if (socket.id === waitingSocket.id)
+			return;
 		const roomName = waitingSocket.id + socket.id;
 		const Game: GameDto = this.gameService.init_game(
 			waitingSocket,  // p1
@@ -134,6 +150,8 @@ export class GamesGateway
 		);
 
 		gameRooms[roomName] = <GameRoom> {
+			nsp: this.nsp,
+			roomName: roomName,
 			p1Ready: false,
 			p2Ready: false,
 			gameDto: Game
@@ -142,35 +160,45 @@ export class GamesGateway
 		RoomNameBySocket[waitingSocket.id] = roomName;
 		RoomNameBySocket[socket.id] = roomName;
 
-		waitingSocket.join(roomName);  // room 입장
-		socket.join(roomName); // room 입장
+		socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
+		waitingSocket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
+		this.nsp.emit('create-room', roomName); // 대기실 방 생성을 연결된 클라들에게 알림
+		this.nsp.to(roomName).emit('join-room', roomName);
 
-		this.nsp.to(roomName).emit('matching');  // room에 있는 모든 소켓에게 전송
+		//this.nsp.to(roomName).emit('message', { message: `${socket.id} join room!` });
+		//this.nsp.to(roomName).emit('message', { message: `${waitingSocket.id} join room!` });
+
 		waitingSocket = undefined;
-		//socket.emit('matching');
+		this.logger.log('matching success!!!');
+		//this.nsp.to(roomName).emit('message', { message: `${waitingSocket.id} join room!` });
 	}
 	else {
 		waitingSocket = socket;
+		this.logger.log('matching waiting...');
 	}
   }
 
   @SubscribeMessage('ready-rank')
   handleReadyRank(@ConnectedSocket() socket: Socket) {
-    if (RoomNameBySocket[socket.id])  // 여기 조건문 달아서 중복 호출 막음
-      return;
-    this.logger.log(`Ready !!!`);
 	const roomName = RoomNameBySocket[socket.id];
+	if (!roomName)  // 여기 조건문 달아서 중복 호출 막음
+		return;
 	const gameRoom: GameRoom = gameRooms[roomName];
+	if (gameRoom.p1Ready === true && gameRoom.p2Ready == true)
+		return;
+
 	if (socket.id === gameRoom.gameDto.p1.socket.id) {
 		gameRoom.p1Ready = true;
+		this.logger.log(`Ready !!!`);
 	}
-	else {
+	else if (socket.id === gameRoom.gameDto.p2.socket.id ){
 		gameRoom.p2Ready = true;
+		this.logger.log(`Ready !!!`);
 	}
 
-	if (gameRoom.p1Ready === true && gameRoom.p2Ready == true) {
-		this.gameService.gameLoop(gameRoom.gameDto);
-	}
+    if (gameRoom.p1Ready === true && gameRoom.p2Ready == true) {
+      this.gameService.gameLoop_v2(gameRoom);
+    }
     //socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
     //createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
 
@@ -227,9 +255,9 @@ export class GamesGateway
     @MessageBody() roomName: string,
   ) {
     socket.join(roomName); // join room
-    socket.broadcast
-      .to(roomName)
-      .emit('message', { message: `${socket.id} join room!` });
+    //socket.broadcast
+    //  .to(roomName)
+    //  .emit('message', { message: `${socket.id} join room!` });
 
     return { success: true };
   }
@@ -240,9 +268,9 @@ export class GamesGateway
     @MessageBody() roomName: string,
   ) {
     socket.leave(roomName); // leave room
-    socket.broadcast
-      .to(roomName)
-      .emit('message', { message: `${socket.id} out room!` });
+    //socket.broadcast
+    //  .to(roomName)
+    //  .emit('message', { message: `${socket.id} out room!` });
 
     return { success: true };
   }
