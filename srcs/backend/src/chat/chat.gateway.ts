@@ -76,7 +76,7 @@ export class ChatGateway
       const { user } = await this.userService.getUserByNickName(nickname);
       this.users.set(socket.id, {
         user,
-        channel: socket.id,
+        channel: null,
         userMute: new Map<string, number>(),
       });
       this.sockets.set(nickname, socket.id);
@@ -108,11 +108,10 @@ export class ChatGateway
       const channelObj = {
         name: channel.name,
         hidden: channel.private,
-        password: channel.password !== ""
-      }
+        password: channel.password !== '',
+      };
       channelList.push(channelObj);
-    })
-    console.log("received!");
+    });
     return channelList;
   }
 
@@ -121,7 +120,6 @@ export class ChatGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
-    console.log(input);
     const { author, target } = input;
     //const { user } = this.users.get(this.sockets.get(author));
 
@@ -132,18 +130,17 @@ export class ChatGateway
           if (member !== socket.id) {
             const now = new Date().getTime();
             if (channelMute.has(author) && now < channelMute.get(author)) {
-              return
+              return;
             }
             const { userMute } = this.users.get(member);
             if (userMute.has(author) && now < userMute.get(author)) {
-              return
+              return;
             }
             socket.to(member).emit('channel-msg', { ...input });
           }
         });
       }
     }
-    console.log("send back");
     return { ...input };
   }
 
@@ -152,27 +149,34 @@ export class ChatGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
-    const channelName = this.users.get(this.sockets.get(input.author)).channel;
-    const channel = this.channels.get(channelName);
-    
+    const channel = this.users.get(socket.id).channel;
+
     if (input.author !== input.target) {
-      if (channel.owner === socket.id || channel.admins.has(socket.id)) {
-        if (this.sockets.has(input.target) && channel.members.has(input.target)) {
-          const validTime = new Date().getTime() + 300_000
-          channel.channelMute.set(this.sockets.get(input.target), validTime);
+      if (this.sockets.has(input.target)) {
+        const targetSocket = this.sockets.get(input.target);
+        if (
+          this.checkAdmin(socket.id, channel) &&
+          !this.checkAdmin(targetSocket, channel)
+        ) {
+          const validTime = new Date().getTime() + 300_000;
+          this.channels.get(channel).channelMute.set(targetSocket, validTime);
           const output = {
             author: 'server',
             target: input.target,
             message: `${input.target} is muted`,
           };
-          socket.broadcast.to(channelName).emit('channel-mute', output);
+          this.channels.get(channel).members.forEach((member) => {
+            if (member !== socket.id) {
+              socket.to(member).emit('notice', output);
+            }
+          });
           return output;
         }
       }
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to mute ${input.target}`,
     };
   }
@@ -182,26 +186,33 @@ export class ChatGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
-    const channelName = this.users.get(this.sockets.get(input.author)).channel;
-    const channel = this.channels.get(channelName);
+    const channel = this.users.get(socket.id).channel;
 
     if (input.author !== input.target) {
-      if (channel.owner === socket.id || channel.admins.has(socket.id)) {
-        if (this.sockets.has(input.target) && channel.members.has(input.target)) {
-          channel.channelMute.delete(this.sockets.get(input.target));
+      if (this.sockets.has(input.target)) {
+        const targetSocket = this.sockets.get(input.target);
+        if (
+          this.checkAdmin(socket.id, channel) &&
+          !this.checkAdmin(targetSocket, channel)
+        ) {
+          this.channels.get(channel).channelMute.delete(targetSocket);
           const output = {
             author: 'server',
             target: input.target,
             message: `${input.target} is unmuted`,
           };
-          socket.broadcast.to(channelName).emit('channel-mute', output);
+          this.channels.get(channel).members.forEach((member) => {
+            if (member !== socket.id) {
+              socket.to(member).emit('notice', output);
+            }
+          });
           return output;
         }
       }
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to unmute ${input.target}`,
     };
   }
@@ -216,10 +227,11 @@ export class ChatGateway
 
     if (author !== target) {
       if (this.sockets.has(target)) {
-        const { userMute } = this.users.get(this.sockets.get(target));
+        const targetSocket = this.sockets.get(target);
+        const { userMute } = this.users.get(targetSocket);
         const now = new Date().getTime();
         if (!(userMute.has(author) && now < userMute.get(author))) {
-          socket.to(this.sockets.get(target)).emit('direct-msg', { ...chat }); // author -> this.sockets.get(target)
+          socket.to(targetSocket).emit('direct-msg', { ...chat });
         }
       }
     }
@@ -231,11 +243,12 @@ export class ChatGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
-
     if (input.author !== input.target) {
       if (this.users.has(socket.id) && this.sockets.has(input.target)) {
-        const validTime = new Date().getTime() + 300_000
-        this.users.get(socket.id).userMute.set(this.sockets.get(input.target), validTime);
+        const validTime = new Date().getTime() + 300_000;
+        this.users
+          .get(socket.id)
+          .userMute.set(this.sockets.get(input.target), validTime);
         return {
           author: 'server',
           target: input.target,
@@ -245,20 +258,21 @@ export class ChatGateway
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to mute ${input.target}`,
     };
   }
 
-  @SubscribeMessage('direct-unmute') // 서버에서 처리하는게 나을듯(따로 보내줄 명령어 안만들고)
+  @SubscribeMessage('direct-unmute')
   unmuteByUser(
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
-
     if (input.author !== input.target) {
       if (this.users.has(socket.id) && this.sockets.has(input.target)) {
-        this.users.get(socket.id).userMute.delete(this.sockets.get(input.target));
+        this.users
+          .get(socket.id)
+          .userMute.delete(this.sockets.get(input.target));
         return {
           author: 'server',
           target: input.target,
@@ -268,7 +282,7 @@ export class ChatGateway
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to unmute ${input.target}`,
     };
   }
@@ -301,12 +315,17 @@ export class ChatGateway
     if (this.channels.has(input.target)) {
       const channel = this.channels.get(input.target);
       const now = new Date().getTime();
-      if (!(channel.banList.has(socket.id) && now < channel.banList.get(socket.id)) && channel.password === input.password) {
+      if (
+        !(
+          channel.banList.has(socket.id) && now < channel.banList.get(socket.id)
+        ) &&
+        channel.password === input.password
+      ) {
         channel.members.add(socket.id);
       } else {
         return {
           author: 'server',
-          target: input.target, // 여기서 undefine을 넣었으면 좋겠음.
+          target: null, // 여기서 undefine을 넣었으면 좋겠음.
           message: `fails to join channel: ${input.target}`,
         };
       }
@@ -325,7 +344,7 @@ export class ChatGateway
         banList,
         private: false,
         password: '',
-        channelMute
+        channelMute,
       });
     }
     const user = this.users.get(socket.id);
@@ -336,7 +355,11 @@ export class ChatGateway
       target: input.target,
       message: `join channel: ${input.target}`,
     };
-    socket.broadcast.to(input.target).emit('notice', output); // join-channel -> notice[방식이 이게 맞는지 모르겠음.]
+    this.channels.get(input.target).members.forEach((member) => {
+      if (member !== socket.id) {
+        socket.to(member).emit('notice', output);
+      }
+    });
     return output;
   }
 
@@ -348,18 +371,22 @@ export class ChatGateway
     const user = this.users.get(socket.id);
     const leaved = this.part(user.channel, socket.id);
     if (leaved) {
-      user.channel = socket.id;
+      user.channel = null;
       const output = {
         author: 'server',
         target: input.target,
         message: `leave channel: ${input.target}`,
       };
-      socket.broadcast.to(input.target).emit('notice', output); // leave-channel -> notice
+      this.channels.get(input.target).members.forEach((member) => {
+        if (member !== socket.id) {
+          socket.to(member).emit('notice', output);
+        }
+      });
       return output;
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to leave channel: ${input.target}`,
     };
   }
@@ -392,20 +419,27 @@ export class ChatGateway
     const channel = this.users.get(socket.id).channel;
 
     if (input.author !== input.target) {
-      if (this.checkOwner(socket.id, channel) && this.sockets.has(input.target)) {
+      if (
+        this.checkOwner(socket.id, channel) &&
+        this.sockets.has(input.target)
+      ) {
         this.channels.get(channel).admins.add(this.sockets.get(input.target));
         const output = {
           author: 'server',
           target: input.target,
           message: `${input.target} is admin now`,
         };
-        socket.broadcast.to(channel).emit('notice', output);// authorize -> notice
+        this.channels.get(channel).members.forEach((member) => {
+          if (member !== socket.id) {
+            socket.to(member).emit('notice', output);
+          }
+        });
         return output;
       }
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to authorize ${input.target}`,
     };
   }
@@ -418,20 +452,27 @@ export class ChatGateway
     const channel = this.users.get(socket.id).channel;
 
     if (input.author !== input.target) {
-      if (this.checkOwner(socket.id, channel) && this.sockets.has(input.target)) {
+      if (
+        this.checkOwner(socket.id, channel) &&
+        this.sockets.has(input.target)
+      ) {
         this.channels.get(channel).admins.add(this.sockets.get(input.target));
         const output = {
           author: 'server',
           target: input.target,
           message: `${input.target} is admin now`,
         };
-        socket.broadcast.to(channel).emit('deauthorize', output);
+        this.channels.get(channel).members.forEach((member) => {
+          if (member !== socket.id) {
+            socket.to(member).emit('notice', output);
+          }
+        });
         return output;
       }
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to deauthorize ${input.target}`,
     };
   }
@@ -440,16 +481,14 @@ export class ChatGateway
   kickUser(
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
-    userSocket: string,
-    channel: string,
-    target: string,
   ): SocketOutputDto {
+    const channel = this.users.get(socket.id).channel;
 
     if (input.author !== input.target) {
-      if (this.sockets.has(target)) {
-        const targetSocket = this.sockets.get(target);
+      if (this.sockets.has(input.target)) {
+        const targetSocket = this.sockets.get(input.target);
         if (
-          this.checkAdmin(userSocket, channel) &&
+          this.checkAdmin(socket.id, channel) &&
           !this.checkAdmin(targetSocket, channel)
         ) {
           this.part(channel, targetSocket);
@@ -459,7 +498,11 @@ export class ChatGateway
             target: input.target,
             message: `${input.target} is kicked from channel`,
           };
-          socket.broadcast.to(channel).emit('kick', output);
+          this.channels.get(channel).members.forEach((member) => {
+            if (member !== socket.id) {
+              socket.to(member).emit('notice', output);
+            }
+          });
           this.banUser(socket, input);
           return output;
         }
@@ -467,7 +510,7 @@ export class ChatGateway
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to kick ${input.target} from channel`,
     };
   }
@@ -482,26 +525,14 @@ export class ChatGateway
           this.checkAdmin(socket.id, channel) &&
           !this.checkAdmin(targetSocket, channel)
         ) {
-          const validTime = new Date().getTime() + 300_000
+          const validTime = new Date().getTime() + 300_000;
           this.channels.get(channel).banList.set(targetSocket, validTime);
-          const output = {
-            author: 'server',
-            target: input.target,
-            message: `${input.target} is banned`,
-          };
-          socket.broadcast.to(channel).emit('notice', output); // ban을 notice로 바꾸면 어떤지.
-          return output;
         }
       }
     }
-    return {
-      author: 'server',
-      target: input.target,
-      message: `fails to ban ${input.target}`,
-    };
   }
 
- // 서버에서 처리하는게 나을듯(따로 보내줄 명령어 안만들고)
+  // 서버에서 처리하는게 나을듯(따로 보내줄 명령어 안만들고)
   unbanUser(socket: Socket, input: SocketInputDto) {
     const channel = this.users.get(socket.id).channel;
 
@@ -513,21 +544,9 @@ export class ChatGateway
           !this.checkAdmin(targetSocket, channel)
         ) {
           this.channels.get(channel).banList.delete(targetSocket);
-          const output = {
-            author: 'server',
-            target: input.target,
-            message: `${input.target} is unbanned`,
-          };
-          socket.broadcast.to(channel).emit('unban', output);
-          return output;
         }
       }
     }
-    return {
-      author: 'server',
-      target: input.target,
-      message: `fails to unban ${input.target}`,
-    };
   }
 
   @SubscribeMessage('password')
@@ -536,6 +555,7 @@ export class ChatGateway
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
     const channel = this.users.get(socket.id).channel;
+
     if (this.checkOwner(socket.id, channel)) {
       this.channels.get(channel).password = input.password;
       const output = {
@@ -543,12 +563,16 @@ export class ChatGateway
         target: input.target,
         message: `password is set on ${input.target}`,
       };
-      socket.broadcast.to(channel).emit('password', output); // password를 notice로 바꾸면 어떤지.
+      this.channels.get(channel).members.forEach((member) => {
+        if (member !== socket.id) {
+          socket.to(member).emit('notice', output);
+        }
+      });
       return output;
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to set password on ${input.target}`,
     };
   }
@@ -559,6 +583,7 @@ export class ChatGateway
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
     const channel = this.users.get(socket.id).channel;
+
     if (this.checkOwner(socket.id, channel)) {
       this.channels.get(channel).private = true;
       const output = {
@@ -566,12 +591,16 @@ export class ChatGateway
         target: input.target,
         message: `${input.target} is set to private`,
       };
-      socket.broadcast.to(channel).emit('private', output); // private를 notice로 바꾸면 어떤지.
+      this.channels.get(channel).members.forEach((member) => {
+        if (member !== socket.id) {
+          socket.to(member).emit('notice', output);
+        }
+      });
       return output;
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to private ${input.target}`,
     };
   }
@@ -582,6 +611,7 @@ export class ChatGateway
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
     const channel = this.users.get(socket.id).channel;
+
     if (this.checkOwner(socket.id, channel)) {
       this.channels.get(channel).private = false;
       const output = {
@@ -589,12 +619,16 @@ export class ChatGateway
         target: input.target,
         message: `${input.target} is set to deprivate`,
       };
-      socket.broadcast.to(channel).emit('deprivate', output); // deprivate를 notice로 바꾸면 어떤지.
+      this.channels.get(channel).members.forEach((member) => {
+        if (member !== socket.id) {
+          socket.to(member).emit('notice', output);
+        }
+      });
       return output;
     }
     return {
       author: 'server',
-      target: input.target,
+      target: null,
       message: `fails to deprivate ${input.target}`,
     };
   }
