@@ -408,7 +408,7 @@ export class ChatGateway
   checkAdmin(userSocket: string, channel: string) {
     if (this.sockets.has(userSocket) && this.channels.has(channel)) {
       const { owner, admins } = this.channels.get(channel);
-      if (this.sockets.get(userSocket) === owner || admins.has(userSocket)) { // userSocket -> this.sockets.get(userSocket)
+      if (this.sockets.get(userSocket) === owner || admins.has(this.sockets.get(userSocket))) { // userSocket -> this.sockets.get(userSocket)
         return true;
       }
     }
