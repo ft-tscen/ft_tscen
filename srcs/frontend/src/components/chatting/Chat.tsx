@@ -18,17 +18,16 @@ export function Chat({msg, enterGame} :ArgsType) {
         )
     }
     else {
+        const showProfile = () => {
+            console.log("누른 상대 프로필 보기");
+        }
         const joinGame = () => {
             console.log("초대한 게임에 참여함");
             let dto :SocketInputDto = {
                 author :MySocket.instance.name,
                 target :msg.target
             }
-            
             MySocket.instance.emit(SOCKET_EVENT.ENTER_GAME, dto, enterGame);
-        }
-        const showProfile = () => {
-            console.log("누른 상대 프로필 보기");
         }
         return (
             <Row className={
@@ -48,10 +47,17 @@ export function Chat({msg, enterGame} :ArgsType) {
                     className="d-flex h-auto w-75 p-0"
                     bg={msg.type === SOCKET_EVENT.DM ? "danger" : "secondary"}
                     text="white">
-                    <Card.Header>{msg.author}</Card.Header>
+                    <Card.Header>
+                        {
+                            msg.type === SOCKET_EVENT.DM 
+                            ? msg.author === MySocket.instance.name ? `me -> ${msg.target}` : `${msg.author} -> me`
+                            : `${msg.author}`
+                        }
+                    </Card.Header>
                     <Card.Text className="px-2"> {msg.message}</Card.Text>
                     {
-                        msg.type === SOCKET_EVENT.INVITE && <Button variant="outline-dark" onClick={joinGame}>참여하기</Button>
+                        msg.type === SOCKET_EVENT.INVITE && msg.author !== MySocket.instance.name
+                        && <Button variant="outline-dark" onClick={joinGame}>참여하기</Button>
                     }
                 </Card>
             </Row>

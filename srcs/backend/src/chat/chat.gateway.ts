@@ -98,19 +98,21 @@ export class ChatGateway
       });
     }
     console.log(`${socket.id} 소켓 연결 해제 ❌`);
-  }
+  } // 채널에서 나갔다고 알려줘야 함.
 
   @SubscribeMessage('channel-list')
   handleChannelList() {
     const channelList = [];
 
     this.channels.forEach((channel) => {
-      const channelObj = {
-        name: channel.name,
-        hidden: channel.private,
-        password: channel.password !== '',
-      };
-      channelList.push(channelObj);
+      if (!channel.private) { // private일때 안보냄
+        const channelObj = {
+          name: channel.name,
+          // hidden: channel.private,
+          password: channel.password !== '',
+        };
+        channelList.push(channelObj);
+      }
     });
     return channelList;
   }
@@ -129,11 +131,12 @@ export class ChatGateway
         members.forEach((member) => {
           if (member !== socket.id) {
             const now = new Date().getTime();
-            if (channelMute.has(author) && now < channelMute.get(author)) {
+            const authorID :string = this.sockets.get(author); // author -> this->sockets.get(author)
+            if (channelMute.has(authorID) && now < channelMute.get(authorID)) {
               return;
             }
             const { userMute } = this.users.get(member);
-            if (userMute.has(author) && now < userMute.get(author)) {
+            if (userMute.has(authorID) && now < userMute.get(authorID)) {
               return;
             }
             socket.to(member).emit('channel-msg', { ...input });
@@ -155,8 +158,8 @@ export class ChatGateway
       if (this.sockets.has(input.target)) {
         const targetSocket = this.sockets.get(input.target);
         if (
-          this.checkAdmin(socket.id, channel) &&
-          !this.checkAdmin(targetSocket, channel)
+          this.checkAdmin(input.author, channel) && // socket.id -> input.author
+          !this.checkAdmin(input.target, channel) // targetSocket -> input.target
         ) {
           const validTime = new Date().getTime() + 300_000;
           this.channels.get(channel).channelMute.set(targetSocket, validTime);
@@ -192,8 +195,8 @@ export class ChatGateway
       if (this.sockets.has(input.target)) {
         const targetSocket = this.sockets.get(input.target);
         if (
-          this.checkAdmin(socket.id, channel) &&
-          !this.checkAdmin(targetSocket, channel)
+          this.checkAdmin(input.author, channel) && // socket.id -> input.author
+          !this.checkAdmin(input.target, channel) // targetSocket -> input.target
         ) {
           this.channels.get(channel).channelMute.delete(targetSocket);
           const output = {
@@ -230,7 +233,8 @@ export class ChatGateway
         const targetSocket = this.sockets.get(target);
         const { userMute } = this.users.get(targetSocket);
         const now = new Date().getTime();
-        if (!(userMute.has(author) && now < userMute.get(author))) {
+        const authorID :string = this.sockets.get(author); // author -> this->sockets.get(author)
+        if (!(userMute.has(authorID) && now < userMute.get(authorID))) {
           socket.to(targetSocket).emit('direct-msg', { ...chat });
         }
       }
@@ -325,7 +329,7 @@ export class ChatGateway
       } else {
         return {
           author: 'server',
-          target: null, // 여기서 undefine을 넣었으면 좋겠음.
+          target: undefined, // null -> undefined
           message: `fails to join channel: ${input.target}`,
         };
       }
@@ -353,7 +357,7 @@ export class ChatGateway
     const output = {
       author: 'server',
       target: input.target,
-      message: `join channel: ${input.target}`,
+      message: `${input.author} joined the channel: ${input.target}`, // join channel: ${input.target} -> ${input.author} joined the channel: ${input.target}
     };
     this.channels.get(input.target).members.forEach((member) => {
       if (member !== socket.id) {
@@ -371,11 +375,11 @@ export class ChatGateway
     const user = this.users.get(socket.id);
     const leaved = this.part(user.channel, socket.id);
     if (leaved) {
-      user.channel = null;
+      user.channel = undefined; // null -> undefined
       const output = {
         author: 'server',
         target: input.target,
-        message: `leave channel: ${input.target}`,
+        message: `${input.author} left for the channel: ${input.target}`, // leave channel: ${input.target} -> ${input.author} left for the channel: ${input.target}
       };
       this.channels.get(input.target).members.forEach((member) => {
         if (member !== socket.id) {
@@ -386,7 +390,7 @@ export class ChatGateway
     }
     return {
       author: 'server',
-      target: null,
+      target: undefined, // null -> undefined
       message: `fails to leave channel: ${input.target}`,
     };
   }
@@ -394,7 +398,7 @@ export class ChatGateway
   checkOwner(userSocket: string, channel: string) {
     if (this.sockets.has(userSocket) && this.channels.has(channel)) {
       const { owner } = this.channels.get(channel);
-      if (userSocket === owner) {
+      if (this.sockets.get(userSocket) === owner) { // userSocket -> this.sockets.get(userSocket)
         return true;
       }
     }
@@ -404,7 +408,7 @@ export class ChatGateway
   checkAdmin(userSocket: string, channel: string) {
     if (this.sockets.has(userSocket) && this.channels.has(channel)) {
       const { owner, admins } = this.channels.get(channel);
-      if (userSocket === owner || admins.has(userSocket)) {
+      if (this.sockets.get(userSocket) === owner || admins.has(userSocket)) { // userSocket -> this.sockets.get(userSocket)
         return true;
       }
     }
@@ -420,7 +424,7 @@ export class ChatGateway
 
     if (input.author !== input.target) {
       if (
-        this.checkOwner(socket.id, channel) &&
+        this.checkOwner(input.author, channel) && // socket.id -> input.author
         this.sockets.has(input.target)
       ) {
         this.channels.get(channel).admins.add(this.sockets.get(input.target));
@@ -453,7 +457,7 @@ export class ChatGateway
 
     if (input.author !== input.target) {
       if (
-        this.checkOwner(socket.id, channel) &&
+        this.checkOwner(input.author, channel) && // socket.id -> input.author
         this.sockets.has(input.target)
       ) {
         this.channels.get(channel).admins.add(this.sockets.get(input.target));
@@ -488,8 +492,8 @@ export class ChatGateway
       if (this.sockets.has(input.target)) {
         const targetSocket = this.sockets.get(input.target);
         if (
-          this.checkAdmin(socket.id, channel) &&
-          !this.checkAdmin(targetSocket, channel)
+          this.checkAdmin(input.author, channel) && // socket.id -> input.author
+          !this.checkAdmin(input.target, channel) // targetSocket -> input.target
         ) {
           this.part(channel, targetSocket);
           this.users.get(targetSocket).channel = targetSocket;
@@ -522,8 +526,8 @@ export class ChatGateway
       if (this.sockets.has(input.target)) {
         const targetSocket = this.sockets.get(input.target);
         if (
-          this.checkAdmin(socket.id, channel) &&
-          !this.checkAdmin(targetSocket, channel)
+          this.checkAdmin(input.author, channel) && // socket.id -> input.author
+          !this.checkAdmin(input.target, channel) // targetSocket -> input.target
         ) {
           const validTime = new Date().getTime() + 300_000;
           this.channels.get(channel).banList.set(targetSocket, validTime);
@@ -540,8 +544,8 @@ export class ChatGateway
       if (this.sockets.has(input.target)) {
         const targetSocket = this.sockets.get(input.target);
         if (
-          this.checkAdmin(socket.id, channel) &&
-          !this.checkAdmin(targetSocket, channel)
+          this.checkAdmin(input.author, channel) && // socket.id -> input.author
+          !this.checkAdmin(input.target, channel) // targetSocket -> input.target
         ) {
           this.channels.get(channel).banList.delete(targetSocket);
         }
@@ -556,7 +560,7 @@ export class ChatGateway
   ): SocketOutputDto {
     const channel = this.users.get(socket.id).channel;
 
-    if (this.checkOwner(socket.id, channel)) {
+    if (this.checkOwner(input.author, channel)) { // socket.id -> input.author
       this.channels.get(channel).password = input.password;
       const output = {
         author: 'server',
@@ -583,8 +587,7 @@ export class ChatGateway
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
     const channel = this.users.get(socket.id).channel;
-
-    if (this.checkOwner(socket.id, channel)) {
+    if (this.checkOwner(input.author, channel)) { // socket.id -> input.author
       this.channels.get(channel).private = true;
       const output = {
         author: 'server',
@@ -612,7 +615,7 @@ export class ChatGateway
   ): SocketOutputDto {
     const channel = this.users.get(socket.id).channel;
 
-    if (this.checkOwner(socket.id, channel)) {
+    if (this.checkOwner(input.author, channel)) { // socket.id -> input.author
       this.channels.get(channel).private = false;
       const output = {
         author: 'server',

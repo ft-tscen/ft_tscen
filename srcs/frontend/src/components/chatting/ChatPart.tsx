@@ -43,6 +43,12 @@ export default function ChatPart() {
         MySocket.instance.enteredChannelName = undefined;
         setEnterChannelFlag(LEAVE_CHANNEL);
     }
+    const setDMMsg = (dto :SocketOutputDto) => {
+        dto.type = SOCKET_EVENT.DM;
+        setReceivedMsg(dto)};
+    const setInviteMsg = (dto :SocketOutputDto) => {
+        dto.type = SOCKET_EVENT.INVITE;
+        setReceivedMsg(dto)};
 
     useEffect(() => {
         MySocket.instance.enteredChannelName === undefined ? setEnterChannelFlag(LEAVE_CHANNEL) : setEnterChannelFlag(ENTER_CHANNEL);
@@ -53,14 +59,8 @@ export default function ChatPart() {
             setMsgList([...msgList, receivedMsg]);
         }
     }, [receivedMsg]);
-
+    
     useEffect(() => {
-        const setDMMsg = (dto :SocketOutputDto) => {
-            dto.type = SOCKET_EVENT.DM;
-            setReceivedMsg(dto)};
-        const setInviteMsg = (dto :SocketOutputDto) => {
-            dto.type = SOCKET_EVENT.INVITE;
-            setReceivedMsg(dto)};
 
         MySocket.instance.on(SOCKET_EVENT.MSG, setReceivedMsg);
         MySocket.instance.on(SOCKET_EVENT.DM, setDMMsg);
@@ -86,7 +86,11 @@ export default function ChatPart() {
                 : <ChatRoom msgList={msgList} enterGame={enterGame}/>
             }
             {
-                flag === SHOW_CHATROOM && <InputMsg setReceivedMsg={setReceivedMsg} enterChannel={enterChannel}/>
+                flag === SHOW_CHATROOM
+                && <InputMsg setReceivedMsg={setReceivedMsg}
+                            enterChannel={enterChannel}
+                            setDMMsg={setDMMsg}
+                            setInviteMsg={setInviteMsg}/>
             }
         </>
 	);

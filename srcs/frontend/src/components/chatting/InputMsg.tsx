@@ -5,10 +5,12 @@ import MySocket from "./MySocket";
 
 type ArgsType = {
     setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
-    enterChannel : (dto: SocketOutputDto) => void
+    enterChannel : (dto: SocketOutputDto) => void,
+    setDMMsg : (dto: SocketOutputDto) => void,
+    setInviteMsg : (dto: SocketOutputDto) => void,
 };
 
-export function InputMsg({setReceivedMsg, enterChannel} :ArgsType) {
+export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} :ArgsType) {
     const chatInputRef = useRef<HTMLInputElement>(null);
 
     const submitHandler = (event :React.FormEvent<HTMLElement>) => {
@@ -40,7 +42,7 @@ export function InputMsg({setReceivedMsg, enterChannel} :ArgsType) {
                     text = chatInputRef.current!.value.slice(words[0].length + words[1].length + 2);
                     enteredMSG.target = words[1];
                     enteredMSG.message = text;
-                    MySocket.instance.emit(SOCKET_EVENT.DM, enteredMSG, setReceivedMsg);
+                    MySocket.instance.emit(SOCKET_EVENT.DM, enteredMSG, setDMMsg);
                     break;
                 case "/INVITE": // 보류
                     if (words.length !== 2) {
@@ -70,26 +72,38 @@ export function InputMsg({setReceivedMsg, enterChannel} :ArgsType) {
                     enteredMSG.target = words[1];
                     MySocket.instance.emit(SOCKET_EVENT.BLOCK, enteredMSG, setReceivedMsg);
                     break;
+                case "/UNBLOCK":
+                    if (words.length !== 2) {
+                        setReceivedMsg({ author: "server", message :`${text} :${WRONGINPUT}` });
+                        break;
+                    }
+                    enteredMSG.target = words[1];
+                    MySocket.instance.emit(SOCKET_EVENT.UNBLOCK, enteredMSG, setReceivedMsg);
+                    break;
                 case "/ROOMSTATE":
                     let hide :boolean = false;
+                    let idx :number = 1;
                     
-                    for (let idx :number = 1; idx < words.length; ++idx) {
+                    for (; idx < words.length; ++idx) {
                         if (words[idx][0] === '-' && words[idx].length === 2) {
-                            if (words[idx][1] === 'p' && enteredMSG.password === undefined && idx + 1 !== words.length) {
+                            console.log(words[idx]);
+                            if (words[idx][1] === 'p' && enteredMSG.password === '' && idx + 1 !== words.length) {
                                 enteredMSG.password = words[++idx];
                             }
                             else if (words[idx][1] === 'h' && hide === false) {
                                 hide = true;
                             }
                             else {
-                                setReceivedMsg({ author: "server", message :`${text} :${WRONGINPUT}` });
                                 break;
                             }
                         }
                         else {
-                            setReceivedMsg({ author: "server", message :`${text} :${WRONGINPUT}` });
                             break;
                         }
+                    }
+                    if (idx !== words.length) {
+                        setReceivedMsg({ author: "server", message :`${text} :${WRONGINPUT}` });
+                        break;
                     }
                     MySocket.instance.emit(SOCKET_EVENT.SET_PW, enteredMSG, setReceivedMsg);
                     hide === true
@@ -119,6 +133,14 @@ export function InputMsg({setReceivedMsg, enterChannel} :ArgsType) {
                     }
                     enteredMSG.target = words[1];
                     MySocket.instance.emit(SOCKET_EVENT.MUTE, enteredMSG, setReceivedMsg);
+                    break;
+                case "/UNMUTE":
+                    if (words.length !== 2) {
+                        setReceivedMsg({ author: "server", message :`${text} :${WRONGINPUT}` });
+                        break;
+                    }
+                    enteredMSG.target = words[1];
+                    MySocket.instance.emit(SOCKET_EVENT.UNMUTE, enteredMSG, setReceivedMsg);
                     break;
                 default:
                     MySocket.instance.emit(SOCKET_EVENT.MSG, enteredMSG, setReceivedMsg);

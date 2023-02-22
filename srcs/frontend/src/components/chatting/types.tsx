@@ -17,7 +17,6 @@ export interface SocketOutputDto {
 
 export interface ChannelType {
     name: string;
-    hidden: boolean;
     password: boolean;
 }
 
@@ -41,9 +40,11 @@ export const SOCKET_EVENT = {
     SET_PW: "password",
     HIDE: "private",
     SHOW: "deprivate",
-    BAN: "ban",
-    MUTE: "mute",
+    BAN: "channel-ban",
+    MUTE: "channel-mute",
+    UNMUTE: "channel-unmute",
     BLOCK: "direct-mute",
+    UNBLOCK: "direct-unmute",
     INVITE: "invite-game",
     NOTICE: "notice",
     ENTER_GAME: "enter-game",
@@ -61,11 +62,13 @@ const DM :string = "다이렉트 메세지\n/DM <유저 이름> <보낼 메세�
 const INVITE :string = "게임 초대\n/INVITE <유저 이름/닉네임>";
 const PROFILE :string = "유저 프로필\n/PROFILE <유저 이름/닉네임>";
 const BLOCK :string = "개인유저 채팅 숨김\n/BLOCK <유저 이름/닉네임>"
+const UNBLOCK :string = "개인유저 채팅 보임\n/UNBLOCK <유저 이름/닉네임>"
 
 const ROOMSTATE :string = "채널 상태 변경\n/ROOMSTATE (-h[private]) (-p[protected] <비밀번호>)"
 const EMPOWER :string = "ADMIN 권한 주기\n/EMPOWER <유저 이름/닉네임>"
 const BAN :string = "유저 강퇴\n/BAN <유저 이름/닉네임>";
 const MUTE :string = "채널유저 채팅 숨김\n/MUTE <유저 이름/닉네임>";
+const UNMUTE :string = "채널유저 채팅 보임\n/UNMUTE <유저 이름/닉네임>";
 
 export const WRONGINPUT :string = "잘못된 입력입니다.";
 export const HELP :string = `-------------------------- 명령어 목록 ---------------------------
@@ -81,6 +84,8 @@ ${PROFILE}
 
 ${BLOCK}
 
+${UNBLOCK}
+
 ---------------------- CHANNEL OWNER 명령어 ---------------------
 
 ${ROOMSTATE}
@@ -91,11 +96,15 @@ ${BAN}
 
 ${MUTE}
 
+${UNMUTE}
+
 ---------------------- CHANNEL ADMIN 명령어 ---------------------
 
 ${BAN}
 
 ${MUTE}
+
+${UNMUTE}
 `;
 
 export const STARTMSG : SocketOutputDto = {
