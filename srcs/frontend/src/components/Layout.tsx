@@ -5,6 +5,9 @@ import Home from "./Home";
 import Profile from "./Profile";
 import Game from "./game/Game"
 import { gameMod } from "./game/GameType";
+import CreatRoom from "./Room";
+
+
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -42,6 +45,9 @@ function Layout({ isLoggedIn, userData, setUserData }: LayoutComponent) {
 			return ( <Game mod={gameMod.soloGame} /> );
 		else if (param === "rankGame")
 			return ( <Game mod={gameMod.rankGame} /> );
+		else if (param === "creatGame")
+			return ( <CreatRoom /> );
+			
 	};
 	return (
 		<>

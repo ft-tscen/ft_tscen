@@ -3,7 +3,7 @@ import { Container } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom';
 
 // import style from "../css/Home.module.css";
-import Btn from "./Btn";
+// import Btn from "./Btn";
 
 
 enum gameMod{
@@ -22,12 +22,10 @@ function Home({ isLoggedIn }: HomeComponent) {
 
 	function gameModHandle(mode: gameMod) {
 		if (mode === gameMod.normalGame) {
-			// 방만들기 이동
-			;
+			navigate('/creatGame');
 		} else if (mode === gameMod.rankGame) {
 			navigate('/rankGame');
-		}
-		else if (mode === gameMod.soloGame) {
+		} else if (mode === gameMod.soloGame) {
 			navigate('/soloGame');
 		}
 	}
@@ -42,8 +40,11 @@ function Home({ isLoggedIn }: HomeComponent) {
 				</Row>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<Btn text="ㅁㅁㅁ" disable={isLoggedIn} />
-						{/* 채팅 컴포넌트 들어올 자리 */}
+						<Button variant="outline-light" disabled={!isLoggedIn}
+							style={{ width: "100px", height: "50px",}}
+							onClick={() => gameModHandle(gameMod.normalGame)}>
+								방만들기
+						</Button>
 					</Col>
 				</Row>
 				<Row>

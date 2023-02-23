@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
-import { Form, Button, Container, Card, CloseButton , Row, Col } from "react-bootstrap";
+import { Form, Button, Container, Card, CloseButton , Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 function CreatRoom() {
 	const navigate = useNavigate();
-	const [roomName, setRoomName] = useState('');
-	const [hasPassword, setHasPassword] = useState(false);
-	const [password, setPassword] = useState('');
+	const [roomName, setRoomName] = useState<string>('');
+	const [hasPassword, setHasPassword] = useState<boolean>(false);
+	const [password, setPassword] = useState<string>('');
 	const [usePassword, setUsePassword] = useState<boolean>(false);
+	const [showWarning, setShowWarning] = useState<boolean>(false);
+
+	const styleEl = document.createElement('style');
+	styleEl.appendChild(document.createTextNode(styles));
+	document.head.appendChild(styleEl);
 
 	const handleRoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		// const value = e.target.value.replace(/[^A-Za-z0-9]/gi, "");
-		// setRoomName(value.slice(0, 10));
 		const roomName = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10);
 		setRoomName(roomName);
 	};
 	
 	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		// const value = e.target.value;
-		// if (!setUsePassword || /^[a-zA-Z0-9!@#$%^&*()_+]{0,10}$/.test(value))
-		// 	setPassword(value);
 		const password = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10);
 		setPassword(password);
 	};
@@ -30,13 +30,34 @@ function CreatRoom() {
 			setPassword("");
 		}
 	};
+
+	const handleClose = () => {
+		const alert = document.querySelector('.warning-alert');
+		alert?.classList.add('fade-out');
+		setTimeout(() => setShowWarning(false), 100);
+	}
 	
 	const handleSubmit = () => {
 		// e.preventDefault(); 
-		if (usePassword)
-			console.log(`Room: ${roomName}, Password: ${password}`);
-		else
-			console.log(`Room: ${roomName}`);
+		if (usePassword) {
+			if (roomName.length >= 4 && password.length >= 4) {
+				console.log(roomName.length);
+				console.log(password.length);
+				console.log(`Room: ${roomName}, Password: ${password}`);
+			} else {
+				setShowWarning(true);
+				setTimeout(() => setShowWarning(false), 3000);
+			}
+			// if (roomName.length >)
+		}
+		else {
+			if (roomName.length >= 4)
+				console.log(`Room: ${roomName}`);
+			else {
+				setShowWarning(true);
+				setTimeout(() => setShowWarning(false), 3000);
+			}
+		}
 		// navigate("/normalGame");
 	};
 
@@ -61,10 +82,10 @@ function CreatRoom() {
 							placeholder="Enter Room Name"
 							onChange={handleRoomChange}
 							value={roomName}
-							onKeyPress={(e) => /[a-zA-Z0-9]/.test(e.key) || e.preventDefault()}
+							onKeyPress={(e) => /[a-zA-Z0-9!@#$%^&*()_+]/.test(e.key) || e.preventDefault()}
 							className="bg-transparent text-white"
 						/>
-						<Form.Text className="text-muted">Up to 10 alphanumeric characters</Form.Text>
+						<Form.Text className="text-muted">4 - 10 alphanumeric characters</Form.Text>
 					</Form.Group>
 					<Form.Group className="mb-3" controlId="password">
 						<Form.Label className="text-white">PassWord</Form.Label>
@@ -78,7 +99,7 @@ function CreatRoom() {
 							onKeyPress={(e) => /[a-zA-Z0-9]/.test(e.key) || e.preventDefault()}
 						/>
 						<Form.Text className="text-muted">
-						Up to 10 characters, including letters, numbers, and special characters.
+						4 - 10 alphanumeric and special characters.
 					</Form.Text>
 					</Form.Group>
 					<Form.Group className="mb-3">
@@ -91,19 +112,56 @@ function CreatRoom() {
 						onChange={handleUsePassword}
 						/>
 					</Form.Group>
-						<div className="d-flex justify-content-end">
-							<Button
-								onClick={handleSubmit}
-								className="w-100"
-								variant="outline-light">
-								방만들기
-							</Button>
-						</div>
+					<div className="d-flex justify-content-end">
+						<Button
+							onClick={handleSubmit}
+							className="w-100"
+							variant="outline-light">
+							방만들기
+						</Button>
+					</div>
 					</Card.Body>
 				</Form>
 			</Card>
+			{showWarning && (
+				<Alert
+					variant="warning"
+					onClose={handleClose}
+					dismissible
+					className="warning-alert"
+				>
+				At least four characters.
+			</Alert>)}
 		</Container>
 	)
 }
 
 export default CreatRoom;
+
+
+const styles = `
+.warning-alert {
+	border: 2px solid white;
+	background-color: black;
+	color: white;
+	opacity: 1;
+	transition: opacity 0.5s ease-in-out;
+}
+
+.warning-alert .alert-heading {
+	color: white;
+}
+
+.warning-alert .close {
+	color: white;
+}
+
+.warning-alert .close:hover {
+	color: white;
+	opacity: 0.75;
+}
+
+.warning-alert.fade-out {
+	opacity: 0;
+}
+`;

@@ -7,6 +7,7 @@ import EndPage from './PageEnd';
 import ReadyPage from './PageReady';
 import WaitPage from './PageWait';
 import { gameMod } from './GameType';
+import P1 from './p1test';
 
 type gameComponent = {
 	mod: gameMod;
@@ -271,6 +272,7 @@ function Game({ mod }: gameComponent) {
 
 	return (
 		<div>
+			<P1></P1>
 			<canvas
 				ref={canvasRef}
 				width={CanvasWidth}
