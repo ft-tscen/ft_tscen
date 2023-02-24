@@ -20,7 +20,7 @@ const LoginTest = () => {
 	}, [loggedIn]);
 
 	function login() {
-		window.location.href = "http://localhost:3001/login";
+		window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login`;
 	}
 
 	async function logout() {
