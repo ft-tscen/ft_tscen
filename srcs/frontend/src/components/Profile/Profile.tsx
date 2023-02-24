@@ -27,7 +27,7 @@ function Profile({
 	useEffect(() => {}, [edit]);
 
 	if (isLoggedIn) {
-		if (edit === true) {
+		if (edit === true || userData.nickName === null) {
 			return (
 				<SaveProfile
 					userData={userData}

@@ -65,7 +65,13 @@ function SaveProfile({
 				alert("☎️ 전화번호를 입력해주세요.");
 			else {
 				if (!userData.verified) {
-					await api.post(`/tfa/send?phone=${userData.phone}`);
+					if (userData.phone === null) {
+						if (phone_number.length !== 11 || !Number(phone_number)) {
+							alert("☎️ 전화번호 형식이 올바르지 않습니다.");
+							return;
+						}
+						await api.post(`/tfa/send?phone=${phone_number}`);
+					} else await api.post(`/tfa/send?phone=${userData.phone}`);
 					setVCModalShow(true);
 				} else {
 					setCertificated(true);
@@ -77,12 +83,12 @@ function SaveProfile({
 	};
 
 	const handleSubmit = async () => {
-		if (phone_number.length !== 11 || !Number(phone_number)) {
-			alert("전화번호 형식이 올바르지 않습니다.");
+		if (nick_name == "" || nick_name == null || nick_name == undefined) {
+			alert("닉네임을 작성해주세요.");
 			return;
 		}
-		if (nick_name == "" || nick_name == null || nick_name == undefined) {
-			alert("닉네임을 작성해주세요");
+		if (phone_number.length !== 11 || !Number(phone_number)) {
+			alert("☎️ 전화번호 형식이 올바르지 않습니다.");
 			return;
 		}
 		if (
@@ -176,7 +182,7 @@ function SaveProfile({
 									type="tel"
 									placeholder="'-' 없이 숫자만 입력"
 									className="bg-transparent text-white"
-									value={phone_number}
+									value={phone_number === "null" ? "" : phone_number}
 									onChange={(e) => setPhoneNumber(e.target.value)}
 								/>
 							</Form.Group>
