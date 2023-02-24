@@ -45,12 +45,12 @@ function Layout({
 			<Container fluid style={{ height: "90vmin" }}>
 				<Row style={{ height: "90vmin" }}>
 					<Col xs={3}>
-						<div>adsf</div>
+						{userData.nickName === null || !isLoggedIn ? null : <div>asdf</div>}
 						{/* 정보 컴포넌트 들어올 자리 */}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
 					<Col xs={3}>
-						<div>asdf</div>
+						{userData.nickName === null || !isLoggedIn ? null : <div>asdf</div>}
 						{/* 채팅 컴포넌트 들어올 자리 */}
 					</Col>
 				</Row>
