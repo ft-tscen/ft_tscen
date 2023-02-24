@@ -6,11 +6,29 @@ import {
   UpdateUserOutput,
 } from './dtos/user.dto';
 import { UserService } from './user.service';
-import { Body, Controller, Get, Patch, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Query,
+  UseGuards,
+  Post,
+  UseInterceptors,
+  UploadedFile,
+  ParseIntPipe,
+  Param,
+  Res,
+  StreamableFile,
+  Session,
+} from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
 import { AuthUser } from 'src/auth/authUser.decorator';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Readable } from 'stream';
+import { Response } from 'express';
 
 @ApiTags('user')
 @Controller('user')
@@ -69,9 +87,9 @@ export class UserController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Patch('/update')
   async updateUser(
-    @AuthUser() user: User,
+    @Session() session: Record<string, any>,
     @Body() updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
-    return await this.userService.updateUser(user.id, updateData);
+    return await this.userService.updateUser(session, updateData);
   }
 }
