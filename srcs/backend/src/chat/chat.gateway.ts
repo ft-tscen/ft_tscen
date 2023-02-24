@@ -46,7 +46,7 @@ export interface SocketOutputDto {
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: ['http://localhost:3000'],
+    origin: [`http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}`],
     credentials: true,
   },
 })

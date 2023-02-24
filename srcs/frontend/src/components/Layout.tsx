@@ -1,9 +1,8 @@
-import { Col, Row } from "react-bootstrap";
-import { Container } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { Col, Row, Container } from "react-bootstrap";
 import ChatPart from "./chatting/ChatPart";
+import { useNavigate, useParams } from "react-router-dom";
 import Home from "./Home";
-import Profile from "./Profile";
+import Profile from "./Profile/Profile";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -14,18 +13,19 @@ type LayoutComponent = {
 		phone: string;
 		verified: boolean;
 	};
-	setUserData: (userData: {
-		intraID: string;
-		name: string;
-		nickName: string;
-		phone: string;
-		verified: boolean;
-	}) => any;
+	isChangedData: boolean;
+	setChangedData: (isChangedData: boolean) => any;
 };
 
-function Layout({ isLoggedIn, userData, setUserData }: LayoutComponent) {
+function Layout({
+	isLoggedIn,
+	userData,
+	isChangedData,
+	setChangedData,
+}: LayoutComponent) {
 	const url = useParams();
 	const param = url["*"];
+	const navigate = useNavigate();
 
 	const getComponent = () => {
 		if (param === "") return <Home isLoggedIn={isLoggedIn} />;
@@ -34,9 +34,11 @@ function Layout({ isLoggedIn, userData, setUserData }: LayoutComponent) {
 				<Profile
 					isLoggedIn={isLoggedIn}
 					userData={userData}
-					setUserData={setUserData}
+					isChangedData={isChangedData}
+					setChangedData={setChangedData}
 				/>
 			);
+		else navigate("/");
 	};
 	return (
 		<>

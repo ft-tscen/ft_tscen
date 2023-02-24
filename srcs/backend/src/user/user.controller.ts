@@ -20,6 +20,7 @@ import {
   Param,
   Res,
   StreamableFile,
+  Session,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
@@ -86,10 +87,10 @@ export class UserController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Patch('/update')
   async updateUser(
-    @AuthUser() user: User,
+    @Session() session: Record<string, any>,
     @Body() updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
-    return await this.userService.updateUser(user.id, updateData);
+    return await this.userService.updateUser(session, updateData);
   }
 
   @UseGuards(AuthGuard)

@@ -90,11 +90,13 @@ export class UserService {
   }
 
   async updateUser(
-    userId: number,
+    session: Record<string, any>,
     updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
     try {
-      this.users.update(userId, { ...updateData });
+      await this.users.update(session.user.id, { ...updateData });
+      const { user } = await this.getMe(session.user.intra);
+      session.user = user;
       return { ok: true };
     } catch (error) {
       return { ok: false, error };

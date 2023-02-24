@@ -43,7 +43,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${REACT_PORT}:${REACT_PORT}"
+      - "${REACT_APP_PORT}:${REACT_APP_PORT}"
     volumes:
       - ./frontend:/frontend
     networks:

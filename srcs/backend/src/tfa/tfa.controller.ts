@@ -1,4 +1,4 @@
-import { Controller, Post, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Query, Session, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AuthUser } from 'src/auth/authUser.decorator';
@@ -19,10 +19,10 @@ export class TfaController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Post('send')
   async sendSMS(
-    @AuthUser() user: User,
+    @Session() session: Record<string, any>,
     @Query('phone') phone: string,
   ): Promise<SendSMSOutput> {
-    return await this.tfaService.sendSMS(user, phone);
+    return await this.tfaService.sendSMS(session, phone);
   }
 
   @UseGuards(AuthGuard)
@@ -33,9 +33,9 @@ export class TfaController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Post('/verify')
   async verifyUser(
-    @AuthUser() user: User,
+    @Session() session: Record<string, any>,
     @Query('code') code: string,
   ): Promise<VerifyUserOutput> {
-    return await this.tfaService.verifyUser(user, code);
+    return await this.tfaService.verifyUser(session, code);
   }
 }
