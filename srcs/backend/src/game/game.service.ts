@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
+import { Socket, Namespace } from 'socket.io';
 import type { GameDto } from './dtos/game.dto';
 import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
-import { GameRoom } from './game.gateway';
 
 //  Dto에 필요한 변수 : score, ball_x, ball_velocityX, ball_y, ball_velocityY, left_padle_y, right_padle_y, roomName
 
@@ -63,6 +62,7 @@ export class GameService {
     p2: Socket,
     roomName: string,
     GameMod: gameMod,
+	nsp: Namespace,
   ): GameDto {
     const params: GameDto = <GameDto>{
       roomName: roomName,
@@ -105,6 +105,10 @@ export class GameService {
         ballX: CanvasWidth / 2,
         ballY: CanvasHeight / 2,
       },
+	  p1Ready: false,
+	  p2Ready: false,
+	  nsp: nsp,
+	  interval: undefined,
     };
     return params;
   }
@@ -215,8 +219,7 @@ export class GameService {
     Game.p1.socket.emit('update', Game.front);
   }
 
-  private update_v2(gameRoom: GameRoom) {
-	const Game: GameDto = gameRoom.gameDto;
+  private update_v2(Game: GameDto) {
     // ready 확인 추가 자리 //
     if (Game.ball.x - Game.ball.radius < 0) {
       Game.p2.score++;
@@ -277,7 +280,7 @@ export class GameService {
     Game.front.rightScore = Game.p2.score;
     // render 호출하는 socket 추가
     //Game.p1.socket.emit('update', Game.front);
-	gameRoom.nsp.to(gameRoom.roomName).emit('update', Game.front);
+	Game.nsp.to(Game.roomName).emit('update', Game.front);
   }
 
   paddleUp(client: Socket, Game: GameDto) {
@@ -332,12 +335,12 @@ export class GameService {
   gameLoop(Game: GameDto) {
     Game.interval = setInterval(() => {
       this.update(Game);
-    }, 1000 / 30);
+    }, 1000 / 60);
   }
 
-  gameLoop_v2(Game: GameRoom) {
-    Game.gameDto.interval = setInterval(() => {
+  gameLoop_v2(Game: GameDto) {
+    Game.interval = setInterval(() => {
       this.update_v2(Game);
-    }, 1000 / 30);
+    }, 1000 / 60);
   }
 }

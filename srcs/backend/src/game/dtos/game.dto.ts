@@ -1,5 +1,6 @@
 import { BallDto } from './ball.dto';
 import { PlayerDto } from './player.dto';
+import { Namespace } from 'socket.io';
 
 export enum gameMod{
   normalGame,
@@ -24,5 +25,8 @@ export type GameDto = {
   p2: PlayerDto,
   gameMod: gameMod,
   front: FrontData,
+  p1Ready: boolean,
+  p2Ready: boolean,
+  nsp: Namespace,
   interval: NodeJS.Timer,
 }

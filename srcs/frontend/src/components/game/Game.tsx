@@ -202,13 +202,13 @@ function Game({ mod }: gameComponent) {
 		// game시작 했을 때만 적용되게
 		if (startGame) {
 			if (paddleUp === true) {
-				socketa.emit('PaddleUp');
+				socketa.emit('PaddleUp', true);
 			}
 			if (paddleDown === true) {
-				socketa.emit('PaddleDown');
+				socketa.emit('PaddleDown', true);
 			}
 			if (paddleDown === false && paddleUp === false) {
-				socketa.emit('PaddleStop');
+				socketa.emit('PaddleStop', true);
 			}
 		}
 	}, [paddleDown, paddleUp]);
