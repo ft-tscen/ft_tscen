@@ -24,6 +24,7 @@ function Game({ mod }: gameComponent) {
 	// const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 	const [canvas, setCanvas] = useState<any>();
 	const [ctx, setCtx] = useState<any>();
+	const [match,setMatch] = useState<boolean>(false);
 
 	const [startGame, setStartGame] = useState<boolean>(false);
 
@@ -114,6 +115,10 @@ function Game({ mod }: gameComponent) {
 
 	useEffect(() => {
 		if (canvas && ctx) {
+			socketa.on('matching-success', () => {
+				setMatch(true);
+			})
+
 			if (mod === gameMod.soloGame) {
 				ReadyPage(ctx, CanvasWidth, CanvasHeight);
 				document.addEventListener('keydown', (e) => {
@@ -126,6 +131,18 @@ function Game({ mod }: gameComponent) {
 			if (mod === gameMod.rankGame) {
 				WaitPage(ctx, CanvasWidth, CanvasHeight);
 				socketa.emit('matching');
+				if (match) {
+					ReadyPage(ctx, CanvasWidth, CanvasHeight);
+					document.addEventListener('keydown', (e) => {
+					if (e.code === 'KeyR') {
+						socketa.emit('ready-rank');
+						socketa.on('start-game', ()=> {
+							setStartGame(true);
+						})
+					}
+					});
+				}
+				}
 				//socketa.on('matching', ()=> {})
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
