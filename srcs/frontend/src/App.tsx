@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import NavBar from "./components/NavBar";
 import Layout from "./components/Layout";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { api } from "./axios/api";
 
 function App() {
+	const navigate = useNavigate();
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [isChangedData, setChangedData] = useState(false);
 	let [userData, setUserData] = useState({
@@ -45,6 +46,7 @@ function App() {
 			};
 			setLoggedIn(true);
 			setUserData(data);
+			if (data.nickName === null && data.phone === null) navigate("/profile");
 		} catch (e) {
 			setLoggedIn(false);
 			setUserData({
