@@ -8,7 +8,7 @@ export class LoginController {
   constructor(private readonly loginService: LoginService) {}
 
   @Get()
-  @Redirect(`http://localhost:3000`)
+  @Redirect(`http://${process.env.NESTJS_HOST}:3000`)
   checkLogin(@Session() session: Record<string, any>) {
     if (!session.login) {
       return {
@@ -18,7 +18,7 @@ export class LoginController {
   }
 
   @Get('/redirect')
-  @Redirect(`http://localhost:3000`)
+  @Redirect(`http://${process.env.NESTJS_HOST}:3000`)
   async login(
     @Session() session: Record<string, any>,
     @Query('code') code: string,

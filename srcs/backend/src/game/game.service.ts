@@ -8,7 +8,7 @@ import { PlayerDto } from './dtos/player.dto';
 
 const CanvasWidth = 600;
 const CanvasHeight = 400;
-const VictoryScore = 3;
+const VictoryScore = 10;
 
 @Injectable()
 export class GameService {
@@ -221,25 +221,25 @@ export class GameService {
 
   private update_v2(Game: GameDto) {
     // ready 확인 추가 자리 //
-    if (Game.ball.x - Game.ball.radius < 0) {
-      Game.p2.score++;
-      this.resetBall(Game);
-    } else if (Game.ball.x + Game.ball.radius > CanvasWidth) {
-      Game.p1.score++;
-      this.resetBall(Game);
-    }
-    if (Game.p1.score >= VictoryScore) {
+	if (Game.ball.x - Game.ball.radius < 0) {
+		Game.p2.score++;
+		this.resetBall(Game);
+	} else if (Game.ball.x + Game.ball.radius > CanvasWidth) {
+		Game.p1.score++;
+		this.resetBall(Game);
+	}
+	if (Game.p1.score >= VictoryScore) {
 		Game.p1.socket.emit('end-game', true);
-    if (Game.p2.socket)
+		if (Game.p2.socket)
 			Game.p2.socket.emit('end-game', false);
-		//Game.p2.socket.emit('end-game', false);
+		Game.p2.socket.emit('end-game', false);
 		clearInterval(Game.interval);
 		return ;
 	}
-    else if (Game.p2.score >= VictoryScore) {
-		//Game.p2.socket.emit('end-game', true);
+	else if (Game.p2.score >= VictoryScore) {
+		Game.p2.socket.emit('end-game', true);
 		Game.p1.socket.emit('end-game', false);
-    if (Game.p2.socket)
+		if (Game.p2.socket)
 			Game.p2.socket.emit('end-game', true);
 		clearInterval(Game.interval);
 		return ;
@@ -250,7 +250,7 @@ export class GameService {
     Game.ball.x += Game.ball.velocityX;
     Game.ball.y += Game.ball.velocityY;
     // soloMod
-    // if (Game.gameMod === gameMod.soloGame)
+     if (Game.gameMod === gameMod.soloGame)
     Game.p2.padleY +=
       (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
     const player =
@@ -286,27 +286,31 @@ export class GameService {
   paddleUp(client: Socket, Game: GameDto) {
     //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
     // if (client.id === Game.p1.socket)
-    Game.p1.padleUp = true;
-    // if (client.id === Game.p2.socket)
-    Game.p2.padleUp = true;
+	if (client.id === Game.p1.socket.id)
+    	Game.p1.padleUp = true;
+	else
+    	Game.p2.padleUp = true;
   }
 
   paddleDown(client: Socket, Game: GameDto) {
     //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
     // if (client.id === Game.p1.socket)
-    Game.p1.padleDown = true;
-    // if (client.id === Game.p2.socket)
-    Game.p2.padleDown = true;
+	if (client.id === Game.p1.socket.id)
+		Game.p1.padleDown = true;
+	else
+		Game.p2.padleDown = true;
   }
 
   paddleStop(client: Socket, Game: GameDto) {
     //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
-    // if (client.id === Game.p1.socket)
-    Game.p1.padleUp = false;
-    Game.p1.padleDown = false;
-    // if (client.id === Game.p2.socket)
-    Game.p2.padleUp = false;
-    Game.p2.padleDown = false;
+	if (client.id === Game.p1.socket.id) {
+		 Game.p1.padleUp = false;
+		 Game.p1.padleDown = false;
+	}
+	else {
+		Game.p2.padleUp = false;
+		Game.p2.padleDown = false;
+	}
   }
 
   private paddleCalculate(Game: GameDto) {

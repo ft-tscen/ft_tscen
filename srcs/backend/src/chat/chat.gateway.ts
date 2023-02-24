@@ -9,7 +9,7 @@ import {
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: [`http://localhost:3000`],
+    origin: [`http://${process.env.NESTJS_HOST}:3000`],
     credentials: true,
   },
 })

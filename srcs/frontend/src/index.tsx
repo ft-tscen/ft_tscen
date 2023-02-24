@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.css";
 
 import { io } from "socket.io-client";
 
-export const socket = io(`http://localhost:3001`);
+export const socket = io(`http://${process.env.REACT_APP_NESTJS_HOST}:3001`);
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement

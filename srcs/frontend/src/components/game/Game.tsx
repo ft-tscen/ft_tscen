@@ -13,7 +13,7 @@ type gameComponent = {
 	mod: gameMod;
 };
 
-const socketa = io(`http://localhost:3001/game`);
+const socketa = io(`http://${process.env.REACT_APP_NESTJS_HOST}:3001/game`);
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -117,17 +117,30 @@ function Game({ mod }: gameComponent) {
 	useEffect(() => {
 		if (canvas && ctx) {
 			socketa.on('matching-success', () => {
-				console.log("test");
-				setMatch(true);
+				console.log('매칭 성공');
+				//setMatch(true);
+				//if (match) {
+					console.log('ssersr3');
+					ReadyPage(ctx, CanvasWidth, CanvasHeight);
+					document.addEventListener('keydown', (e) => {
+						if (e.code === 'KeyR') {
+							socketa.emit('ready-rank');
+							socketa.on('start-game', ()=> {
+							setStartGame(true);
+						})
+					}
+					});
+				//}
 			})
 
 			if (mod === gameMod.soloGame) {
 				ReadyPage(ctx, CanvasWidth, CanvasHeight);
 				document.addEventListener('keydown', (e) => {
-				if (e.code === 'KeyR') {
-					socketa.emit('ready-solo');
-					setStartGame(true);
-				}
+					if (e.code === 'KeyR') {
+						console.log('solo ready!');
+						socketa.emit('ready-solo');
+						setStartGame(true);
+					}
 				});
 			}
 			if (mod === gameMod.rankGame) {
@@ -136,15 +149,17 @@ function Game({ mod }: gameComponent) {
 				if (match) {
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
 					document.addEventListener('keydown', (e) => {
-					if (e.code === 'KeyR') {
-						socketa.emit('ready-rank');
-						socketa.on('start-game', (res: boolean)=> {
-							console.log(res);
-							console.log("HREEEEEEEE");
-							setPlayer(res);
-							setStartGame(true);
-						})
-					}
+						if (e.code === 'KeyR') {
+							socketa.emit('ready-rank');
+							console.log('ready !');
+							socketa.on('start-game', (res: any)=> {
+								console.log(res);
+								console.log(res.res);
+								console.log('WHY');
+								setPlayer(res);
+								setStartGame(true);
+							})
+						}
 					});
 				}
 				}
@@ -222,6 +237,8 @@ function Game({ mod }: gameComponent) {
 	useEffect(() => {
 		// game시작 했을 때만 적용되게
 		if (startGame) {
+			console.log(player);
+			//console.log(player.valueOf);
 			if (paddleUp === true) {
 				socketa.emit('PaddleUp', (player: boolean)=> {
 					console.log(player.valueOf);

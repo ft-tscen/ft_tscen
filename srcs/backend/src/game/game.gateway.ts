@@ -40,7 +40,7 @@ let waitingSocket: Socket = undefined;
 @WebSocketGateway({
   namespace: 'game',
   cors: {
-    origin: [`http://localhost:3000`],
+    origin: [`http://${process.env.NESTJS_HOST}:3000`],
   },
 })
 export class GamesGateway
@@ -85,9 +85,9 @@ export class GamesGateway
       'test',
       gameMod.soloGame,
     );
-    gameDtoByRoomName[Game.roomName] = Game;
+    gameRooms[Game.roomName] = Game;
     RoomNameBySocket[socket.id] = Game.roomName;
-    this.gameService.gameLoop(gameDtoByRoomName[Game.roomName]);
+    this.gameService.gameLoop(gameRooms[Game.roomName]);
 
     socket.emit('test', `${socket.id}: test success!`);
   }
@@ -95,7 +95,7 @@ export class GamesGateway
   @SubscribeMessage('PaddleUp')
   handlePaddleUp(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
     const na = RoomNameBySocket[socket.id];
-    const dto: GameDto = gameDtoByRoomName[na];
+    const dto: GameDto = gameRooms[na];
     if (is_p1)
 		dto.p1.padleUp = true;
 	else
@@ -106,7 +106,7 @@ export class GamesGateway
   @SubscribeMessage('PaddleDown')
   handlePaddleDown(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
     const na = RoomNameBySocket[socket.id];
-    const dto: GameDto = gameDtoByRoomName[na];
+    const dto: GameDto = gameRooms[na];
 	if (is_p1)
     	dto.p1.padleDown = true;
 	else
@@ -117,7 +117,7 @@ export class GamesGateway
   @SubscribeMessage('PaddleStop')
   handlePaddleStop(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
     const na = RoomNameBySocket[socket.id];
-    const dto: GameDto = gameDtoByRoomName[na];
+    const dto: GameDto = gameRooms[na];
 	if (!dto)
 		return;
 	if (is_p1) {
@@ -136,7 +136,8 @@ export class GamesGateway
   }
 
   @SubscribeMessage('friendly-match')
-  handleFriendlyMatching(@ConnectedSocket() socket: Socket) {
+  handleFriendlyMatching(@ConnectedSocket() socket: Socket,
+  @MessageBody() roomName: string) {
 	//if ()
   }
 
@@ -181,7 +182,7 @@ export class GamesGateway
 	}
 	else {
 		waitingSocket = socket;
-		this.logger.log('matching waiting...');
+		this.logger.log(`${socket.id} matching waiting...`);
 	}
   }
 
@@ -196,14 +197,16 @@ export class GamesGateway
 
 	if (socket.id === game.p1.socket.id) {
 		game.p1Ready = true;
-		this.logger.log(`Ready End!!!`);
+		this.logger.log(`Ready p1!!!`);
 	}
 	else if (socket.id === game.p2.socket.id ){
 		game.p2Ready = true;
-		this.logger.log(`Ready End!!!`);
+		this.logger.log(`Ready p2!!!`);
 	}
 
     if (game.p1Ready === true && game.p2Ready == true) {
+		game.p1.socket.emit('start-game', true);
+		game.p2.socket.emit('start-game', false);
 		this.gameService.gameLoop_v2(game);
 		this.logger.log(`Ready End!!!`);
     }
@@ -223,13 +226,13 @@ export class GamesGateway
       'roomName',
       gameMod.soloGame,
     );
-    gameDtoByRoomName[Game.roomName] = Game;
+    gameRooms[Game.roomName] = Game;
     RoomNameBySocket[socket.id] = Game.roomName;
 
     //socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
     //createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
 
-    this.gameService.gameLoop(gameDtoByRoomName[Game.roomName]);
+    this.gameService.gameLoop(gameRooms[Game.roomName]);
     //socket.emit('test', `${socket.id}: test success!`);
   }
 
