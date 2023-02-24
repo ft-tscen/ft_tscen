@@ -33,7 +33,7 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 									variant="outline-light"
 									size="lg"
 									onClick={() =>
-										(window.location.href = "http://localhost:3001/login")
+										(window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login`)
 									}
 								>
 									로그인
@@ -65,7 +65,7 @@ export default NavBar;
 {
 	/* <Nav.Link
 onClick={() =>
-	(window.location.href = "http://localhost:3001/login")
+	(window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login`)
 }
 className="text-light"
 >
