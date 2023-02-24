@@ -139,6 +139,8 @@ function Game({ mod }: gameComponent) {
 					if (e.code === 'KeyR') {
 						socketa.emit('ready-rank');
 						socketa.on('start-game', (res: boolean)=> {
+							console.log(res);
+							console.log("HREEEEEEEE");
 							setPlayer(res);
 							setStartGame(true);
 						})
@@ -221,7 +223,9 @@ function Game({ mod }: gameComponent) {
 		// game시작 했을 때만 적용되게
 		if (startGame) {
 			if (paddleUp === true) {
-				socketa.emit('PaddleUp', player);
+				socketa.emit('PaddleUp', (player: boolean)=> {
+					console.log(player.valueOf);
+				});
 			}
 			if (paddleDown === true) {
 				socketa.emit('PaddleDown', player);
