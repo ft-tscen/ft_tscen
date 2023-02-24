@@ -25,6 +25,7 @@ function Game({ mod }: gameComponent) {
 	const [canvas, setCanvas] = useState<any>();
 	const [ctx, setCtx] = useState<any>();
 	const [match,setMatch] = useState<boolean>(false);
+	const [player,setPlayer] = useState<boolean>(true);
 
 	const [startGame, setStartGame] = useState<boolean>(false);
 
@@ -116,6 +117,7 @@ function Game({ mod }: gameComponent) {
 	useEffect(() => {
 		if (canvas && ctx) {
 			socketa.on('matching-success', () => {
+				console.log("test");
 				setMatch(true);
 			})
 
@@ -136,7 +138,8 @@ function Game({ mod }: gameComponent) {
 					document.addEventListener('keydown', (e) => {
 					if (e.code === 'KeyR') {
 						socketa.emit('ready-rank');
-						socketa.on('start-game', ()=> {
+						socketa.on('start-game', (res: boolean)=> {
+							setPlayer(res);
 							setStartGame(true);
 						})
 					}
@@ -175,7 +178,6 @@ function Game({ mod }: gameComponent) {
 					socketa.emit('end-game');
 				}
 			})
-		}
 	}, [ctx])
 
 	function killSockets(socket : any) {
@@ -219,13 +221,13 @@ function Game({ mod }: gameComponent) {
 		// game시작 했을 때만 적용되게
 		if (startGame) {
 			if (paddleUp === true) {
-				socketa.emit('PaddleUp', true);
+				socketa.emit('PaddleUp', player);
 			}
 			if (paddleDown === true) {
-				socketa.emit('PaddleDown', true);
+				socketa.emit('PaddleDown', player);
 			}
 			if (paddleDown === false && paddleUp === false) {
-				socketa.emit('PaddleStop', true);
+				socketa.emit('PaddleStop', player);
 			}
 		}
 	}, [paddleDown, paddleUp]);
