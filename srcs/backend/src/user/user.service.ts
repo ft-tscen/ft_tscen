@@ -6,16 +6,18 @@ import {
   UpdateUserDto,
   UpdateUserOutput,
 } from './dtos/user.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+// import Avatar from './entities/avatar.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
-  ) {}
+  ) // @InjectRepository(Avatar) private readonly avatars: Repository<Avatar>,
+  {}
 
   async getMe(intra: string): Promise<getMeOutput> {
     try {
@@ -88,11 +90,13 @@ export class UserService {
   }
 
   async updateUser(
-    userId: number,
+    session: Record<string, any>,
     updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
     try {
-      this.users.update(userId, { ...updateData });
+      await this.users.update(session.user.id, { ...updateData });
+      const { user } = await this.getMe(session.user.intra);
+      session.user = user;
       return { ok: true };
     } catch (error) {
       return { ok: false, error };
