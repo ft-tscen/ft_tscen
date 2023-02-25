@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Form, Button, Container, Card, CloseButton , Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { socket } from "..";
 import { socketa } from "./game/Game";
 
-interface RoomInfo {
-	roomName : string
-	passWord : string | undefined;
+type RoomInfo =  {
+	roomName : string,
+	passWord : string,
+	isPass : boolean
 }
 
 function CreatRoom() {
@@ -16,6 +16,7 @@ function CreatRoom() {
 	const [password, setPassword] = useState<string>('');
 	const [usePassword, setUsePassword] = useState<boolean>(false);
 	const [showWarning, setShowWarning] = useState<boolean>(false);
+	const [roomInfo, setRoomInfo] = useState<RoomInfo>();
 
 	const styleEl = document.createElement('style');
 	styleEl.appendChild(document.createTextNode(styles));
@@ -48,12 +49,14 @@ function CreatRoom() {
 		// e.preventDefault(); 
 		if (usePassword) {
 			if (roomName.length >= 4 && password.length >= 4) {
-				// console.log(roomName.length);
-				// console.log(password.length);
-				// console.log(`Room: ${roomName}, Password: ${password}`);
-				socketa.emit('makeRoom', (data: RoomInfo)=> {
-					data.roomName = roomName;
-					data.passWord = password;
+				// setRoomInfo({
+				// 	roomName : roomName,
+				// 	passWord : password,
+				// 	isPass : true
+				// });
+				socketa.emit('makeRoom', roomName, password , (res: boolean)=> {
+					if (res)
+						console.log('성공');
 				})
 				navigate("/soloGame");
 			} else {
@@ -64,9 +67,13 @@ function CreatRoom() {
 		}
 		else {
 			if (roomName.length >= 4) {
-				socketa.emit('makeRoom', (data: RoomInfo)=> {
-					data.roomName = roomName;
-					data.passWord = undefined;
+				// setRoomInfo({
+				// 	roomName : roomName,
+				// 	passWord : password
+				// });
+				socketa.emit('makeRoom', roomName, (res: boolean) => {
+					if (res)
+						console.log('성공');
 				})
 				navigate("/soloGame");
 			}
@@ -77,6 +84,10 @@ function CreatRoom() {
 		}
 		// navigate("/normalGame");
 	};
+
+	// useEffect(()=> {
+	// 	socketa.on('')
+	// }, []);
 
 	const handleClickClose = () => {
 		navigate("/");
