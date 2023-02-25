@@ -3,12 +3,6 @@ import { Form, Button, Container, Card, CloseButton , Row, Col, Alert } from "re
 import { useNavigate } from "react-router-dom";
 import { socketa } from "./game/Game";
 
-type RoomInfo =  {
-	roomName : string,
-	passWord : string,
-	isPass : boolean
-}
-
 function CreatRoom() {
 	const navigate = useNavigate();
 	const [roomName, setRoomName] = useState<string>('');
@@ -16,7 +10,6 @@ function CreatRoom() {
 	const [password, setPassword] = useState<string>('');
 	const [usePassword, setUsePassword] = useState<boolean>(false);
 	const [showWarning, setShowWarning] = useState<boolean>(false);
-	const [roomInfo, setRoomInfo] = useState<RoomInfo>();
 
 	const styleEl = document.createElement('style');
 	styleEl.appendChild(document.createTextNode(styles));
@@ -26,7 +19,7 @@ function CreatRoom() {
 		const roomName = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10);
 		setRoomName(roomName);
 	};
-
+	
 	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const password = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10);
 		setPassword(password);
@@ -44,21 +37,15 @@ function CreatRoom() {
 		alert?.classList.add('fade-out');
 		setTimeout(() => setShowWarning(false), 100);
 	}
-
+	
 	const handleSubmit = () => {
-		// e.preventDefault();
 		if (usePassword) {
 			if (roomName.length >= 4 && password.length >= 4) {
-				// setRoomInfo({
-				// 	roomName : roomName,
-				// 	passWord : password,
-				// 	isPass : true
-				// });
 				socketa.emit('create-room', roomName, password , (res: boolean)=> {
 					if (res)
 						console.log('성공');
 				})
-				navigate("/soloGame");
+				navigate("/privateGame");
 			} else {
 				setShowWarning(true);
 				setTimeout(() => setShowWarning(false), 3000);
@@ -67,15 +54,11 @@ function CreatRoom() {
 		}
 		else {
 			if (roomName.length >= 4) {
-				// setRoomInfo({
-				// 	roomName : roomName,
-				// 	passWord : password
-				// });
 				socketa.emit('create-room', roomName, (res: boolean) => {
 					if (res)
 						console.log('성공');
 				})
-				navigate("/soloGame");
+				navigate("/friendlyGame");
 			}
 			else {
 				setShowWarning(true);
@@ -85,10 +68,6 @@ function CreatRoom() {
 		// navigate("/normalGame");
 	};
 
-	// useEffect(()=> {
-	// 	socketa.on('')
-	// }, []);
-
 	const handleClickClose = () => {
 		navigate("/");
 	};
@@ -97,9 +76,9 @@ function CreatRoom() {
 		<Container className="pt-5 mt-5">
 			<Card className="bg-transparent border p-3">
 				<Form>
-				<CloseButton
-					aria-label="Hide"
-					variant="white"
+				<CloseButton 
+					aria-label="Hide" 
+					variant="white" 
 					onClick={handleClickClose}
 				/>;
 				<Card.Body>
