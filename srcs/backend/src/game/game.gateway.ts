@@ -96,6 +96,7 @@ export class GamesGateway
   handlePaddleUp(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
     const na = RoomNameBySocket[socket.id];
     const dto: GameDto = gameRooms[na];
+	this.logger.log(`player1 ${is_p1}`);
     if (is_p1)
 		dto.p1.padleUp = true;
 	else
@@ -153,12 +154,12 @@ export class GamesGateway
 		const roomName = wait_socket.id + socket.id;
 		const Game: GameDto = this.gameService.init_game(
 			wait_socket,  // p1
-			socket,  // p2
 			roomName, // roomName
 			gameMod.rankGame, // game mod
 			this.nsp,
 		);
-
+		Game.p2.name = wait_socket.id;
+		Game.p2.socket = wait_socket;
 		gameRooms[roomName] = Game;
 
 		createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
@@ -168,11 +169,12 @@ export class GamesGateway
 
 		socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
 		wait_socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
-		this.nsp.emit('create-room', roomName); // 대기실 방 생성을 연결된 클라들에게 알림
-		this.nsp.to(roomName).emit('join-room', roomName);
 
-		socket.emit('matching-success'); // 매칭 성공 이벤트를 보냄
-		wait_socket.emit('matching-success'); // 매칭 성공 이벤트를 보냄
+		this.nsp.emit('matching-success'); // 대기실 방 생성을 연결된 클라들에게 알림
+		//this.nsp.to(roomName).emit('join-room', roomName);
+
+		//socket.emit('matching-success'); // 매칭 성공 이벤트를 보냄
+		//wait_socket.emit('matching-success'); // 매칭 성공 이벤트를 보냄
 
 		//this.nsp.to(roomName).emit('message', { message: `${socket.id} join room!` });
 		//this.nsp.to(roomName).emit('message', { message: `${wait_socket.id} join room!` });
@@ -193,7 +195,7 @@ export class GamesGateway
 	//	return;
 	const game: GameDto = gameRooms[roomName];
 	if (game.p1Ready === true && game.p2Ready == true)
-		return;
+		return { success: false, payload: `already started!` };
 
 	if (socket.id === game.p1.socket.id) {
 		game.p1Ready = true;
@@ -208,7 +210,7 @@ export class GamesGateway
 		game.p1.socket.emit('start-game', true);
 		game.p2.socket.emit('start-game', false);
 		this.gameService.gameLoop_v2(game);
-		this.logger.log(`Ready End!!!`);
+		this.logger.log(`Game Start!!!`);
     }
     //socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
     //createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
@@ -247,11 +249,24 @@ export class GamesGateway
   handleCreateRoom(
     @ConnectedSocket() socket: Socket,
     @MessageBody() roomName: string,
+    @MessageBody() password: string
   ) {
     const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
     if (exists) {
       return { success: false, payload: `${roomName} room already existed!` };
     }
+
+	const Game: GameDto = this.gameService.init_game(
+		socket,  // p1
+		roomName, // roomName
+		gameMod.soloGame, // game mod
+		this.nsp,
+	);
+	if (password) {
+		Game.gameMod = gameMod.passwordGame;
+		Game.password = password;
+	}
+	gameRooms[roomName] = Game;
 
     socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
     createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
@@ -262,16 +277,40 @@ export class GamesGateway
     return { success: true, payload: roomName };
   }
 
-  @SubscribeMessage('join-room')
+  @SubscribeMessage('enter-room')
+  handleEnterRoom(
+	  @ConnectedSocket() socket: Socket,
+	  @MessageBody() roomName: string,
+	  @MessageBody() password: string,
+  ) {
+	const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
+    if (exists == undefined) {
+      return { success: false, payload: `${roomName} not found!` };
+    }
+
+	const Game: GameDto =  gameRooms[roomName];
+	if (Game.password !== undefined && Game.password !== password) {
+		return { success: false, payload: `${roomName} password wrong!` };
+	}
+
+	socket.join(roomName); // join room
+	RoomNameBySocket[socket.id] = roomName;
+	Game.p2.name = socket.id;
+	Game.p2.socket = socket;
+
+	return { success: true, payload: roomName };
+  }
+
+  @SubscribeMessage('watch-room')
   handleJoinRoom(
     @ConnectedSocket() socket: Socket,
     @MessageBody() roomName: string,
   ) {
     socket.join(roomName); // join room
 	RoomNameBySocket[socket.id] = roomName;
-    //socket.broadcast
-    //  .to(roomName)
-    //  .emit('message', { message: `${socket.id} join room!` });
+    socket.broadcast
+      .to(roomName)
+      .emit('message', { message: `${socket.id} join room!` });
 
     return { success: true };
   }

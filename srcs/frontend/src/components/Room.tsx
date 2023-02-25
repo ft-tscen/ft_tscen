@@ -26,7 +26,7 @@ function CreatRoom() {
 		const roomName = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10);
 		setRoomName(roomName);
 	};
-	
+
 	const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const password = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10);
 		setPassword(password);
@@ -44,9 +44,9 @@ function CreatRoom() {
 		alert?.classList.add('fade-out');
 		setTimeout(() => setShowWarning(false), 100);
 	}
-	
+
 	const handleSubmit = () => {
-		// e.preventDefault(); 
+		// e.preventDefault();
 		if (usePassword) {
 			if (roomName.length >= 4 && password.length >= 4) {
 				// setRoomInfo({
@@ -54,7 +54,7 @@ function CreatRoom() {
 				// 	passWord : password,
 				// 	isPass : true
 				// });
-				socketa.emit('makeRoom', roomName, password , (res: boolean)=> {
+				socketa.emit('create-room', roomName, password , (res: boolean)=> {
 					if (res)
 						console.log('성공');
 				})
@@ -71,7 +71,7 @@ function CreatRoom() {
 				// 	roomName : roomName,
 				// 	passWord : password
 				// });
-				socketa.emit('makeRoom', roomName, (res: boolean) => {
+				socketa.emit('create-room', roomName, (res: boolean) => {
 					if (res)
 						console.log('성공');
 				})
@@ -97,9 +97,9 @@ function CreatRoom() {
 		<Container className="pt-5 mt-5">
 			<Card className="bg-transparent border p-3">
 				<Form>
-				<CloseButton 
-					aria-label="Hide" 
-					variant="white" 
+				<CloseButton
+					aria-label="Hide"
+					variant="white"
 					onClick={handleClickClose}
 				/>;
 				<Card.Body>

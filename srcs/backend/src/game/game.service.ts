@@ -59,13 +59,13 @@ export class GameService {
 
   init_game(
     p1: Socket,
-    p2: Socket,
     roomName: string,
     GameMod: gameMod,
 	nsp: Namespace,
   ): GameDto {
     const params: GameDto = <GameDto>{
       roomName: roomName,
+	  password: undefined,
       ball: {
         x: CanvasWidth / 2,
         y: CanvasHeight / 2,
@@ -87,7 +87,7 @@ export class GameService {
         socket: p1,
       },
       p2: {
-        name: p2.id,  // 에러나서 임시로 고침
+        name: undefined,  // 에러나서 임시로 고침
         padleX: CanvasWidth - 15,
         padleY: (CanvasHeight - 100) / 2,
         padleW: CanvasWidth / 60,
@@ -96,7 +96,7 @@ export class GameService {
         padleUp: false,
         padleDown: false,
         speed: CanvasHeight / 50,
-        socket: p2,
+        socket: undefined,
       },
       gameMod: GameMod,
       front: {
@@ -279,13 +279,10 @@ export class GameService {
     Game.front.leftScore = Game.p1.score;
     Game.front.rightScore = Game.p2.score;
     // render 호출하는 socket 추가
-    //Game.p1.socket.emit('update', Game.front);
 	Game.nsp.to(Game.roomName).emit('update', Game.front);
   }
 
   paddleUp(client: Socket, Game: GameDto) {
-    //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
-    // if (client.id === Game.p1.socket)
 	if (client.id === Game.p1.socket.id)
     	Game.p1.padleUp = true;
 	else
@@ -293,8 +290,6 @@ export class GameService {
   }
 
   paddleDown(client: Socket, Game: GameDto) {
-    //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
-    // if (client.id === Game.p1.socket)
 	if (client.id === Game.p1.socket.id)
 		Game.p1.padleDown = true;
 	else
@@ -302,7 +297,6 @@ export class GameService {
   }
 
   paddleStop(client: Socket, Game: GameDto) {
-    //const Game: GameDto = this.init_test(client, 'test', gameMod.soloGame);
 	if (client.id === Game.p1.socket.id) {
 		 Game.p1.padleUp = false;
 		 Game.p1.padleDown = false;
@@ -339,12 +333,12 @@ export class GameService {
   gameLoop(Game: GameDto) {
     Game.interval = setInterval(() => {
       this.update(Game);
-    }, 1000 / 60);
+    }, 1000 / 45);
   }
 
   gameLoop_v2(Game: GameDto) {
     Game.interval = setInterval(() => {
       this.update_v2(Game);
-    }, 1000 / 60);
+    }, 1000 / 45);
   }
 }

@@ -112,10 +112,16 @@ function Game({ mod }: gameComponent) {
 		}
 	}, []);
 
-///////////////////// socket 관련 이벤트 /////////////////////////////////
+	///////////////////// socket 관련 이벤트 /////////////////////////////////
 
 	useEffect(() => {
 		if (canvas && ctx) {
+			socketa.on('start-game', (res: boolean)=> {
+				console.log(res);
+				console.log('WHY');
+				setPlayer(res);
+				setStartGame(true);
+			})
 			socketa.on('matching-success', () => {
 				console.log('매칭 성공');
 				//setMatch(true);
@@ -152,13 +158,6 @@ function Game({ mod }: gameComponent) {
 						if (e.code === 'KeyR') {
 							socketa.emit('ready-rank');
 							console.log('ready !');
-							socketa.on('start-game', (res: any)=> {
-								console.log(res);
-								console.log(res.res);
-								console.log('WHY');
-								setPlayer(res);
-								setStartGame(true);
-							})
 						}
 					});
 				}
@@ -240,9 +239,7 @@ function Game({ mod }: gameComponent) {
 			console.log(player);
 			//console.log(player.valueOf);
 			if (paddleUp === true) {
-				socketa.emit('PaddleUp', (player: boolean)=> {
-					console.log(player.valueOf);
-				});
+				socketa.emit('PaddleUp', player);
 			}
 			if (paddleDown === true) {
 				socketa.emit('PaddleDown', player);
