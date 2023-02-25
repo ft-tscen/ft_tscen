@@ -45,6 +45,10 @@ function Layout({
 			return ( <Game mod={gameMod.soloGame} /> );
 		else if (param === "rankGame")
 			return ( <Game mod={gameMod.rankGame} /> );
+		else if (param === "friendlyGame")
+			return ( <Game mod={gameMod.normalGame} /> );
+		else if (param === "privateGame")
+			return ( <Game mod={gameMod.passwordGame} /> );
 		else if (param === "creatGame")
 			return ( <CreatRoom /> );
 
