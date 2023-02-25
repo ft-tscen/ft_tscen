@@ -289,7 +289,7 @@ export class GamesGateway
     }
 
 	const Game: GameDto =  gameRooms[roomName];
-	if (Game.password !== undefined && Game.password !== password) {
+	if (Game.gameMod === gameMod.passwordGame && Game.password !== password) {
 		return { success: false, payload: `${roomName} password wrong!` };
 	}
 
@@ -297,6 +297,8 @@ export class GamesGateway
 	RoomNameBySocket[socket.id] = roomName;
 	Game.p2.name = socket.id;
 	Game.p2.socket = socket;
+
+	this.nsp.emit('matching-success');
 
 	return { success: true, payload: roomName };
   }
