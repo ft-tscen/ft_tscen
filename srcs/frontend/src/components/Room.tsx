@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Form, Button, Container, Card, CloseButton , Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { socket } from "..";
+import { socketa } from "./game/Game";
+
+interface RoomInfo {
+	roomName : string
+	passWord : string | undefined;
+}
 
 function CreatRoom() {
 	const navigate = useNavigate();
@@ -41,9 +48,14 @@ function CreatRoom() {
 		// e.preventDefault(); 
 		if (usePassword) {
 			if (roomName.length >= 4 && password.length >= 4) {
-				console.log(roomName.length);
-				console.log(password.length);
-				console.log(`Room: ${roomName}, Password: ${password}`);
+				// console.log(roomName.length);
+				// console.log(password.length);
+				// console.log(`Room: ${roomName}, Password: ${password}`);
+				socketa.emit('makeRoom', (data: RoomInfo)=> {
+					data.roomName = roomName;
+					data.passWord = password;
+				})
+				navigate("/soloGame");
 			} else {
 				setShowWarning(true);
 				setTimeout(() => setShowWarning(false), 3000);
@@ -51,8 +63,13 @@ function CreatRoom() {
 			// if (roomName.length >)
 		}
 		else {
-			if (roomName.length >= 4)
-				console.log(`Room: ${roomName}`);
+			if (roomName.length >= 4) {
+				socketa.emit('makeRoom', (data: RoomInfo)=> {
+					data.roomName = roomName;
+					data.passWord = undefined;
+				})
+				navigate("/soloGame");
+			}
 			else {
 				setShowWarning(true);
 				setTimeout(() => setShowWarning(false), 3000);

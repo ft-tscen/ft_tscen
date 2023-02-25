@@ -13,7 +13,7 @@ type gameComponent = {
 	mod: gameMod;
 };
 
-const socketa = io(`http://${process.env.REACT_APP_NESTJS_HOST}:3001/game`);
+export const socketa = io(`http://${process.env.REACT_APP_NESTJS_HOST}:3001/game`);
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
