@@ -5,9 +5,12 @@ import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
 
 //  Dto에 필요한 변수 : score, ball_x, ball_velocityX, ball_y, ball_velocityY, left_padle_y, right_padle_y, roomName
-
-const CanvasWidth = 600;
-const CanvasHeight = 400;
+// Cluster
+const CanvasWidth = 1200;
+const CanvasHeight = 800;
+// // Laptop
+// const CanvasWidth = 600;
+// const CanvasHeight = 400;
 const VictoryScore = 10;
 
 @Injectable()
@@ -18,38 +21,38 @@ export class GameService {
       ball: {
         x: CanvasWidth / 2,
         y: CanvasHeight / 2,
-        radius: 5,
-        speed: 10,
-        velocityX: 10,
-        velocityY: 10,
+        radius: CanvasWidth / 60,
+        speed: CanvasWidth / 100,
+        velocityX: CanvasWidth / 60,
+        velocityY: CanvasWidth / 60,
       },
       p1: {
         name: 'user',
         padleX: 5,
-        padleY: (CanvasHeight - 100) / 2,
+        padleY: (CanvasHeight - CanvasHeight / 4) / 2,
         padleW: CanvasWidth / 60,
         padleH: CanvasHeight / 4,
         score: 0,
         padleUp: false,
         padleDown: false,
-        speed: CanvasHeight / 50,
+        speed: CanvasWidth / 80,
         socket: p1,
       },
       p2: {
         name: 'com',
-        padleX: CanvasWidth - 15,
-        padleY: (CanvasHeight - 100) / 2,
+        padleX: CanvasWidth - (CanvasWidth / 60 + 5),
+        padleY: (CanvasHeight - CanvasHeight / 4) / 2,
         padleW: CanvasWidth / 60,
         padleH: CanvasHeight / 4,
         score: 0,
         padleUp: false,
         padleDown: false,
-        speed: CanvasHeight / 50,
+        speed: CanvasWidth / 80,
       },
       gameMod: GameMod,
       front: {
-        leftPaddle: (CanvasHeight - 100) / 2,
-        rightPaddle: (CanvasHeight - 100) / 2,
+        leftPaddle: (CanvasHeight - CanvasHeight / 4) / 2,
+        rightPaddle: (CanvasHeight - CanvasHeight / 4) / 2,
         ballX: CanvasWidth / 2,
         ballY: CanvasHeight / 2,
       },
@@ -69,39 +72,39 @@ export class GameService {
       ball: {
         x: CanvasWidth / 2,
         y: CanvasHeight / 2,
-        radius: 5,
-        speed: 5,
-        velocityX: 10,
-        velocityY: 10,
+        radius: CanvasWidth / 60,
+        speed: CanvasWidth / 100,
+        velocityX: CanvasWidth / 60,
+        velocityY: CanvasWidth / 60,
       },
       p1: {
         name: p1.id,  // 에러나서 임시로 고침
         padleX: 5,
-        padleY: (CanvasHeight - 100) / 2,
+        padleY: (CanvasHeight - CanvasHeight / 4) / 2,
         padleW: CanvasWidth / 60,
         padleH: CanvasHeight / 4,
         score: 0,
         padleUp: false,
         padleDown: false,
-        speed: CanvasHeight / 50,
+        speed: CanvasHeight / 80,
         socket: p1,
       },
       p2: {
         name: undefined,  // 에러나서 임시로 고침
-        padleX: CanvasWidth - 15,
-        padleY: (CanvasHeight - 100) / 2,
+        padleX: CanvasWidth - (CanvasWidth / 60 + 5),
+        padleY: (CanvasHeight - CanvasHeight / 4) / 2,
         padleW: CanvasWidth / 60,
         padleH: CanvasHeight / 4,
         score: 0,
         padleUp: false,
         padleDown: false,
-        speed: CanvasHeight / 50,
+        speed: CanvasHeight / 80,
         socket: undefined,
       },
       gameMod: GameMod,
       front: {
-        leftPaddle: (CanvasHeight - 100) / 2,
-        rightPaddle: (CanvasHeight - 100) / 2,
+        leftPaddle: (CanvasHeight - CanvasHeight / 4) / 2,
+        rightPaddle: (CanvasHeight - CanvasHeight / 4) / 2,
         ballX: CanvasWidth / 2,
         ballY: CanvasHeight / 2,
       },
@@ -113,29 +116,15 @@ export class GameService {
     return params;
   }
 
-
-
-  // private async startMatch(p1: Socket, p2: Socket, roomName: string, GameMod: gameMod{
-  //   const params: GameDto = this.init_game(player1, player2, "test", 0);
-  //   this.currentMatch.set(
-  //     match.id,
-  //     param
-  //   );
-  //   player1.join(match.id);
-  //   player2.join(match.id);
-  //   this.gateway.server.to(match.id).emit('set_names', param.names);
-  //   this.gateway.server.to(match.id).emit('game_countdownStart', specialMode);
-  // }
-
   private resetBall(GameDto: GameDto) {
     GameDto.ball.x = CanvasWidth / 2;
     GameDto.ball.y = CanvasHeight / 2;
-    GameDto.ball.speed = 10;
+    GameDto.ball.speed = CanvasWidth / 100;
     if (GameDto.ball.velocityX > 0)
-      GameDto.ball.velocityX = -10;
+      GameDto.ball.velocityX = -(CanvasWidth / 100);
     else
-      GameDto.ball.velocityX = 10;
-    GameDto.ball.velocityY = 10;
+      GameDto.ball.velocityX = CanvasWidth / 100;
+    GameDto.ball.velocityY = CanvasWidth / 100;
   }
 
   private collision(GameDto: GameDto, player: PlayerDto): boolean {
@@ -255,8 +244,8 @@ export class GameService {
       (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
     const player =
       Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? Game.p1 : Game.p2;
-    //  if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height)
-    //	ball.velocityY = -ball.velocityY;
+    if(Game.ball.y - Game.ball.radius < 0 || Game.ball.y + Game.ball.radius > CanvasHeight)
+     Game.ball.velocityY = -Game.ball.velocityY;
     if (
       Game.ball.y + Game.ball.radius < 0 ||
       Game.ball.y + Game.ball.radius > CanvasHeight
@@ -279,7 +268,7 @@ export class GameService {
     Game.front.leftScore = Game.p1.score;
     Game.front.rightScore = Game.p2.score;
     // render 호출하는 socket 추가
-	Game.nsp.to(Game.roomName).emit('update', Game.front);
+	  Game.nsp.to(Game.roomName).emit('update', Game.front);
   }
 
   paddleUp(client: Socket, Game: GameDto) {

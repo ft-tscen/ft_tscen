@@ -17,8 +17,12 @@ export const socketa = io(`http://${process.env.REACT_APP_BACKEND_HOST}:3001/gam
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	let CanvasWidth = 600;
-	let CanvasHeight = 400;
+	// Cluster
+	let CanvasWidth = 1200;
+	let CanvasHeight = 800;
+	// // Laptop
+	// let CanvasWidth = 600;
+	// let CanvasHeight = 400;
 
 	// const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
 	// const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
@@ -31,45 +35,6 @@ function Game({ mod }: gameComponent) {
 
 	let [data, setData] = useState<dataType>();
 
-	const [leftName, setLeftName] = useState<string>("user");
-	const [rightName, setRightName] = useState<string>("com");
-
-	const [leftUser, setLeftUser] = useState<userType>({
-		x: 5,
-		y: (CanvasWidth - 100)/2,
-		width: 10,
-		height: 100,
-		speed: 5,
-		color: "WHITE",
-	})
-
-	const [RightUser, setRightUser] = useState<userType>({
-		x: CanvasHeight - 15,
-		y: (CanvasWidth - 100)/2,
-		width: 10,
-		height: 100,
-		speed: 5,
-		color: "WHITE",
-	})
-
-	const [net, setNet] = useState<netType>({
-		x : CanvasWidth/2 - 2/2,
-		y :	0,
-		width : 2,
-		height : 10,
-		color : "WHITE",
-	})
-
-	const [ball, setBall] = useState<ballType>({
-		x : 400/2,
-		y : 600/2,
-		radius : 10,
-		velocityX : 5,
-		velocityY : 5,
-		speed : 7,
-		color : "WHITE"
-	})
-
 	useEffect(()=> {
 		const canvas = canvasRef.current;
 		if (canvas) {
@@ -77,38 +42,6 @@ function Game({ mod }: gameComponent) {
 			canvas.width = CanvasWidth;
 			setCanvas(canvas);
 			setCtx(canvas.getContext("2d"));
-			setBall({
-				x : canvas.width/2,
-				y : canvas.height/2,
-				radius : 10,
-				velocityX : 5,
-				velocityY : 5,
-				speed : 5,
-				color : "WHITE"
-			});
-			setNet({
-				x : CanvasWidth/2 - 2/2,
-				y :	0,
-				width : 2,
-				height : 10,
-				color : "WHITE",
-			})
-			setLeftUser({
-				x: 5,
-				y: (canvas.height - 100)/2,
-				width: 10,
-				height: 100,
-				speed: 5,
-				color: "WHITE",
-			});
-			setRightUser({
-				x: canvas.width - 15,
-				y: (canvas.height - 100)/2,
-				width: 10,
-				height: 100,
-				speed: 5,
-				color: "WHITE",
-			})
 		}
 	}, []);
 
@@ -118,19 +51,19 @@ function Game({ mod }: gameComponent) {
 		if (canvas && ctx) {
 			socketa.on('matching-success', () => {
 				console.log('매칭 성공');
-				//setMatch(true);
-				//if (match) {
+				setMatch(true);
+				if (match) {
 					console.log('ssersr3');
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
 					document.addEventListener('keydown', (e) => {
 						if (e.code === 'KeyR') {
 							socketa.emit('ready-rank');
 							socketa.on('start-game', ()=> {
-							setStartGame(true);
+								setStartGame(true);
 						})
 					}
 					});
-				//}
+				}
 			})
 
 			if (mod === gameMod.soloGame) {
@@ -149,7 +82,7 @@ function Game({ mod }: gameComponent) {
 				mod === gameMod.passwordGame) {
 				WaitPage(ctx, CanvasWidth, CanvasHeight);
 				socketa.emit('matching');
-				if (match) {
+				if (startGame) {
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
 					document.addEventListener('keydown', (e) => {
 						if (e.code === 'KeyR') {
@@ -166,7 +99,6 @@ function Game({ mod }: gameComponent) {
 					});
 				}
 				}
-				//socketa.on('matching', ()=> {})
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
 
@@ -184,15 +116,6 @@ function Game({ mod }: gameComponent) {
 			socketa.on('end-game', (res: boolean) => {
 				const ctx = canvas?.getContext("2d");
 				if (ctx) {
-					// ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
-					// drawRect(0, 0, CanvasWidth, CanvasHeight, "BALCK");
-					// ctx.fillStyle = "WHITE";
-					// ctx.font = "40px serif";
-					// ctx.textAlign = "center";
-					// if (res)
-					// 	ctx.fillText("p1 win", CanvasWidth/2, CanvasHeight/2);
-					// else
-					// 	ctx.fillText("p2 win", CanvasWidth/2, CanvasHeight/2);
 					EndPage(ctx, CanvasWidth, CanvasHeight, res);
 					killSockets(socketa);
 					socketa.emit('end-game');
@@ -241,11 +164,8 @@ function Game({ mod }: gameComponent) {
 		// game시작 했을 때만 적용되게
 		if (startGame) {
 			console.log(player);
-			//console.log(player.valueOf);
 			if (paddleUp === true) {
-				socketa.emit('PaddleUp', (player: boolean)=> {
-					console.log(player.valueOf);
-				});
+				socketa.emit('PaddleUp', player);
 			}
 			if (paddleDown === true) {
 				socketa.emit('PaddleDown', player);
@@ -276,8 +196,8 @@ function Game({ mod }: gameComponent) {
 	}
 
 	function drawNet() {
-		for (let i = 0; i <= canvas.height; i += 15) {
-			drawRect(net.x, net.y + i, net.width, net.height, net.color);
+		for (let i = 0; i <= CanvasHeight; i += 15) {
+			drawRect(CanvasWidth/2-2/2,i,2,10,"WHITE");
 		}
 	}
 
@@ -289,7 +209,6 @@ function Game({ mod }: gameComponent) {
 			ctx.fillText(text, x, y);
 		}
 	}
-
 
 ///////////////////////////////render Event/////////////////////////////////////
 
@@ -307,9 +226,9 @@ function Game({ mod }: gameComponent) {
 			drawText(data.leftScore.toString(),CanvasWidth/4,CanvasHeight/5,"WHITE");
 			drawText(data.rightScore.toString(),3*CanvasWidth/4,CanvasHeight/5,"WHITE");
 			drawNet();
-			drawRect(leftUser.x,data.leftPaddle,leftUser.width, leftUser.height, leftUser.color);
-			drawRect(RightUser.x,data.rightPaddle,RightUser.width,RightUser.height,RightUser.color);
-			drawCircle(data.ballX,data.ballY,ball.radius,ball.color);
+			drawRect(5,data.leftPaddle,CanvasWidth/60,CanvasHeight/4,"WHITE");
+			drawRect(CanvasWidth-(CanvasWidth/60+5),data.rightPaddle,CanvasWidth/60,CanvasHeight/4,"WHITE");
+			drawCircle(data.ballX,data.ballY,CanvasWidth/60,"WHITE");
 		}
 	}
 
