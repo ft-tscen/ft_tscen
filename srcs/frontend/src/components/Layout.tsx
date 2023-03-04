@@ -44,13 +44,16 @@ function Layout({
 		<>
 			<Container fluid style={{ height: "90vmin" }}>
 				<Row style={{ height: "90vmin" }}>
-					<Col xs={3} className="border">{/* disable={isLoggedIn}> */}
-						<div>adsf</div>
-						{/* 정보 컴포넌트 들어올 자리 */}
+					<Col xs={3} className="border">
+						{
+							isLoggedIn &&	<div>adsf</div>
+						}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
-					<Col xs={3} className="border">{/* disable={isLoggedIn}> */}
-						<ChatPart/>
+					<Col xs={3} className="border">
+						{
+							isLoggedIn &&	<ChatPart/>
+						}
 					</Col>
 				</Row>
 			</Container>

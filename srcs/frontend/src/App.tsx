@@ -3,6 +3,7 @@ import NavBar from "./components/NavBar";
 import Layout from "./components/Layout";
 import { Route, Routes } from "react-router-dom";
 import { api } from "./axios/api";
+import MySocket from "./components/chatting/MySocket";
 
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
@@ -45,6 +46,7 @@ function App() {
 			};
 			setLoggedIn(true);
 			setUserData(data);
+			MySocket.instance.name = userData.nickName;
 		} catch (e) {
 			setLoggedIn(false);
 			setUserData({
