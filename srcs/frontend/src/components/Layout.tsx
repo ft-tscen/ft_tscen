@@ -3,7 +3,8 @@ import ChatPart from "./chatting/ChatPart";
 import { useNavigate, useParams } from "react-router-dom";
 import Home from "./Home";
 import Profile from "./Profile/Profile";
-import Inform from "./Inform";
+import MyInform from "./Information/MyInform";
+import OtherInform from "./Information/OtherInform";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -14,6 +15,7 @@ type LayoutComponent = {
 		phone: string;
 		verified: boolean;
 	};
+	imageURL: string;
 	isChangedData: boolean;
 	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -21,6 +23,7 @@ type LayoutComponent = {
 function Layout({
 	isLoggedIn,
 	userData,
+	imageURL,
 	isChangedData,
 	setChangedData,
 }: LayoutComponent) {
@@ -41,17 +44,23 @@ function Layout({
 			);
 		else navigate("/");
 	};
+
+	const getBorder = () => {
+		if (isLoggedIn) return "border";
+		else return "";
+	};
 	return (
 		<>
 			<Container fluid style={{ height: "90vmin" }}>
 				<Row style={{ height: "90vmin" }}>
-					<Col xs={3}>
+					<Col xs={3} className={getBorder()}>
 						{userData.nickName === null || !isLoggedIn ? null : (
-							<Inform userData={userData} />
+							<MyInform userData={userData} imageURL={imageURL} />
+							// <OtherInform userData={userData} imageURL={imageURL} />
 						)}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
-					<Col xs={3} className="border">
+					<Col xs={3} className={getBorder()}>
 						{isLoggedIn && <ChatPart />}
 					</Col>
 				</Row>

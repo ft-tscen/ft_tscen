@@ -16,6 +16,7 @@ function App() {
 		phone: "",
 		verified: false,
 	});
+	const [imageDataUrl, setImageDataUrl] = useState<string>("");
 	const [isChangedData, setChangedData] = useState<boolean>(false);
 
 	const getUserData = async () => {
@@ -29,8 +30,21 @@ function App() {
 				phone: user.phone,
 				verified: user.verified,
 			};
-			setUserData(data);
-			mySocket.name = user.nickname;
+			try {
+				const response = await api.get(`/user/avatar/${user.avatarId}`, {
+					responseType: "arraybuffer",
+				});
+				const arrayBufferView = new Uint8Array(response.data);
+				const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+				const urlCreator = window.URL || window.webkitURL;
+				const imageUrl = urlCreator.createObjectURL(blob);
+				setImageDataUrl(imageUrl);
+			} catch (e) {
+				console.error(e);
+			} finally {
+				setUserData(data);
+				mySocket.name = user.nickname;
+			}
 		} catch (e) {
 			console.error(e);
 		}
@@ -47,11 +61,23 @@ function App() {
 				phone: user.phone,
 				verified: user.verified,
 			};
-			setLoggedIn(true);
-			setUserData(data);
-			mySocket === undefined && SetSocket(data.intraID);
-			if (data.nickName === null && data.phone === null)
-				navigate("/profile");
+			try {
+				const response = await api.get(`/user/avatar/${user.avatarId}`, {
+					responseType: "arraybuffer",
+				});
+				const arrayBufferView = new Uint8Array(response.data);
+				const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+				const urlCreator = window.URL || window.webkitURL;
+				const imageUrl = urlCreator.createObjectURL(blob);
+				setImageDataUrl(imageUrl);
+			} catch (e) {
+				console.error(e);
+			} finally {
+				setLoggedIn(true);
+				setUserData(data);
+				mySocket === undefined && SetSocket(data.intraID);
+				if (data.nickName === null && data.phone === null) navigate("/profile");
+			}
 		} catch (e) {
 			setLoggedIn(false);
 			setUserData({
@@ -63,7 +89,7 @@ function App() {
 			});
 		}
 	};
-	
+
 	useEffect(() => {
 		intraLogin();
 	}, [loggedIn]);
@@ -82,6 +108,7 @@ function App() {
 						<Layout
 							isLoggedIn={loggedIn}
 							userData={userData}
+							imageURL={imageDataUrl}
 							isChangedData={isChangedData}
 							setChangedData={setChangedData}
 						/>

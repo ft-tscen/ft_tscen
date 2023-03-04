@@ -1,13 +1,14 @@
 import {
-	Container,
 	Col,
+	Container,
 	Row,
+	Stack,
 	Image,
 	Card,
-	ListGroup,
-	Stack,
 	Form,
+	Button,
 } from "react-bootstrap";
+import MyInform from "./MyInform";
 
 type InformComponent = {
 	userData: {
@@ -17,22 +18,25 @@ type InformComponent = {
 		phone: string;
 		verified: boolean;
 	};
+	imageURL: string;
 };
 
-function Inform({ userData }: InformComponent) {
-	const getNickName = () => {
-		if (userData.nickName.length > 15)
-			return userData.nickName.slice(0, 7) + "...";
-		else return userData.nickName;
+function OtherInform({ userData, imageURL }: InformComponent) {
+	const getAvatar = () => {
+		if (imageURL === "") return "./profile.jpeg";
+		else return imageURL;
 	};
 	return (
 		<>
+			<Button className="mt-3" variant="outline-light">
+				Back
+			</Button>
 			<Stack gap={5} className="mt-5" style={{ height: "40vmin" }}>
 				<Container>
 					<Row>
 						<Col className="d-flex justify-content-center align-items-center">
 							<Image
-								src="./profile.jpeg"
+								src={getAvatar()}
 								roundedCircle
 								style={{ width: "15vmin" }}
 							/>
@@ -40,7 +44,7 @@ function Inform({ userData }: InformComponent) {
 					</Row>
 				</Container>
 				<Container>
-					<Card className="bg-transparent border p-2">
+					<Card className="bg-transparent border-top p-2">
 						<Card.Body>
 							<Form>
 								<Form.Group className="mb-2" controlId="formIntraID">
@@ -86,16 +90,4 @@ function Inform({ userData }: InformComponent) {
 	);
 }
 
-export default Inform;
-
-/* <Container fluid className="mt-4" style={{ height: "10vmin" }}>
-<Row>
-	<Col className="d-flex justify-content-center align-items-center">
-		<Image
-			src="./profile.jpeg"
-			roundedCircle
-			style={{ width: "15vmin" }}
-		/>
-	</Col>
-</Row>
-</Container> */
+export default OtherInform;
