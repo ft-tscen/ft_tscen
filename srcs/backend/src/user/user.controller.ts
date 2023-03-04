@@ -1,6 +1,8 @@
 import {
+  changeAvatarOutput,
   CheckNickNameOutput,
   getMeOutput,
+  getUserByIdOutput,
   getUserByNickNameOutput,
   UpdateUserDto,
   UpdateUserOutput,
@@ -104,7 +106,7 @@ export class UserController {
   async changeAvatar(
     @AuthUser() user: userSession,
     @UploadedFile() file: Express.Multer.File,
-  ) {
+  ): Promise<changeAvatarOutput> {
     return this.userService.changeAvatar(user.id, file.buffer, file.originalname);
   }
 
@@ -121,11 +123,11 @@ export class UserController {
   ) {
     const file = await this.userService.getAvatarById(id);
     const stream = Readable.from(file.data);
+    
     response.set({
       'Content-Disposition': `inline; filename="${file.filename}"`,
       'Content-Type': 'image',
     });
-
     return new StreamableFile(stream);
   }
 
@@ -179,7 +181,7 @@ export class UserController {
   @Get('/:id')
   async getUserById(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<getUserByNickNameOutput> {
+  ): Promise<getUserByIdOutput> {
     return await this.userService.getUserById(id);
   }
 }

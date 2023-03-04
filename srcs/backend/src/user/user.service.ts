@@ -1,7 +1,9 @@
 import {
+  changeAvatarOutput,
   CheckNickNameOutput,
   CreateUserOutput,
   getMeOutput,
+  getUserByIdOutput,
   getUserByNickNameOutput,
   UpdateUserDto,
   UpdateUserOutput,
@@ -73,7 +75,7 @@ export class UserService {
     }
   }
 
-  async getUserById(id: number): Promise<getUserByNickNameOutput> {
+  async getUserById(id: number): Promise<getUserByIdOutput> {
     try {
       const user = await this.users.findOne({
         where: { id },
@@ -138,7 +140,7 @@ export class UserService {
     return file;
   }
 
-  async changeAvatar(id: number, imageBuffer: Buffer, filename: string) {
+  async changeAvatar(id: number, imageBuffer: Buffer, filename: string): Promise<changeAvatarOutput> {
     try {
       const user = await this.users.findOne({ where: { id } });
       if (user.avatarId) {
@@ -146,7 +148,7 @@ export class UserService {
       }
       const avatar = await this.uploadAvatar(imageBuffer, filename);
       await this.users.update(id, { avatarId: avatar.id });
-      return { ok: true, avatar}
+      return { ok: true }
     } catch (error) {
       return {ok: false, error};
     }
