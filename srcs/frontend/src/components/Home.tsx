@@ -25,8 +25,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 				</Row>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<Btn text="채팅하기" disable={isLoggedIn} />
-						{/* 채팅 컴포넌트 들어올 자리 */}
+						<Btn text="채널 만들기" disable={isLoggedIn} />
 					</Col>
 				</Row>
 			</Container>

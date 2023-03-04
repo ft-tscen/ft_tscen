@@ -35,8 +35,7 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 									onClick={() =>
 										(window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login`)
 									}
-								>
-									로그인
+								>로그인
 								</Button>
 							) : (
 								<>

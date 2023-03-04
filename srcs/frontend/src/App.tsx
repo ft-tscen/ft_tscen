@@ -3,18 +3,20 @@ import NavBar from "./components/NavBar";
 import Layout from "./components/Layout";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { api } from "./axios/api";
+import { UserData } from "./common/types";
+import { mySocket, SetSocket } from "./common/MySocket";
 
 function App() {
 	const navigate = useNavigate();
 	const [loggedIn, setLoggedIn] = useState(false);
-	const [isChangedData, setChangedData] = useState(false);
-	let [userData, setUserData] = useState({
+	let [userData, setUserData] = useState<UserData>({
 		intraID: "",
 		name: "",
 		nickName: "",
 		phone: "",
 		verified: false,
 	});
+	const [isChangedData, setChangedData] = useState<boolean>(false);
 
 	const getUserData = async () => {
 		try {
@@ -28,6 +30,7 @@ function App() {
 				verified: user.verified,
 			};
 			setUserData(data);
+			mySocket.name = user.nickname;
 		} catch (e) {
 			console.error(e);
 		}
@@ -46,7 +49,9 @@ function App() {
 			};
 			setLoggedIn(true);
 			setUserData(data);
-			if (data.nickName === null && data.phone === null) navigate("/profile");
+			mySocket === undefined && SetSocket(data.intraID);
+			if (data.nickName === null && data.phone === null)
+				navigate("/profile");
 		} catch (e) {
 			setLoggedIn(false);
 			setUserData({
@@ -58,7 +63,7 @@ function App() {
 			});
 		}
 	};
-
+	
 	useEffect(() => {
 		intraLogin();
 	}, [loggedIn]);

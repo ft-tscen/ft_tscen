@@ -1,5 +1,5 @@
-import { Col, Row } from "react-bootstrap";
-import { Container } from "react-bootstrap";
+import { Col, Row, Container } from "react-bootstrap";
+import ChatPart from "./chatting/ChatPart";
 import { useNavigate, useParams } from "react-router-dom";
 import Home from "./Home";
 import Profile from "./Profile/Profile";
@@ -15,7 +15,7 @@ type LayoutComponent = {
 		verified: boolean;
 	};
 	isChangedData: boolean;
-	setChangedData: (isChangedData: boolean) => any;
+	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function Layout({
@@ -51,9 +51,8 @@ function Layout({
 						)}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
-					<Col xs={3}>
-						{userData.nickName === null || !isLoggedIn ? null : <div>asdf</div>}
-						{/* 채팅 컴포넌트 들어올 자리 */}
+					<Col xs={3} className="border">
+						{isLoggedIn && <ChatPart />}
 					</Col>
 				</Row>
 			</Container>
