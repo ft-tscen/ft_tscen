@@ -49,7 +49,7 @@ function App() {
 			};
 			setLoggedIn(true);
 			setUserData(data);
-			mySocket === undefined && SetSocket(data.intraID);
+			mySocket === undefined && SetSocket(data.nickName);
 			if (data.nickName === null && data.phone === null)
 				navigate("/profile");
 		} catch (e) {

@@ -8,6 +8,7 @@ import { SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/type
 type ArgsType = {
     msg :SocketOutputDto,
     enterGame : (dto: SocketOutputDto) => void
+    setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
 }
 
 type FlagType = [
@@ -18,11 +19,15 @@ type ShowType = [
     show :boolean,
     setShow :React.Dispatch<React.SetStateAction<boolean>>
 ]
+type ActiveType = [
+    active :boolean,
+    setActive :React.Dispatch<React.SetStateAction<boolean>>
+]
 
-export function Chat({msg, enterGame} :ArgsType) {
+export function Chat({msg, enterGame, setReceivedMsg} :ArgsType) {
     let [isFriend, setIsFriend] : FlagType = useState<boolean>(false);
     let [show, setShow] : ShowType = useState<boolean>(false);
-
+    let [active, setActive] : ActiveType = useState<boolean>(true);
     if (msg.author === "server"){
         return (
             <Row className="m-0 p-0 pb-1 h-auto text-left justify-content-center">
@@ -34,13 +39,18 @@ export function Chat({msg, enterGame} :ArgsType) {
     else {
         const checkFriend = async () => {
 	        const res = await api.get(`/user/friends`);
-            if (res.data.friends.includes(msg.author))
+            if (res.data.friends.find((user :any) => user.nickname === msg.author))
                 setIsFriend(true);
-            setIsFriend(false);
+            else
+                setIsFriend(false);
             show ? setShow(false) : setShow(true);
         }
-        const beFriend = async () => {
-	        await api.post(`/user/friends?nickname=${msg.author}`);
+        const beFriend = () => {
+            let dto :SocketInputDto = {
+                author :mySocket.name,
+                target :msg.author,
+            };
+            mySocket.socket.emit(SOCKET_EVENT.BEFRIEND, dto, setReceivedMsg);
             setShow(false);
         }
         const delFriend = async () => {
@@ -58,6 +68,26 @@ export function Chat({msg, enterGame} :ArgsType) {
                 target :msg.target
             }
             mySocket.socket.emit(SOCKET_EVENT.ENTER_GAME, dto, enterGame);
+            setActive(false);
+        }
+
+        const weAreFriend = async () => {
+	        await api.post(`/user/friends?nickname=${msg.author}`);
+            let dto :SocketInputDto = {
+                author :mySocket.name,
+                target :msg.author,
+                message :"ok"
+            };
+            mySocket.socket.emit(SOCKET_EVENT.RESFRIEND, dto, setReceivedMsg);
+            setActive(false);
+        }
+        const weAreNotFriend = () => {
+            let dto :SocketInputDto = {
+                author :mySocket.name,
+                target :msg.author,
+            };
+            mySocket.socket.emit(SOCKET_EVENT.RESFRIEND, dto, setReceivedMsg);
+            setActive(false);
         }
         return (
             <Row className={
@@ -106,7 +136,14 @@ export function Chat({msg, enterGame} :ArgsType) {
                     <Card.Text className="px-2"> {msg.message}</Card.Text>
                     {
                         msg.type === SOCKET_EVENT.INVITE && msg.author !== mySocket.name
-                        && <Button variant="outline-dark" onClick={joinGame}>참여하기</Button>
+                        && <Button variant="outline-dark" onClick={joinGame} disabled={!active}>참여하기</Button>
+                    }
+                    {
+                        msg.type === SOCKET_EVENT.BEFRIEND
+                        &&  <>
+                                <Button variant="outline-dark" onClick={weAreFriend} disabled={!active}>수락</Button>
+                                <Button variant="outline-dark" onClick={weAreNotFriend} disabled={!active}>거절</Button>
+                            </>
                     }
                 </Card>
             </Row>

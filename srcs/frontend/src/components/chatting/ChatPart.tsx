@@ -49,6 +49,9 @@ export default function ChatPart() {
     const setInviteMsg = (dto :SocketOutputDto) => {
         dto.type = SOCKET_EVENT.INVITE;
         setReceivedMsg(dto)};
+    const connectFriendMsg = (dto :SocketOutputDto) => {
+        dto.type = SOCKET_EVENT.BEFRIEND;
+        setReceivedMsg(dto)};
 
     useEffect(() => {
         mySocket.enteredChannelName === "" ? setEnterChannelFlag(LEAVE_CHANNEL) : setEnterChannelFlag(ENTER_CHANNEL);
@@ -65,11 +68,13 @@ export default function ChatPart() {
         mySocket.socket.on(SOCKET_EVENT.DM, setDMMsg);
         mySocket.socket.on(SOCKET_EVENT.INVITE, setInviteMsg);
         mySocket.socket.on(SOCKET_EVENT.NOTICE, setReceivedMsg);
+        mySocket.socket.on(SOCKET_EVENT.BEFRIEND, connectFriendMsg);
         return ()=>{
             mySocket.socket.off(SOCKET_EVENT.MSG, setReceivedMsg);
             mySocket.socket.off(SOCKET_EVENT.DM, setDMMsg);
             mySocket.socket.off(SOCKET_EVENT.INVITE, setInviteMsg);
             mySocket.socket.off(SOCKET_EVENT.NOTICE, setReceivedMsg);
+            mySocket.socket.off(SOCKET_EVENT.BEFRIEND, connectFriendMsg);
         };
     }, []);
 
@@ -82,7 +87,7 @@ export default function ChatPart() {
             {
                 flag === SHOW_OTHER
                 ? (enterChannelFlag === ENTER_CHANNEL ? <GameRooms enterGame={enterGame}/> : <Channels enterChannel={enterChannel}/>)
-                : <ChatRoom msgList={msgList} enterGame={enterGame}/>
+                : <ChatRoom msgList={msgList} enterGame={enterGame} setReceivedMsg={setReceivedMsg}/>
             }
             {
                 flag === SHOW_CHATROOM

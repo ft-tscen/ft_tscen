@@ -52,6 +52,8 @@ export const SOCKET_EVENT = {
     BLOCK: "direct-mute",
     UNBLOCK: "direct-unmute",
     INVITE: "invite-game",
+    BEFRIEND: "be-friend",
+    RESFRIEND: "res-friend",
     NOTICE: "notice",
     ENTER_GAME: "enter-game",
     WATCH_GAME: "watch-gaem",

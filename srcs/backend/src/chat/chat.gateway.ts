@@ -70,7 +70,7 @@ export class ChatGateway
   // 처음 접속시 user에 추가
   async handleConnection(@ConnectedSocket() socket: Socket) {
     const { nickname } = socket.handshake.query;
-
+    
     // 중복 접속 불허
     if (typeof nickname === 'string' && !this.users.has(nickname)) {
       const { user } = await this.userService.getUserByNickName(nickname);
@@ -647,10 +647,11 @@ export class ChatGateway
         target: input.target,
         message: `${input.author} wants to be friend with you`,
       };
-      socket.to(input.target).emit('be-friend', output);
+      const targetSocket :string = this.sockets.get(input.target);
+      socket.to(targetSocket).emit('be-friend', output);
       return {
-        author: input.author,
-        target: input.target,
+        author: 'server',
+        target: null,
         message: `send friend request to ${input.target}`,
       };
     }
@@ -668,14 +669,15 @@ export class ChatGateway
   ): SocketOutputDto {
     if (input.target) {
       const output = {
-        author: input.author,
-        target: input.target,
+        author: 'server',
+        target: null,
         message: input.message ? `${input.author} become friend with you` :`${input.author} rejected your request`,
       };
-      socket.to(input.target).emit('notice', output);
+      const targetSocket :string = this.sockets.get(input.target);
+      socket.to(targetSocket).emit('notice', output);
       return {
-        author: input.author,
-        target: input.target,
+        author: 'server',
+        target: null,
         message: `you ${input.message ? 'accepted' : 'rejected'} friend request from ${input.target}`,
       };
     }

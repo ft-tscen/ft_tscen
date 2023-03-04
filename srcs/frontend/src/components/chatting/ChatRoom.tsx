@@ -7,9 +7,10 @@ import "./Effect.css";
 type ArgsType = {
     msgList :SocketOutputDto[],
     enterGame : (dto: SocketOutputDto) => void
+    setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
 }
 
-export function ChatRoom({msgList, enterGame} :ArgsType) {
+export function ChatRoom({msgList, enterGame, setReceivedMsg} :ArgsType) {
     const chatWindow = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -26,7 +27,7 @@ export function ChatRoom({msgList, enterGame} :ArgsType) {
             {
                 msgList.map((msg :SocketOutputDto, idx :number) => {
                     return (
-                        <Chat key={idx} msg={msg} enterGame={enterGame}/>
+                        <Chat key={idx} msg={msg} enterGame={enterGame} setReceivedMsg={setReceivedMsg}/>
                     );
                 })
             }
