@@ -1,5 +1,5 @@
 import { Container, Button, Col, Row } from "react-bootstrap";
-import { ENTER_CHANNEL, SHOW_OTHER, SHOW_CHATROOM } from "./types"
+import { ENTER_CHANNEL, SHOW_OTHER, SHOW_CHATROOM } from "../../common/types"
 
 const CHANNEL : string = "Channel";
 const GAMEROOM : string = "GameRoom";

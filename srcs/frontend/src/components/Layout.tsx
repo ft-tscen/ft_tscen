@@ -14,7 +14,7 @@ type LayoutComponent = {
 		verified: boolean;
 	};
 	isChangedData: boolean;
-	setChangedData: (isChangedData: boolean) => any;
+	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function Layout({

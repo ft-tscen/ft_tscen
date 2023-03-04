@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Container } from "react-bootstrap";
-import { SocketOutputDto } from "./types";
+import { SocketOutputDto } from "../../common/types";
 import { Chat } from "./Chat";
 import "./Effect.css";
 

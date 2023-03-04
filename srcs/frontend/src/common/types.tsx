@@ -1,5 +1,13 @@
 import React from "react";
 
+export interface UserData {
+	intraID: string,
+	name: string,
+	nickName: string,
+	phone: string,
+	verified: boolean,
+}
+
 export interface SocketInputDto {
     author?: string; // nickname
     target?: string; // nickname or channel name

@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
-import { GameRoomType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "./types";
+import { GameRoomType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
 import "./Effect.css"
-import MySocket from "./MySocket";
+import MySocket from "../../common/MySocket";
 
 type ArgsType = {
     obj :GameRoomType,

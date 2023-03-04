@@ -1,7 +1,7 @@
 import { Card, Row, Image } from "react-bootstrap";
 import { Button } from "react-bootstrap";
-import MySocket from "./MySocket";
-import { SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "./types";
+import MySocket from "../../common/MySocket";
+import { SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
 
 type ArgsType = {
     msg :SocketOutputDto,

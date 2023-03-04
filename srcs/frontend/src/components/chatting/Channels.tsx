@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { Channel } from "./Channel";
-import { ChannelType, SocketOutputDto, SOCKET_EVENT } from "./types";
+import { ChannelType, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
 import "./Effect.css";
-import MySocket from "./MySocket";
+import MySocket from "../../common/MySocket";
 
 type channelListType = [
     channelList: ChannelType[],

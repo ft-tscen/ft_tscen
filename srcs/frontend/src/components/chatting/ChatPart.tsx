@@ -1,9 +1,9 @@
 import { ChatMenuBar } from "./ChatMenuBar";
 import { GameRooms } from "./GameRooms";
-import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, STARTMSG, SOCKET_EVENT } from "./types"
+import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, STARTMSG, SOCKET_EVENT } from "../../common/types"
 import { useEffect, useState } from "react";
 import { ChatRoom } from "./ChatRoom";
-import MySocket from "./MySocket";
+import MySocket from "../../common/MySocket";
 import { InputMsg } from "./InputMsg";
 import { Channels } from "./Channels";
 

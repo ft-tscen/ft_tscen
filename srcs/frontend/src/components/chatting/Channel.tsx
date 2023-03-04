@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
-import { ChannelType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "./types";
-import MySocket from "./MySocket";
+import { ChannelType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import MySocket from "../../common/MySocket";
 import "./Effect.css"
 
 type ArgsType = {

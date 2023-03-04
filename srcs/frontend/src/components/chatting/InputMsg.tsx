@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Button, Container, Form, InputGroup, Row } from "react-bootstrap";
-import { HELP, WRONGINPUT, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "./types";
-import MySocket from "./MySocket";
+import { HELP, WRONGINPUT, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import MySocket from "../../common/MySocket";
 
 type ArgsType = {
     setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { GameRoom } from "./GameRoom";
-import { GameRoomType, SocketOutputDto, SOCKET_EVENT } from "./types";
-import MySocket from "./MySocket";
+import { GameRoomType, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import MySocket from "../../common/MySocket";
 import "./Effect.css";
 
 type GameRoomListType = [
