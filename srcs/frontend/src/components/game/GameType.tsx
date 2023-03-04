@@ -14,6 +14,7 @@ export const SOCKET_GAME_EVENT = {
     RANK_READY: "ready-rank",
     SOLO_READY: "ready-solo",
     UPDATE: "update",
+	NICK: "nickname",
 }
 
 type userType = {

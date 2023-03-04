@@ -41,6 +41,7 @@ function Game({ mod }: gameComponent) {
 	useEffect(()=> {
 		const canvas = canvasRef.current;
 		if (canvas) {
+			myGameSocket.socket.emit(SOCKET_GAME_EVENT.NICK, myGameSocket.name);
 			canvas.height = CanvasHeight;
 			canvas.width = CanvasWidth;
 			setCanvas(canvas);

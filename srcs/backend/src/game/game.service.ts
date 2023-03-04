@@ -218,10 +218,10 @@ export class GameService {
 		this.resetBall(Game);
 	}
 	if (Game.p1.score >= VictoryScore) {
-		//Game.p1.socket.emit('end-game', true);
-		//if (Game.p2.socket)
-		//	Game.p2.socket.emit('end-game', false);
-		//Game.p2.socket.emit('end-game', false);
+		Game.p1.socket.emit('end-game', true);
+		if (Game.p2.socket)
+			Game.p2.socket.emit('end-game', false);
+		Game.p2.socket.emit('end-game', false);
 		//clearInterval(Game.interval);
 		this.finishGame(Game, true);
 		return ;
@@ -246,8 +246,8 @@ export class GameService {
       (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
     const player =
       Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? Game.p1 : Game.p2;
-    if(Game.ball.y - Game.ball.radius < 0 || Game.ball.y + Game.ball.radius > CanvasHeight)
-     Game.ball.velocityY = -Game.ball.velocityY;
+    // if(Game.ball.y - Game.ball.radius < 0 || Game.ball.y + Game.ball.radius > CanvasHeight)
+    //  Game.ball.velocityY = -Game.ball.velocityY;
     if (
       Game.ball.y + Game.ball.radius < 0 ||
       Game.ball.y + Game.ball.radius > CanvasHeight

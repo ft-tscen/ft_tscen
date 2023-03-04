@@ -82,6 +82,7 @@ export class GamesGateway
 
   handleConnection(@ConnectedSocket() socket: Socket) {
 	const { nickname } = socket.handshake.query;
+  this.logger.log(nickname);
 	NicknameBySocketId[socket.id] = nickname;
 
 	if (NicknameBySocketId[socket.id] == undefined)
