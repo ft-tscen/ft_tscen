@@ -2,9 +2,13 @@ import { Col, Row, Container } from "react-bootstrap";
 import ChatPart from "./chatting/ChatPart";
 import { useNavigate, useParams } from "react-router-dom";
 import Home from "./Home";
+import Game from "./game/Game"
+import { gameMod } from "./game/GameType";
+import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
 import OtherInform from "./Information/OtherInform";
+
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -42,7 +46,17 @@ function Layout({
 					setChangedData={setChangedData}
 				/>
 			);
-		else navigate("/");
+		else if (param === "soloGame")
+			return ( <Game mod={gameMod.soloGame} /> );
+		else if (param === "rankGame")
+			return ( <Game mod={gameMod.rankGame} /> );
+		else if (param === "friendlyGame")
+			return ( <Game mod={gameMod.normalGame} /> );
+		else if (param === "privateGame")
+			return ( <Game mod={gameMod.passwordGame} /> );
+		else if (param === "creatGame")
+			return ( <CreatRoom /> );
+
 	};
 
 	const getBorder = () => {

@@ -1,23 +1,50 @@
-import { Container, Col, Row } from "react-bootstrap";
-import Btn from "./Btn";
+import { Col, Row, Button } from "react-bootstrap";
+import { Container } from "react-bootstrap";
+import { useNavigate } from 'react-router-dom';
+
+// import style from "../css/Home.module.css";
+// import Btn from "./Btn";
+
+
+enum gameMod{
+	normalGame,
+	passwordGame,
+	soloGame,
+	rankGame,
+}
 
 type HomeComponent = {
 	isLoggedIn: boolean;
 };
 
 function Home({ isLoggedIn }: HomeComponent) {
+	const navigate = useNavigate();
+
+	function gameModHandle(mode: gameMod) {
+		if (mode === gameMod.normalGame) {
+			navigate('/creatGame');
+		} else if (mode === gameMod.rankGame) {
+			navigate('/rankGame');
+		} else if (mode === gameMod.soloGame) {
+			navigate('/soloGame');
+		}
+	}
+
 	return (
 		<>
 			<Container>
-				<Row>
+			<Row>
 					<Col className="d-flex justify-content-center">
 						<img src="./pong-logo.jpeg" alt="홈 이미지" width="90%" />
 					</Col>
 				</Row>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<Btn text="게임하기" disable={isLoggedIn} />
-						{/* 게임 컴포넌트 들어올 자리 */}
+						<Button variant="outline-light" disabled={!isLoggedIn}
+							style={{ width: "100px", height: "50px",}}
+							onClick={() => gameModHandle(gameMod.normalGame)}>
+								방만들기
+						</Button>
 					</Col>
 				</Row>
 				<Row>
@@ -25,7 +52,25 @@ function Home({ isLoggedIn }: HomeComponent) {
 				</Row>
 				<Row>
 					<Col className="d-flex justify-content-center">
+<<<<<<< HEAD
 						<Btn text="채널 만들기" disable={isLoggedIn} />
+=======
+						<Button variant="outline-light" disabled={!isLoggedIn}
+							style={{ width: "100px", height: "50px",}}
+							onClick={() => gameModHandle(gameMod.rankGame)}>
+								경쟁전
+						</Button>
+					</Col>
+				</Row>
+					<p> </p>
+				<Row>
+					<Col className="d-flex justify-content-center">
+						<Button variant="outline-light" disabled={!isLoggedIn}
+							style={{ width: "100px", height: "50px",}}
+							onClick={() => gameModHandle(gameMod.soloGame)}>
+								혼자하기
+						</Button>
+>>>>>>> tscen/main
 					</Col>
 				</Row>
 			</Container>

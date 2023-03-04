@@ -20,8 +20,7 @@ export class AppController {
   @Get('/logout')
   async logout(@Session() session: Record<string, any>) {
     session.login = false;
-    session.intra = null;
-    session.name = null;
+    session.user = null;
     return { ok: true };
   }
 }
