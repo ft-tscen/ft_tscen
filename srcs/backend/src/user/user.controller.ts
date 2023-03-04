@@ -20,6 +20,7 @@ import {
   Param,
   Res,
   StreamableFile,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
@@ -63,11 +64,7 @@ export class UserController {
   async getUserByNickName(
     @Query('nickname') nickname: string,
   ): Promise<getUserByNickNameOutput> {
-    const { user } = await this.userService.getUserByNickName(nickname);
-    if (user) {
-      return { ok: true, user };
-    }
-    return { ok: false };
+    return await this.userService.getUserByNickName(nickname);
   }
 
   @UseGuards(AuthGuard)
@@ -130,5 +127,59 @@ export class UserController {
     });
 
     return new StreamableFile(stream);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'get freinds',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Get('/friends')
+  async getFriends(
+    @AuthUser() user: userSession
+  ) {
+    return await this.userService.getFriends(user.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'add freind by nickname',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Post('/friends')
+  async addFriends(
+    @AuthUser() user: userSession,
+    @Query('nickname') nickname: string,
+  ) {
+    return await this.userService.addFriends(user.id, nickname);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'delete freind by nickname',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Delete('/friends')
+  async deleteFriends(
+    @AuthUser() user: userSession,
+    @Query('nickname') nickname: string,
+  ) {
+    return await this.userService.deleteFriends(user.id, nickname);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'get user by id',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Get('/:id')
+  async getUserById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<getUserByNickNameOutput> {
+    return await this.userService.getUserById(id);
   }
 }
