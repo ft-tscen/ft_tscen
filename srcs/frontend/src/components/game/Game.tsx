@@ -51,7 +51,7 @@ function Game({ mod }: gameComponent) {
 				setCtx(canvas.getContext("2d"));
 			}
 		}
-		catch (error) {
+		catch (error: any) {
 			console.log(error);
 			navigate('/');
 		}
@@ -127,7 +127,7 @@ function Game({ mod }: gameComponent) {
 					myGameSocket.socket.emit('end-game');
 				}
 			})
-		} catch (error) {
+		} catch (error: any) {
 			console.log(error);
 			navigate('/');
 		}

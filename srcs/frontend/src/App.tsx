@@ -14,7 +14,6 @@ interface MySocket {
 	enteredGameRoom: string;
 }
 
-export let myChatSocket: MySocket;
 export let myGameSocket: MySocket;
 
 export function setChatSocket(newName: string) {
