@@ -62,6 +62,7 @@ export class GameService {
 
   init_game(
     p1: Socket,
+	p1NickName: string,
     roomName: string,
     GameMod: gameMod,
 	nsp: Namespace,
@@ -78,7 +79,7 @@ export class GameService {
         velocityY: CanvasWidth / 60,
       },
       p1: {
-        name: p1.id,  // 에러나서 임시로 고침
+        name: p1NickName,  // 에러나서 임시로 고침
         padleX: 5,
         padleY: (CanvasHeight - CanvasHeight / 4) / 2,
         padleW: CanvasWidth / 60,

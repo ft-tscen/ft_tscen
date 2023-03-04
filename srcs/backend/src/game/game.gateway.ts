@@ -199,6 +199,7 @@ export class GamesGateway
 		const roomName = waitingPlayer.nickname + nickname;
 		const Game: GameDto = this.gameService.init_game(
 			waitingPlayer.socket,  // p1
+			waitingPlayer.nickname,
 			roomName, // roomName
 			gameMod.rankGame, // game mod
 			this.nsp,
@@ -303,6 +304,7 @@ export class GamesGateway
 
 	const Game: GameDto = this.gameService.init_game(
 		socket,  // p1
+		NicknameBySocketId[socket.id],
 		roomName, // roomName
 		gameMod.soloGame, // game mod
 		this.nsp,
