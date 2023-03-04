@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { LoginModule } from './login/login.module';
 import { TfaModule } from './tfa/tfa.module';
 import { ChatModule } from './chat/chat.module';
+import { GameModule } from './game/game.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ChatModule } from './chat/chat.module';
       sender: process.env.NESTJS_SOLAPI_SENDER,
     }),
     ChatModule,
+    GameModule,
   ],
   controllers: [AppController],
   providers: [AppService],
