@@ -635,4 +635,54 @@ export class ChatGateway
       message: `fails to deprivate ${input.target}`,
     };
   }
+
+  @SubscribeMessage('be-friend')
+  addFriend(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto,
+  ): SocketOutputDto {
+    if (input.target) {
+      const output = {
+        author: input.author,
+        target: input.target,
+        message: `${input.author} wants to be friend with you`,
+      };
+      socket.to(input.target).emit('be-friend', output);
+      return {
+        author: input.author,
+        target: input.target,
+        message: `send friend request to ${input.target}`,
+      };
+    }
+    return {
+      author: 'server',
+      target: null,
+      message: `fails to send friend request to ${input.target}`,
+    };
+  }
+
+  @SubscribeMessage('res-friend')
+  checkFriend(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto,
+  ): SocketOutputDto {
+    if (input.target) {
+      const output = {
+        author: input.author,
+        target: input.target,
+        message: input.message ? `${input.author} become friend with you` :`${input.author} rejected your request`,
+      };
+      socket.to(input.target).emit('notice', output);
+      return {
+        author: input.author,
+        target: input.target,
+        message: `you ${input.message ? 'accepted' : 'rejected'} friend request from ${input.target}`,
+      };
+    }
+    return {
+      author: 'server',
+      target: null,
+      message: `fails to response to ${input.target}`,
+    };
+  }
 }
