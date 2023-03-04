@@ -2,7 +2,11 @@ import { Col, Row } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import Home from "./Home";
+import Game from "./game/Game"
+import { gameMod } from "./game/GameType";
+import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
+
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -38,7 +42,17 @@ function Layout({
 					setChangedData={setChangedData}
 				/>
 			);
-		else navigate("/");
+		else if (param === "soloGame")
+			return ( <Game mod={gameMod.soloGame} /> );
+		else if (param === "rankGame")
+			return ( <Game mod={gameMod.rankGame} /> );
+		else if (param === "friendlyGame")
+			return ( <Game mod={gameMod.normalGame} /> );
+		else if (param === "privateGame")
+			return ( <Game mod={gameMod.passwordGame} /> );
+		else if (param === "creatGame")
+			return ( <CreatRoom /> );
+
 	};
 	return (
 		<>
