@@ -61,14 +61,14 @@ export class LoginService {
       session.login = true;
       const { ok, user } = await this.userService.getMe(intra);
       if (ok) {
-        session.user = user;
+        session.user = {intra, id: user.id};
       } else {
         const { ok, user } = await this.userService.createUser(
           intra,
           usual_full_name,
         );
         if (ok) {
-          session.user = user;
+          session.user = {intra, id: user.id};
         }
       }
       return { ok: session.login };

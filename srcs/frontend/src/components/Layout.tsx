@@ -1,11 +1,13 @@
-import { Col, Row } from "react-bootstrap";
-import { Container } from "react-bootstrap";
+import { Col, Row, Container } from "react-bootstrap";
+import ChatPart from "./chatting/ChatPart";
 import { useNavigate, useParams } from "react-router-dom";
 import Home from "./Home";
 import Game from "./game/Game"
 import { gameMod } from "./game/GameType";
 import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
+import MyInform from "./Information/MyInform";
+import OtherInform from "./Information/OtherInform";
 
 
 type LayoutComponent = {
@@ -17,13 +19,15 @@ type LayoutComponent = {
 		phone: string;
 		verified: boolean;
 	};
+	imageURL: string;
 	isChangedData: boolean;
-	setChangedData: (isChangedData: boolean) => any;
+	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function Layout({
 	isLoggedIn,
 	userData,
+	imageURL,
 	isChangedData,
 	setChangedData,
 }: LayoutComponent) {
@@ -54,18 +58,24 @@ function Layout({
 			return ( <CreatRoom /> );
 
 	};
+
+	const getBorder = () => {
+		if (isLoggedIn) return "border";
+		else return "";
+	};
 	return (
 		<>
 			<Container fluid style={{ height: "90vmin" }}>
 				<Row style={{ height: "90vmin" }}>
-					<Col xs={3}>
-						{userData.nickName === null || !isLoggedIn ? null : <div>asdf</div>}
-						{/* 정보 컴포넌트 들어올 자리 */}
+					<Col xs={3} className={getBorder()}>
+						{userData.nickName === null || !isLoggedIn ? null : (
+							<MyInform userData={userData} imageURL={imageURL} />
+							// <OtherInform userData={userData} imageURL={imageURL} />
+						)}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
-					<Col xs={3}>
-						{userData.nickName === null || !isLoggedIn ? null : <div>asdf</div>}
-						{/* 채팅 컴포넌트 들어올 자리 */}
+					<Col xs={3} className={getBorder()}>
+						{isLoggedIn && <ChatPart />}
 					</Col>
 				</Row>
 			</Container>

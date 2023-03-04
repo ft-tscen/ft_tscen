@@ -1,12 +1,11 @@
 import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 // import style from "../css/Home.module.css";
 // import Btn from "./Btn";
 
-
-enum gameMod{
+enum gameMod {
 	normalGame,
 	passwordGame,
 	soloGame,
@@ -22,28 +21,31 @@ function Home({ isLoggedIn }: HomeComponent) {
 
 	function gameModHandle(mode: gameMod) {
 		if (mode === gameMod.normalGame) {
-			navigate('/creatGame');
+			navigate("/creatGame");
 		} else if (mode === gameMod.rankGame) {
-			navigate('/rankGame');
+			navigate("/rankGame");
 		} else if (mode === gameMod.soloGame) {
-			navigate('/soloGame');
+			navigate("/soloGame");
 		}
 	}
 
 	return (
 		<>
 			<Container>
-			<Row>
+				<Row>
 					<Col className="d-flex justify-content-center">
 						<img src="./pong-logo.jpeg" alt="홈 이미지" width="90%" />
 					</Col>
 				</Row>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<Button variant="outline-light" disabled={!isLoggedIn}
-							style={{ width: "100px", height: "50px",}}
-							onClick={() => gameModHandle(gameMod.normalGame)}>
-								방만들기
+						<Button
+							variant="outline-light"
+							disabled={!isLoggedIn}
+							style={{ width: "100px", height: "50px" }}
+							onClick={() => gameModHandle(gameMod.normalGame)}
+						>
+							방만들기
 						</Button>
 					</Col>
 				</Row>
@@ -52,20 +54,26 @@ function Home({ isLoggedIn }: HomeComponent) {
 				</Row>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<Button variant="outline-light" disabled={!isLoggedIn}
-							style={{ width: "100px", height: "50px",}}
-							onClick={() => gameModHandle(gameMod.rankGame)}>
-								경쟁전
+						<Button
+							variant="outline-light"
+							disabled={!isLoggedIn}
+							style={{ width: "100px", height: "50px" }}
+							onClick={() => gameModHandle(gameMod.rankGame)}
+						>
+							경쟁전
 						</Button>
 					</Col>
 				</Row>
-					<p> </p>
+				<p> </p>
 				<Row>
 					<Col className="d-flex justify-content-center">
-						<Button variant="outline-light" disabled={!isLoggedIn}
-							style={{ width: "100px", height: "50px",}}
-							onClick={() => gameModHandle(gameMod.soloGame)}>
-								혼자하기
+						<Button
+							variant="outline-light"
+							disabled={!isLoggedIn}
+							style={{ width: "100px", height: "50px" }}
+							onClick={() => gameModHandle(gameMod.soloGame)}
+						>
+							혼자하기
 						</Button>
 					</Col>
 				</Row>
