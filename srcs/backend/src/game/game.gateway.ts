@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger, Query, UseGuards } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 import {
   ConnectedSocket,
@@ -10,6 +10,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { subscribeOn } from 'rxjs';
 import { Namespace, Socket } from 'socket.io';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GameDto, gameMod } from './dtos/game.dto';
@@ -52,7 +53,8 @@ const waitingPlayer: WaitingPlayer = {
 @WebSocketGateway({
   namespace: 'game',
   cors: {
-    origin: [`http://${process.env.NESTJS_HOST}:3000`],
+    origin: [`http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}`],
+    credentials: true,
   },
 })
 export class GamesGateway
@@ -81,19 +83,24 @@ export class GamesGateway
   }
 
   handleConnection(@ConnectedSocket() socket: Socket) {
-	const { nickname } = socket.handshake.query;
-  this.logger.log(nickname);
-	NicknameBySocketId[socket.id] = nickname;
+	//const { nickname } = socket.handshake.query;
+	//this.logger.log(socket.handshake);
+	//this.logger.log(test);
+	//NicknameBySocketId[socket.id] = nickname;
 
-	if (NicknameBySocketId[socket.id] == undefined)
-		NicknameBySocketId[socket.id] = socket.id;
+	//if (NicknameBySocketId[socket.id] == undefined)
+	//	NicknameBySocketId[socket.id] = socket.id;
 
-	this.logger.log(`${NicknameBySocketId[socket.id]} +=+=+=+=+=+= Socket Connected +=+=+=+=+=+=`);
+	this.logger.log(`${socket.id} +=+=+=+=+=+= Socket Connected +=+=+=+=+=+=`);
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-	this.logger.log(`${NicknameBySocketId[socket.id]} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
-	NicknameBySocketId.delete(socket.id);
+	if (NicknameBySocketId[socket.id]) {
+		this.logger.log(`${socket.id} (${NicknameBySocketId[socket.id]}) -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
+		NicknameBySocketId.delete(socket.id);
+	}
+	else
+		this.logger.log(`${socket.id} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
 
 	const roomName  = RoomNameBySocketId[socket.id];
 	const gameDto = GameDtoByRoomName[roomName];
@@ -104,6 +111,15 @@ export class GamesGateway
 		else
 			this.gameService.finishGame(gameDto, false)
 	}
+	if (waitingPlayer.socket && socket.id == waitingPlayer.socket.id)
+		waitingPlayer.waiting = false;
+
+  }
+
+  @SubscribeMessage('nickname')
+  handleNickname(@ConnectedSocket() socket: Socket, @MessageBody() nickname: string) {
+	this.logger.log(`Nickname Registration ${nickname}`);
+	NicknameBySocketId[socket.id] = nickname;
   }
 
   @SubscribeMessage('test')

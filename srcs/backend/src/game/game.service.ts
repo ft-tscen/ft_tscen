@@ -335,9 +335,18 @@ export class GameService {
 
   finishGame(Game: GameDto, p1_win: boolean) {
 	if (p1_win) {
-		Game.p1.socket.to(Game.roomName).emit('end-game', true);
-		clearInterval(Game.interval);
+		if (Game.nsp)
+			Game.nsp.in(Game.roomName).emit('end-game', true);
+		else
+			Game.p1.socket.emit('end-game', true);
 	}
+	else {
+		if (Game.nsp)
+			Game.nsp.in(Game.roomName).emit('end-game', false);
+		else
+			Game.p1.socket.emit('end-game', false);
+	}
+	clearInterval(Game.interval);
   }
 }
 

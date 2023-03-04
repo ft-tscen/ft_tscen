@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-
+import { useNavigate } from "react-router-dom";
 import { userType, netType, ballType, dataType, SOCKET_GAME_EVENT } from './GameType';
 
 import { io } from "socket.io-client"
@@ -9,6 +9,7 @@ import WaitPage from './PageWait';
 import { gameMod } from './GameType';
 import Player from './PlayerBar';
 import { myGameSocket } from '../../App';
+import { Navigate } from 'react-router-dom';
 
 
 type gameComponent = {
@@ -28,6 +29,7 @@ function Game({ mod }: gameComponent) {
 
 	// const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
 	// const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+	const navigate = useNavigate();
 	const [canvas, setCanvas] = useState<any>();
 	const [ctx, setCtx] = useState<any>();
 	const [match,setMatch] = useState<boolean>(false);
@@ -39,41 +41,48 @@ function Game({ mod }: gameComponent) {
 	let [data, setData] = useState<dataType>();
 
 	useEffect(()=> {
-		const canvas = canvasRef.current;
-		if (canvas) {
-			myGameSocket.socket.emit(SOCKET_GAME_EVENT.NICK, myGameSocket.name);
-			canvas.height = CanvasHeight;
-			canvas.width = CanvasWidth;
-			setCanvas(canvas);
-			setCtx(canvas.getContext("2d"));
+		try {
+			const canvas = canvasRef.current;
+			if (canvas) {
+				myGameSocket.socket.emit(SOCKET_GAME_EVENT.NICK, myGameSocket.name);
+				canvas.height = CanvasHeight;
+				canvas.width = CanvasWidth;
+				setCanvas(canvas);
+				setCtx(canvas.getContext("2d"));
+			}
+		}
+		catch (error) {
+			console.log(error);
+			navigate('/');
 		}
 	}, []);
 
 ///////////////////// socket 관련 이벤트 /////////////////////////////////
 
 	useEffect(() => {
-		if (canvas && ctx) {
-			// watch모드 대비 추가 iswatch일시 paddle 작동 막아둠
-			if (mod === gameMod.watchGame) {
-				// myGameSocket.socket.emit('watching');
-				setIsWatch(true);
-			}
-			myGameSocket.socket.on('start-game', (res: any)=> {
-				setPlayer(res);
-				setStartGame(true);
-			})
-			// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
-			myGameSocket.socket.on('matching-success', () => {
-				console.log('매칭 성공');
-				setMatch(true);
-				console.log('ssersr3');
-				ReadyPage(ctx, CanvasWidth, CanvasHeight);
-				document.addEventListener('keydown', (e) => {
-					if (e.code === 'KeyR') {
-						console.log('rank ready!');
-						myGameSocket.socket.emit('ready-rank');
+		try {
+			if (canvas && ctx) {
+				// watch모드 대비 추가 iswatch일시 paddle 작동 막아둠
+				if (mod === gameMod.watchGame) {
+					// myGameSocket.socket.emit('watching');
+					setIsWatch(true);
 				}
-				});
+				myGameSocket.socket.on('start-game', (res: any)=> {
+					setPlayer(res);
+					setStartGame(true);
+				})
+				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
+				myGameSocket.socket.on('matching-success', () => {
+					console.log('매칭 성공');
+					setMatch(true);
+					console.log('ssersr3');
+					ReadyPage(ctx, CanvasWidth, CanvasHeight);
+					document.addEventListener('keydown', (e) => {
+						if (e.code === 'KeyR') {
+							console.log('rank ready!');
+							myGameSocket.socket.emit('ready-rank');
+						}
+					});
 			})
 			// Sologame 특징: playerbar 컴포넌트 불러오지 않음
 			if (mod === gameMod.soloGame) {
@@ -91,8 +100,8 @@ function Game({ mod }: gameComponent) {
 			if (mod === gameMod.rankGame ||
 				mod === gameMod.normalGame ||
 				mod === gameMod.passwordGame) {
-				WaitPage(ctx, CanvasWidth, CanvasHeight);
-				myGameSocket.socket.emit('matching');
+					WaitPage(ctx, CanvasWidth, CanvasHeight);
+					myGameSocket.socket.emit('matching');
 				}
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
@@ -118,22 +127,26 @@ function Game({ mod }: gameComponent) {
 					myGameSocket.socket.emit('end-game');
 				}
 			})
-	}, [ctx])
+		} catch (error) {
+			console.log(error);
+			navigate('/');
+		}
+		}, [ctx])
 
-	function killSockets(socket : any) {
-		socket.off('end-game');
-		socket.off('update');
-		socket.off('start-game');
-		socket.off('matching-success');
-	}
+		function killSockets(socket : any) {
+			socket.off('end-game');
+			socket.off('update');
+			socket.off('start-game');
+			socket.off('matching-success');
+		}
 
-//////////////////////////paddle 관련 이벤트////////////////////////////
+		//////////////////////////paddle 관련 이벤트////////////////////////////
 
-	let [paddleUp, setPaddleUp] = useState<boolean>(false);
-	let [paddleDown, setPaddleDown] = useState<boolean>(false);
+		let [paddleUp, setPaddleUp] = useState<boolean>(false);
+		let [paddleDown, setPaddleDown] = useState<boolean>(false);
 
-	document.addEventListener('keydown', (e) => {
-		if (startGame) {
+		document.addEventListener('keydown', (e) => {
+			if (startGame) {
 			var code = e.code;
 
 			if (code === 'KeyS' && paddleDown === false) {
