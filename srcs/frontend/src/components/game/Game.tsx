@@ -7,7 +7,7 @@ import EndPage from './PageEnd';
 import ReadyPage from './PageReady';
 import WaitPage from './PageWait';
 import { gameMod } from './GameType';
-import P1 from './p1test';
+import Player from './PlayerBar';
 
 type gameComponent = {
 	mod: gameMod;
@@ -32,6 +32,7 @@ function Game({ mod }: gameComponent) {
 	const [player,setPlayer] = useState<boolean>(true);
 
 	const [startGame, setStartGame] = useState<boolean>(false);
+	const [isWatch, setIsWatch] = useState<boolean>(false);
 
 	let [data, setData] = useState<dataType>();
 
@@ -49,6 +50,12 @@ function Game({ mod }: gameComponent) {
 
 	useEffect(() => {
 		if (canvas && ctx) {
+			// watch모드 대비 추가 iswatch일시 paddle 작동 막아둠
+			if (mod === gameMod.watchGame) {
+				socketa.emit('watching');
+				setIsWatch(true);
+			}
+			// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
 			socketa.on('matching-success', () => {
 				console.log('매칭 성공');
 				setMatch(true);
@@ -65,7 +72,7 @@ function Game({ mod }: gameComponent) {
 					});
 				}
 			})
-
+			// Sologame 특징: playerbar 컴포넌트 불러오지 않음
 			if (mod === gameMod.soloGame) {
 				ReadyPage(ctx, CanvasWidth, CanvasHeight);
 				document.addEventListener('keydown', (e) => {
@@ -101,7 +108,8 @@ function Game({ mod }: gameComponent) {
 				}
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
-
+			// 프론트에서 보여줄 데이터 받기 위한 소켓
+			// 받을 때마다 USEEffect를 통해 render함수를 계속 실행
 			socketa.on('update', (data: dataType) => {
 				setData({
 					leftPaddle : data.leftPaddle,
@@ -112,11 +120,12 @@ function Game({ mod }: gameComponent) {
 					rightScore : data.rightScore,
 				})
 			})
-
 			socketa.on('end-game', (res: boolean) => {
 				const ctx = canvas?.getContext("2d");
 				if (ctx) {
 					EndPage(ctx, CanvasWidth, CanvasHeight, res);
+					// 여기에 경기 결과 db에 업데이트 하는 코드 추가 (watch상태 아닐시에만)
+					// if (mod !== gameMod.watchGame)
 					killSockets(socketa);
 					socketa.emit('end-game');
 				}
@@ -126,7 +135,8 @@ function Game({ mod }: gameComponent) {
 	function killSockets(socket : any) {
 		socket.off('end-game');
 		socket.off('update');
-		// socket.off('setData');
+		socket.off('start-game');
+		socket.off('matching-success');
 	}
 
 //////////////////////////paddle 관련 이벤트////////////////////////////
@@ -162,7 +172,7 @@ function Game({ mod }: gameComponent) {
 
 	useEffect(() => {
 		// game시작 했을 때만 적용되게
-		if (startGame) {
+		if (startGame && !isWatch) {
 			console.log(player);
 			if (paddleUp === true) {
 				socketa.emit('PaddleUp', player);
@@ -234,7 +244,7 @@ function Game({ mod }: gameComponent) {
 
 	return (
 		<div>
-			<P1></P1>
+			<Player mod={mod}></Player>
 			<canvas
 				ref={canvasRef}
 				width={CanvasWidth}

@@ -3,6 +3,7 @@ export enum gameMod{
 	passwordGame,
 	soloGame,
 	rankGame,
+	watchGame,
 }
 
 type userType = {
