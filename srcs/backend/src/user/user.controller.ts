@@ -1,6 +1,8 @@
 import {
+  changeAvatarOutput,
   CheckNickNameOutput,
   getMeOutput,
+  getUserByIdOutput,
   getUserByNickNameOutput,
   UpdateUserDto,
   UpdateUserOutput,
@@ -20,7 +22,7 @@ import {
   Param,
   Res,
   StreamableFile,
-  Session,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
@@ -29,6 +31,11 @@ import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'stream';
 import { Response } from 'express';
+
+export interface userSession {
+  id: number;
+  intra: string;
+}
 
 @ApiTags('user')
 @Controller('user')
@@ -42,9 +49,9 @@ export class UserController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Get('/me')
-  getMe(@AuthUser() user: User): getMeOutput {
+  async getMe(@AuthUser() user: userSession): Promise<getMeOutput> {
     if (user) {
-      return { ok: true, user };
+      return await this.userService.getMe(user.intra);
     }
     return { ok: false };
   }
@@ -59,11 +66,7 @@ export class UserController {
   async getUserByNickName(
     @Query('nickname') nickname: string,
   ): Promise<getUserByNickNameOutput> {
-    const { user } = await this.userService.getUserByNickName(nickname);
-    if (user) {
-      return { ok: true, user };
-    }
-    return { ok: false };
+    return await this.userService.getUserByNickName(nickname);
   }
 
   @UseGuards(AuthGuard)
@@ -86,11 +89,10 @@ export class UserController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Patch('/update')
-  async updateUser(
-    @Session() session: Record<string, any>,
+  async updateUser(@AuthUser() user: userSession,
     @Body() updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
-    return await this.userService.updateUser(session, updateData);
+    return await this.userService.updateUser(user.id, updateData);
   }
 
   @UseGuards(AuthGuard)
@@ -101,11 +103,11 @@ export class UserController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Post('avatar')
   @UseInterceptors(FileInterceptor('file'))
-  async addAvatar(
-    @AuthUser() user: User,
+  async changeAvatar(
+    @AuthUser() user: userSession,
     @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.userService.addAvatar(user.id, file.buffer, file.originalname);
+  ): Promise<changeAvatarOutput> {
+    return this.userService.changeAvatar(user.id, file.buffer, file.originalname);
   }
 
   @UseGuards(AuthGuard)
@@ -120,14 +122,66 @@ export class UserController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const file = await this.userService.getAvatarById(id);
-
     const stream = Readable.from(file.data);
-
+    
     response.set({
       'Content-Disposition': `inline; filename="${file.filename}"`,
       'Content-Type': 'image',
     });
-
     return new StreamableFile(stream);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'get freinds',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Get('/friends')
+  async getFriends(
+    @AuthUser() user: userSession
+  ) {
+    return await this.userService.getFriends(user.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'add freind by nickname',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Post('/friends')
+  async addFriends(
+    @AuthUser() user: userSession,
+    @Query('nickname') nickname: string,
+  ) {
+    return await this.userService.addFriends(user.id, nickname);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'delete freind by nickname',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Delete('/friends')
+  async deleteFriends(
+    @AuthUser() user: userSession,
+    @Query('nickname') nickname: string,
+  ) {
+    return await this.userService.deleteFriends(user.id, nickname);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'get user by id',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Get('/:id')
+  async getUserById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<getUserByIdOutput> {
+    return await this.userService.getUserById(id);
   }
 }

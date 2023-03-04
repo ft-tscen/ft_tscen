@@ -1,7 +1,9 @@
 import {
+  changeAvatarOutput,
   CheckNickNameOutput,
   CreateUserOutput,
   getMeOutput,
+  getUserByIdOutput,
   getUserByNickNameOutput,
   UpdateUserDto,
   UpdateUserOutput,
@@ -55,10 +57,28 @@ export class UserService {
       return { ok: false, error };
     }
   }
+
   async getUserByNickName(nickname: string): Promise<getUserByNickNameOutput> {
     try {
       const user = await this.users.findOne({
         where: { nickname },
+      });
+      if (user) {
+        return {
+          ok: false,
+          user,
+        };
+      }
+      return { ok: false, error: 'Cannot find User.' };
+    } catch (error) {
+      return { ok: false, error };
+    }
+  }
+
+  async getUserById(id: number): Promise<getUserByIdOutput> {
+    try {
+      const user = await this.users.findOne({
+        where: { id },
       });
       if (user) {
         return {
@@ -90,13 +110,11 @@ export class UserService {
   }
 
   async updateUser(
-    session: Record<string, any>,
+    id: number,
     updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
     try {
-      await this.users.update(session.user.id, { ...updateData });
-      const { user } = await this.getMe(session.user.intra);
-      session.user = user;
+      await this.users.update(id, { ...updateData });
       return { ok: true };
     } catch (error) {
       return { ok: false, error };
@@ -110,6 +128,10 @@ export class UserService {
     return newFile;
   }
 
+  async deleteAvatar(id: number) {
+    await this.avatars.delete(id);
+  }
+
   async getAvatarById(id: number) {
     const file = await this.avatars.findOne({ where: { id } });
     if (!file) {
@@ -118,9 +140,58 @@ export class UserService {
     return file;
   }
 
-  async addAvatar(userId: number, imageBuffer: Buffer, filename: string) {
-    const avatar = await this.uploadAvatar(imageBuffer, filename);
-    await this.users.update(userId, { avatarId: avatar.id });
-    return avatar;
+  async changeAvatar(id: number, imageBuffer: Buffer, filename: string): Promise<changeAvatarOutput> {
+    try {
+      const user = await this.users.findOne({ where: { id } });
+      if (user.avatarId) {
+        await this.deleteAvatar(user.avatarId);
+      }
+      const avatar = await this.uploadAvatar(imageBuffer, filename);
+      await this.users.update(id, { avatarId: avatar.id });
+      return { ok: true }
+    } catch (error) {
+      return {ok: false, error};
+    }
+  }
+
+  async getFriends(id: number) {
+    try {
+      const user = await this.users.findOne({ where: { id }, relations: ['friends'] });
+      return {ok:true, friends: user.friends};
+    } catch (error) {
+      return {ok: false, error};
+    } 
+  }
+
+  async addFriends(id: number, nickname:string) {
+    try {
+      const user1 = await this.users.findOne({ where: { id }, relations: ['friends'] });
+      const user2 = await this.users.findOne({ where: { nickname }, relations: ['friends'] });
+  
+      if (!user1.friends.some(friend => friend.id === user2.id)) {
+        user1.friends.push(user2);
+        user2.friends.push(user1);
+        await this.users.save([user1, user2]);
+      }
+      return {ok: true};
+    } catch (error) {
+      return {ok: false, error};
+    }
+  }
+
+  async deleteFriends(id: number, nickname:string) {
+    try {
+      const user1 = await this.users.findOne({ where: { id }, relations: ['friends'] });
+      const user2 = await this.users.findOne({ where: { nickname }, relations: ['friends'] });
+  
+      if (user1.friends.some(friend => friend.id === user2.id)) {
+        user1.friends = user1.friends.filter(friend => friend.id !== user2.id);
+        user2.friends = user2.friends.filter(friend => friend.id !== user1.id);
+        await this.users.save([user1, user2]);
+      }
+      return {ok: true};
+    } catch (error) {
+      return {ok: false, error};
+    } 
   }
 }

@@ -30,11 +30,12 @@ export class User extends BaseEntity {
   code?: string;
 
   @JoinColumn({ name: 'avatarId' })
-  @OneToOne(() => Avatar, { nullable: true })
+  @OneToOne(() => Avatar, { nullable: true, onDelete: 'SET NULL', })
   public avatar?: Avatar;
 
   @Column({ nullable: true })
   public avatarId?: number;
+
   @ManyToMany(() => User)
   @JoinTable()
   friends: User[];

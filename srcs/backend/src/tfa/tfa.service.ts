@@ -16,7 +16,7 @@ export class TfaService {
   ) {}
 
   async sendSMS(
-    session: Record<string, any>,
+    id: number,
     phone: string,
   ): Promise<SendSMSOutput> {
     try {
@@ -28,7 +28,7 @@ export class TfaService {
       const code = Math.round(Math.random() * 1000000)
         .toString()
         .padStart(6, '0');
-      await this.userService.updateUser(session, { phone, code });
+      await this.userService.updateUser(id, { phone, code });
       messageService.sendOne({
         to: phone,
         from: this.options.sender,
@@ -40,14 +40,14 @@ export class TfaService {
     }
   }
 
-  async verifyUser(session: Record<string, any>, code: string) {
+  async verifyUser(id: number, code: string) {
     try {
       const userCode = await this.users.findOne({
-        where: { id: session.user.id },
+        where: { id },
         select: ['code'],
       });
       if (userCode.code === code) {
-        await this.userService.updateUser(session, { verified: true });
+        await this.userService.updateUser(id, { verified: true });
         return { ok: true };
       }
       return { ok: false, error: 'Incorrect verification code' };
