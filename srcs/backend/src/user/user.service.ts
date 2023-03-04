@@ -90,13 +90,11 @@ export class UserService {
   }
 
   async updateUser(
-    session: Record<string, any>,
+    id: number,
     updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
     try {
-      await this.users.update(session.user.id, { ...updateData });
-      const { user } = await this.getMe(session.user.intra);
-      session.user = user;
+      await this.users.update(id, { ...updateData });
       return { ok: true };
     } catch (error) {
       return { ok: false, error };
@@ -110,6 +108,10 @@ export class UserService {
     return newFile;
   }
 
+  async deleteAvatar(id: number) {
+    await this.avatars.delete(id);
+  }
+
   async getAvatarById(id: number) {
     const file = await this.avatars.findOne({ where: { id } });
     if (!file) {
@@ -118,9 +120,14 @@ export class UserService {
     return file;
   }
 
-  async addAvatar(userId: number, imageBuffer: Buffer, filename: string) {
+  async changeAvatar(id: number, imageBuffer: Buffer, filename: string) {
+    // avatar 존재? delete
+    const user = await this.users.findOne({ where: { id } });
+    if (user.avatarId) {
+      await this.deleteAvatar(user.avatarId);
+    }
     const avatar = await this.uploadAvatar(imageBuffer, filename);
-    await this.users.update(userId, { avatarId: avatar.id });
+    await this.users.update(id, { avatarId: avatar.id });
     return avatar;
   }
 }

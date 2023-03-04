@@ -20,7 +20,6 @@ import {
   Param,
   Res,
   StreamableFile,
-  Session,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
@@ -29,6 +28,11 @@ import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'stream';
 import { Response } from 'express';
+
+export interface userSession {
+  id: number;
+  intra: string;
+}
 
 @ApiTags('user')
 @Controller('user')
@@ -42,9 +46,9 @@ export class UserController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Get('/me')
-  getMe(@AuthUser() user: User): getMeOutput {
+  async getMe(@AuthUser() user: userSession): Promise<getMeOutput> {
     if (user) {
-      return { ok: true, user };
+      return await this.userService.getMe(user.intra);
     }
     return { ok: false };
   }
@@ -86,11 +90,10 @@ export class UserController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Patch('/update')
-  async updateUser(
-    @Session() session: Record<string, any>,
+  async updateUser(@AuthUser() user: userSession,
     @Body() updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
-    return await this.userService.updateUser(session, updateData);
+    return await this.userService.updateUser(user.id, updateData);
   }
 
   @UseGuards(AuthGuard)
@@ -101,11 +104,11 @@ export class UserController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Post('avatar')
   @UseInterceptors(FileInterceptor('file'))
-  async addAvatar(
-    @AuthUser() user: User,
+  async changeAvatar(
+    @AuthUser() user: userSession,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.userService.addAvatar(user.id, file.buffer, file.originalname);
+    return this.userService.changeAvatar(user.id, file.buffer, file.originalname);
   }
 
   @UseGuards(AuthGuard)
@@ -120,9 +123,7 @@ export class UserController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const file = await this.userService.getAvatarById(id);
-
     const stream = Readable.from(file.data);
-
     response.set({
       'Content-Disposition': `inline; filename="${file.filename}"`,
       'Content-Type': 'image',
