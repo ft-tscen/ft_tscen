@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Button, Container, Form, InputGroup, Row } from "react-bootstrap";
 import { HELP, WRONGINPUT, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
-import MySocket from "../../common/MySocket";
+import { mySocket } from "../../common/MySocket";
 
 type ArgsType = {
     setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
@@ -18,7 +18,7 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
         if (chatInputRef.current!.value !== "") {
             let text :string|undefined = chatInputRef.current!.value;
             let words :string[] = chatInputRef.current!.value.split(" ");
-            const enteredMSG : SocketInputDto = { author: MySocket.instance.name, target: MySocket.instance.enteredChannelName, message :text, password :''};
+            const enteredMSG : SocketInputDto = { author: mySocket.name, target: mySocket.enteredChannelName, message :text, password :''};
             switch (words.at(0)) {
                 case "/HELP":
                     text = HELP;
@@ -32,7 +32,7 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                         break;
                     }
                     enteredMSG.target = words[1];
-                    MySocket.instance.emit(SOCKET_EVENT.JOIN, enteredMSG, enterChannel);
+                    mySocket.socket.emit(SOCKET_EVENT.JOIN, enteredMSG, enterChannel);
                     break;
                 case "/DM":
                     if (words.length < 3) {
@@ -42,7 +42,7 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                     text = chatInputRef.current!.value.slice(words[0].length + words[1].length + 2);
                     enteredMSG.target = words[1];
                     enteredMSG.message = text;
-                    MySocket.instance.emit(SOCKET_EVENT.DM, enteredMSG, setDMMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.DM, enteredMSG, setDMMsg);
                     break;
                 case "/INVITE": // 보류
                     if (words.length !== 2) {
@@ -70,7 +70,7 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                         break;
                     }
                     enteredMSG.target = words[1];
-                    MySocket.instance.emit(SOCKET_EVENT.BLOCK, enteredMSG, setReceivedMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.BLOCK, enteredMSG, setReceivedMsg);
                     break;
                 case "/UNBLOCK":
                     if (words.length !== 2) {
@@ -78,7 +78,7 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                         break;
                     }
                     enteredMSG.target = words[1];
-                    MySocket.instance.emit(SOCKET_EVENT.UNBLOCK, enteredMSG, setReceivedMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.UNBLOCK, enteredMSG, setReceivedMsg);
                     break;
                 case "/ROOMSTATE":
                     let hide :boolean = false;
@@ -105,10 +105,10 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                         setReceivedMsg({ author: "server", message :`${text} :${WRONGINPUT}` });
                         break;
                     }
-                    MySocket.instance.emit(SOCKET_EVENT.SET_PW, enteredMSG, setReceivedMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.SET_PW, enteredMSG, setReceivedMsg);
                     hide === true
-                    ? MySocket.instance.emit(SOCKET_EVENT.HIDE, enteredMSG, setReceivedMsg)
-                    : MySocket.instance.emit(SOCKET_EVENT.SHOW, enteredMSG, setReceivedMsg);
+                    ? mySocket.socket.emit(SOCKET_EVENT.HIDE, enteredMSG, setReceivedMsg)
+                    : mySocket.socket.emit(SOCKET_EVENT.SHOW, enteredMSG, setReceivedMsg);
                     break;
                 case "/EMPOWER":
                     if (words.length !== 2) {
@@ -116,7 +116,7 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                         break;
                     }
                     enteredMSG.target = words[1];
-                    MySocket.instance.emit(SOCKET_EVENT.EMPOWER, enteredMSG, setReceivedMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.EMPOWER, enteredMSG, setReceivedMsg);
                     break;
                 case "/BAN":
                     if (words.length !== 2) {
@@ -124,7 +124,7 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                         break;
                     }
                     enteredMSG.target = words[1];
-                    MySocket.instance.emit(SOCKET_EVENT.BAN, enteredMSG, setReceivedMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.BAN, enteredMSG, setReceivedMsg);
                     break;
                 case "/MUTE":
                     if (words.length !== 2) {
@@ -132,7 +132,7 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                         break;
                     }
                     enteredMSG.target = words[1];
-                    MySocket.instance.emit(SOCKET_EVENT.MUTE, enteredMSG, setReceivedMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.MUTE, enteredMSG, setReceivedMsg);
                     break;
                 case "/UNMUTE":
                     if (words.length !== 2) {
@@ -140,10 +140,10 @@ export function InputMsg({setReceivedMsg, enterChannel, setDMMsg, setInviteMsg} 
                         break;
                     }
                     enteredMSG.target = words[1];
-                    MySocket.instance.emit(SOCKET_EVENT.UNMUTE, enteredMSG, setReceivedMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.UNMUTE, enteredMSG, setReceivedMsg);
                     break;
                 default:
-                    MySocket.instance.emit(SOCKET_EVENT.MSG, enteredMSG, setReceivedMsg);
+                    mySocket.socket.emit(SOCKET_EVENT.MSG, enteredMSG, setReceivedMsg);
                     break;
             }
             chatInputRef.current!.value = "";

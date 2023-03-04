@@ -1,33 +1,24 @@
 import { io, Socket } from 'socket.io-client'
-import { SERVER_PORT, SocketOutputDto } from './types'
 
-export default class MySocket {
-    private socket :Socket;
-    public static instance :MySocket = new MySocket();
+interface MySocket {
+  socket: Socket;
+  name: string;
+  enteredChannelName: string;
+  enteredGameRoom: string;
+}
 
-	public name :string = "Unknown" + parseInt((Math.random() * 100).toString()).toString();
-    public enteredChannelName :string|undefined;
-    public enteredGameName :string|undefined;
+export let mySocket: MySocket;
 
-    private constructor() {
-        this.socket = io(`http://localhost:${SERVER_PORT}/chat`, {
-            withCredentials :true,
-            query :{
-                nickname : this.name
-            }
-            });
-    }
-
-    public emit(type :string, info :SocketOutputDto, func :any) {
-        this.socket.emit(type, info, func);
-    }
-    public emit_func(type :string, func :any) {
-        this.socket.emit(type, func);
-    }
-    public on(type :string, func :any) {
-        this.socket.on(type, func);
-    }
-    public off(type :string, func :any) {
-        this.socket.off(type, func);
-    }
+export function SetSocket(newName: string) {
+  mySocket = {
+    socket: io(`http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/chat`, {
+      withCredentials: true,
+      query: {
+        nickname: newName,
+      },
+    }),
+    name: newName,
+    enteredChannelName: "",
+    enteredGameRoom: "",
+  };
 }

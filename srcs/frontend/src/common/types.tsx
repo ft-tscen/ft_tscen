@@ -35,8 +35,6 @@ export interface GameRoomType {
 
 export type InputEvent = React.FormEvent<HTMLFormElement>;
 
-export const SERVER_PORT :number = 3001;
-
 export const SOCKET_EVENT = {
     MSG: "channel-msg",
     DM: "direct-msg",

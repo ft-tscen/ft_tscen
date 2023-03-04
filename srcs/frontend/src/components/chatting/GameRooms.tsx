@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { GameRoom } from "./GameRoom";
 import { GameRoomType, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
-import MySocket from "../../common/MySocket";
+import { mySocket } from "../../common/MySocket";
 import "./Effect.css";
 
 type GameRoomListType = [
@@ -14,7 +14,7 @@ export function GameRooms({enterGame} : { enterGame : (dto: SocketOutputDto) => 
     let [gameRoomList, setGameRoomList] : GameRoomListType = useState<GameRoomType[]>([]);
 
     useEffect(() => {
-        MySocket.instance.emit_func(SOCKET_EVENT.GET_GAMEROOM, setGameRoomList);
+        mySocket.socket.emit(SOCKET_EVENT.GET_GAMEROOM, setGameRoomList);
     }, []);
 
 	return (

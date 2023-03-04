@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
 import { ChannelType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
-import MySocket from "../../common/MySocket";
+import { mySocket } from "../../common/MySocket";
 import "./Effect.css"
 
 type ArgsType = {
@@ -19,15 +19,18 @@ export function Channel({obj, enterChannel} :ArgsType) {
     const pwInputRef = useRef<HTMLInputElement>(null);
 
     const toJoinTheGame = () => {
-        let pw :string = pwInputRef.current?.value === undefined ? '' : pwInputRef.current?.value;
-        console.log(pw);
+        let pw :string;
+        if (pwInputRef.current && pwInputRef.current.value !== null)
+            pw = pwInputRef.current.value;
+        else
+            pw = "";
         const dto :SocketInputDto = {
-            author: MySocket.instance.name,
+            author: mySocket.name,
             target: obj.name,
             password: pw
         };
 
-        MySocket.instance.emit(SOCKET_EVENT.JOIN, dto, enterChannel);
+        mySocket.socket.emit(SOCKET_EVENT.JOIN, dto, enterChannel);
         offVisible();
         pwInputRef.current!.value = "";
     }

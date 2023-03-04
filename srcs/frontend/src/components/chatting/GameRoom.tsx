@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
 import { GameRoomType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import { mySocket } from "../../common/MySocket";
 import "./Effect.css"
-import MySocket from "../../common/MySocket";
 
 type ArgsType = {
     obj :GameRoomType,
@@ -23,24 +23,24 @@ export function GameRoom({obj, enterGame} :ArgsType) {
     const toWatchTheGame = () => {
         let pw :string|undefined = pwInputRef.current!.value;
         let dto :SocketInputDto = {
-            author :MySocket.instance.name,
+            author :mySocket.name,
             target :obj.name,
             password :pw
         }
         
-        MySocket.instance.emit(SOCKET_EVENT.WATCH_GAME, dto, enterGame);
+        mySocket.socket.emit(SOCKET_EVENT.WATCH_GAME, dto, enterGame);
         offVisible();
         pwInputRef.current!.value = "";
     }
     const toJoinTheGame = () => {
         let pw :string|undefined = pwInputRef.current!.value;
         let dto :SocketInputDto = {
-            author :MySocket.instance.name,
+            author :mySocket.name,
             target :obj.name,
             password :pw
         }
         
-        MySocket.instance.emit(SOCKET_EVENT.ENTER_GAME, dto, enterGame);
+        mySocket.socket.emit(SOCKET_EVENT.ENTER_GAME, dto, enterGame);
         offVisible();
         pwInputRef.current!.value = "";
     }

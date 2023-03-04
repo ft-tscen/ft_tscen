@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../axios/api";
-import MySocket from "../../common/MySocket";
 import CheckVerifyingOffModal from "./CheckVerifyingOffModal";
 import VerifyingCodeModal from "./VerifyingCodeModal";
 
@@ -105,7 +104,6 @@ function SaveProfile({
 				});
 				setChangedData(!isChangedData);
 				navigate("/");
-				MySocket.instance.name = nick_name;
 			} catch (e) {
 				console.error(e);
 			}

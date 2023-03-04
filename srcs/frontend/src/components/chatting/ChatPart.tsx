@@ -3,7 +3,7 @@ import { GameRooms } from "./GameRooms";
 import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, STARTMSG, SOCKET_EVENT } from "../../common/types"
 import { useEffect, useState } from "react";
 import { ChatRoom } from "./ChatRoom";
-import MySocket from "../../common/MySocket";
+import { mySocket} from "../../common/MySocket";
 import { InputMsg } from "./InputMsg";
 import { Channels } from "./Channels";
 
@@ -31,16 +31,16 @@ export default function ChatPart() {
     let [enterChannelFlag, setEnterChannelFlag] :EnterChannelFlag = useState<boolean>(LEAVE_CHANNEL);
 
     const enterChannel = (dto :SocketOutputDto) => {
-        MySocket.instance.enteredChannelName = dto.target;
+        mySocket.enteredChannelName = dto.target === undefined ? "" : dto.target;
         setReceivedMsg(dto);
     }
     const enterGame = (dto :SocketOutputDto) => {
-        MySocket.instance.enteredGameName = dto.target;
+        mySocket.enteredGameRoom = dto.target === undefined ? "" : dto.target;
         setReceivedMsg(dto);
     }
     const exitChannel = () => {
-        MySocket.instance.emit(SOCKET_EVENT.LEAVE, {author: MySocket.instance.name, target: MySocket.instance.enteredChannelName}, setReceivedMsg);
-        MySocket.instance.enteredChannelName = undefined;
+        mySocket.socket.emit(SOCKET_EVENT.LEAVE, {author: mySocket.name, target: mySocket.enteredChannelName}, setReceivedMsg);
+        mySocket.enteredChannelName = "";
         setEnterChannelFlag(LEAVE_CHANNEL);
     }
     const setDMMsg = (dto :SocketOutputDto) => {
@@ -51,8 +51,8 @@ export default function ChatPart() {
         setReceivedMsg(dto)};
 
     useEffect(() => {
-        MySocket.instance.enteredChannelName === undefined ? setEnterChannelFlag(LEAVE_CHANNEL) : setEnterChannelFlag(ENTER_CHANNEL);
-    }, [MySocket.instance.enteredChannelName]);
+        mySocket.enteredChannelName === "" ? setEnterChannelFlag(LEAVE_CHANNEL) : setEnterChannelFlag(ENTER_CHANNEL);
+    }, [mySocket.enteredChannelName]);
 
     useEffect(() => {
         if (receivedMsg) {
@@ -61,16 +61,15 @@ export default function ChatPart() {
     }, [receivedMsg]);
     
     useEffect(() => {
-
-        MySocket.instance.on(SOCKET_EVENT.MSG, setReceivedMsg);
-        MySocket.instance.on(SOCKET_EVENT.DM, setDMMsg);
-        MySocket.instance.on(SOCKET_EVENT.INVITE, setInviteMsg);
-        MySocket.instance.on(SOCKET_EVENT.NOTICE, setReceivedMsg);
+        mySocket.socket.on(SOCKET_EVENT.MSG, setReceivedMsg);
+        mySocket.socket.on(SOCKET_EVENT.DM, setDMMsg);
+        mySocket.socket.on(SOCKET_EVENT.INVITE, setInviteMsg);
+        mySocket.socket.on(SOCKET_EVENT.NOTICE, setReceivedMsg);
         return ()=>{
-            MySocket.instance.off(SOCKET_EVENT.MSG, setReceivedMsg);
-            MySocket.instance.off(SOCKET_EVENT.DM, setDMMsg);
-            MySocket.instance.off(SOCKET_EVENT.INVITE, setInviteMsg);
-            MySocket.instance.off(SOCKET_EVENT.NOTICE, setReceivedMsg);
+            mySocket.socket.off(SOCKET_EVENT.MSG, setReceivedMsg);
+            mySocket.socket.off(SOCKET_EVENT.DM, setDMMsg);
+            mySocket.socket.off(SOCKET_EVENT.INVITE, setInviteMsg);
+            mySocket.socket.off(SOCKET_EVENT.NOTICE, setReceivedMsg);
         };
     }, []);
 

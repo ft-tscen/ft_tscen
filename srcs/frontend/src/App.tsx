@@ -4,7 +4,7 @@ import Layout from "./components/Layout";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { api } from "./axios/api";
 import { UserData } from "./common/types";
-import MySocket from "./common/MySocket";
+import { mySocket, SetSocket } from "./common/MySocket";
 
 function App() {
 	const navigate = useNavigate();
@@ -30,7 +30,7 @@ function App() {
 				verified: user.verified,
 			};
 			setUserData(data);
-			MySocket.instance.name = data.nickName;
+			mySocket.name = user.nickname;
 		} catch (e) {
 			console.error(e);
 		}
@@ -49,6 +49,7 @@ function App() {
 			};
 			setLoggedIn(true);
 			setUserData(data);
+			mySocket === undefined && SetSocket(data.intraID);
 			if (data.nickName === null && data.phone === null)
 				navigate("/profile");
 		} catch (e) {

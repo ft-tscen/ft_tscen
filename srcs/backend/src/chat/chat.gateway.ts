@@ -80,7 +80,7 @@ export class ChatGateway
         userMute: new Map<string, number>(),
       });
       this.sockets.set(nickname, socket.id);
-      console.log(`${socket.id} 소켓 연결`);
+      console.log(`${socket.id}(${nickname}) 소켓 연결`);
     } else {
       socket.disconnect();
     }
@@ -357,7 +357,7 @@ export class ChatGateway
     const output = {
       author: 'server',
       target: input.target,
-      message: `${input.author} joined the channel: ${input.target}`, // join channel: ${input.target} -> ${input.author} joined the channel: ${input.target}
+      message: `${input.author} joined the channel: ${input.target}`,
     };
     this.channels.get(input.target).members.forEach((member) => {
       if (member !== socket.id) {

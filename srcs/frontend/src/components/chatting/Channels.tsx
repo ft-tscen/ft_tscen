@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { Channel } from "./Channel";
 import { ChannelType, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import { mySocket } from "../../common/MySocket";
 import "./Effect.css";
-import MySocket from "../../common/MySocket";
 
 type channelListType = [
     channelList: ChannelType[],
@@ -14,7 +14,7 @@ export function Channels({enterChannel} : { enterChannel : (dto: SocketOutputDto
     let [channelList, setChannelList] : channelListType = useState<ChannelType[]>([]);
 
     useEffect(() => {
-        MySocket.instance.emit_func(SOCKET_EVENT.GET_CHANNEL, setChannelList);
+        mySocket.socket.emit(SOCKET_EVENT.GET_CHANNEL, setChannelList);
     }, []);
 
 	return (
