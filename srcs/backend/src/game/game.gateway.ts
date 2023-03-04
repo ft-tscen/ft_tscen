@@ -23,14 +23,26 @@ import { GameService } from './game.service';
 //  gameDto: GameDto;
 //}
 
+export interface WaitingPlayer {
+	waiting: boolean,
+	socket: Socket,
+	nickname: string,
+}
+
 let createdRooms: string[] = [];
 
-const gameRooms = new Map<string, GameDto>();
-const gameDtoByRoomName = new Map<string, GameDto>();
-const RoomNameBySocket = new Map<string, string>();
+//const gameRooms = new Map<string, GameDto>();
+const GameDtoByRoomName = new Map<string, GameDto>();
+const RoomNameBySocketId = new Map<string, string>();
+const NicknameBySocketId = new Map<string, string>();
 
 //const gameQueue: MyQueue = new MyQueue();
 let waitingSocket: Socket = undefined;
+const waitingPlayer: WaitingPlayer = {
+	waiting: false,
+	socket: undefined,
+	nickname: undefined,
+};
 
 @ApiResponse({
   status: 200,
@@ -53,6 +65,7 @@ export class GamesGateway
 
   afterInit() {
     this.nsp.adapter.on('delete-room', (roomName) => {
+		this.logger.log(`${roomName} deleted!!!`);
 		const deletedRoom = createdRooms.find(
 			(createdRoom) => createdRoom === roomName,
 		);
@@ -68,13 +81,28 @@ export class GamesGateway
   }
 
   handleConnection(@ConnectedSocket() socket: Socket) {
-    this.logger.log(`${socket.id} Socket Connected`);
+	const { nickname } = socket.handshake.query;
+	NicknameBySocketId[socket.id] = nickname;
+
+	if (NicknameBySocketId[socket.id] == undefined)
+		NicknameBySocketId[socket.id] = socket.id;
+
+	this.logger.log(`${NicknameBySocketId[socket.id]} +=+=+=+=+=+= Socket Connected +=+=+=+=+=+=`);
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-    this.logger.log(
-      `${socket.id} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,
-    );
+	this.logger.log(`${NicknameBySocketId[socket.id]} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
+	NicknameBySocketId.delete(socket.id);
+
+	const roomName  = RoomNameBySocketId[socket.id];
+	const gameDto = GameDtoByRoomName[roomName];
+
+	if (roomName && gameDto) {
+		if (gameDto.p1.socket.id != socket.id)
+			this.gameService.finishGame(gameDto, true)
+		else
+			this.gameService.finishGame(gameDto, false)
+	}
   }
 
   @SubscribeMessage('test')
@@ -85,17 +113,17 @@ export class GamesGateway
       'test',
       gameMod.soloGame,
     );
-    gameRooms[Game.roomName] = Game;
-    RoomNameBySocket[socket.id] = Game.roomName;
-    this.gameService.gameLoop(gameRooms[Game.roomName]);
+    GameDtoByRoomName[Game.roomName] = Game;
+    RoomNameBySocketId[socket.id] = Game.roomName;
+    this.gameService.gameLoop(GameDtoByRoomName[Game.roomName]);
 
     socket.emit('test', `${socket.id}: test success!`);
   }
 
   @SubscribeMessage('PaddleUp')
   handlePaddleUp(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
-    const na = RoomNameBySocket[socket.id];
-    const dto: GameDto = gameRooms[na];
+    const na = RoomNameBySocketId[socket.id];
+    const dto: GameDto = GameDtoByRoomName[na];
 	this.logger.log(`player1 ${is_p1}`);
     if (is_p1)
 		dto.p1.padleUp = true;
@@ -106,8 +134,8 @@ export class GamesGateway
 
   @SubscribeMessage('PaddleDown')
   handlePaddleDown(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
-    const na = RoomNameBySocket[socket.id];
-    const dto: GameDto = gameRooms[na];
+    const na = RoomNameBySocketId[socket.id];
+    const dto: GameDto = GameDtoByRoomName[na];
 	if (is_p1)
     	dto.p1.padleDown = true;
 	else
@@ -117,8 +145,8 @@ export class GamesGateway
 
   @SubscribeMessage('PaddleStop')
   handlePaddleStop(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
-    const na = RoomNameBySocket[socket.id];
-    const dto: GameDto = gameRooms[na];
+    const na = RoomNameBySocketId[socket.id];
+    const dto: GameDto = GameDtoByRoomName[na];
 	if (!dto)
 		return;
 	if (is_p1) {
@@ -145,55 +173,51 @@ export class GamesGateway
   @SubscribeMessage('matching')
   handleMatching(@ConnectedSocket() socket: Socket) {
 	//this.logger.log('matching');
-    if (waitingSocket) {
-		if (socket.id === waitingSocket.id)
-			return;
-		const wait_socket: Socket = waitingSocket;
-		waitingSocket = undefined;
+	const nickname = NicknameBySocketId[socket.id];
 
-		const roomName = wait_socket.id + socket.id;
+	if (waitingPlayer.waiting) {
+		if (nickname == waitingPlayer.nickname)
+			return;
+
+		const roomName = waitingPlayer.nickname + nickname;
 		const Game: GameDto = this.gameService.init_game(
-			wait_socket,  // p1
+			waitingPlayer.socket,  // p1
 			roomName, // roomName
 			gameMod.rankGame, // game mod
 			this.nsp,
 		);
-		Game.p2.name = wait_socket.id;
-		Game.p2.socket = wait_socket;
-		gameRooms[roomName] = Game;
+		Game.p2.name = socket.id;
+		Game.p2.socket = socket;
+		GameDtoByRoomName[roomName] = Game;
 
 		createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
 
-		RoomNameBySocket[wait_socket.id] = roomName;
-		RoomNameBySocket[socket.id] = roomName;
+		RoomNameBySocketId[waitingPlayer.socket.id] = roomName;
+		RoomNameBySocketId[socket.id] = roomName;
 
 		socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
-		wait_socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
+		waitingPlayer.socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
 
 		this.nsp.emit('matching-success'); // 대기실 방 생성을 연결된 클라들에게 알림
-		//this.nsp.to(roomName).emit('join-room', roomName);
-
-		//socket.emit('matching-success'); // 매칭 성공 이벤트를 보냄
-		//wait_socket.emit('matching-success'); // 매칭 성공 이벤트를 보냄
-
-		//this.nsp.to(roomName).emit('message', { message: `${socket.id} join room!` });
-		//this.nsp.to(roomName).emit('message', { message: `${wait_socket.id} join room!` });
-
 		this.logger.log('matching success!!!');
+
+		waitingPlayer.waiting = false;
 		//this.nsp.to(roomName).emit('message', { message: `${wait_socket.id} join room!` });
 	}
 	else {
-		waitingSocket = socket;
+		waitingPlayer.nickname = nickname;
+		waitingPlayer.socket = socket;
+		waitingPlayer.waiting = true;
 		this.logger.log(`${socket.id} matching waiting...`);
 	}
   }
 
   @SubscribeMessage('ready-rank')
   handleReadyRank(@ConnectedSocket() socket: Socket) {
-	const roomName = RoomNameBySocket[socket.id];
+	const roomName = RoomNameBySocketId[socket.id];
 	//if (!roomName)  // 여기 조건문 달아서 중복 호출 막음
 	//	return;
-	const game: GameDto = gameRooms[roomName];
+	const game: GameDto = GameDtoByRoomName[roomName];
 	if (game.p1Ready === true && game.p2Ready == true)
 		return { success: false, payload: `already started!` };
 
@@ -220,7 +244,7 @@ export class GamesGateway
 
   @SubscribeMessage('ready-solo')
   handleReadySolo(@ConnectedSocket() socket: Socket) {
-    if (RoomNameBySocket[socket.id])  // 여기 조건문 달아서 중복 호출 막음
+    if (RoomNameBySocketId[socket.id])  // 여기 조건문 달아서 중복 호출 막음
       return;
     this.logger.log(`Ready !!!`);
     const Game: GameDto = this.gameService.init_test(
@@ -228,21 +252,25 @@ export class GamesGateway
       'roomName',
       gameMod.soloGame,
     );
-    gameRooms[Game.roomName] = Game;
-    RoomNameBySocket[socket.id] = Game.roomName;
+    GameDtoByRoomName[Game.roomName] = Game;
+    RoomNameBySocketId[socket.id] = Game.roomName;
 
     //socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
     //createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
 
-    this.gameService.gameLoop(gameRooms[Game.roomName]);
+    this.gameService.gameLoop(GameDtoByRoomName[Game.roomName]);
     //socket.emit('test', `${socket.id}: test success!`);
   }
 
   @SubscribeMessage('end-game')
   handleEndGame(@ConnectedSocket() socket: Socket) {
-	const roomName = RoomNameBySocket[socket.id];
-	gameRooms[roomName] = undefined;
-    RoomNameBySocket[socket.id] = undefined;
+	const roomName = RoomNameBySocketId[socket.id];
+	const gameDto = GameDtoByRoomName[roomName];
+	if (roomName && gameDto) {
+		RoomNameBySocketId.delete(gameDto.p1.socket.id);
+		RoomNameBySocketId.delete(gameDto.p2.socket.id);
+		GameDtoByRoomName.delete(roomName);
+	}
   }
 
   @SubscribeMessage('create-room')
@@ -266,11 +294,11 @@ export class GamesGateway
 		Game.gameMod = gameMod.passwordGame;
 		Game.password = password;
 	}
-	gameRooms[roomName] = Game;
+	GameDtoByRoomName[roomName] = Game;
 
     socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
     createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
-	RoomNameBySocket[socket.id] = roomName;
+	RoomNameBySocketId[socket.id] = roomName;
 
     this.nsp.emit('create-room', roomName); // 대기실 방 생성
 
@@ -288,13 +316,13 @@ export class GamesGateway
       return { success: false, payload: `${roomName} not found!` };
     }
 
-	const Game: GameDto =  gameRooms[roomName];
+	const Game: GameDto =  GameDtoByRoomName[roomName];
 	if (Game.gameMod === gameMod.passwordGame && Game.password !== password) {
 		return { success: false, payload: `${roomName} password wrong!` };
 	}
 
 	socket.join(roomName); // join room
-	RoomNameBySocket[socket.id] = roomName;
+	RoomNameBySocketId[socket.id] = roomName;
 	Game.p2.name = socket.id;
 	Game.p2.socket = socket;
 
@@ -309,7 +337,7 @@ export class GamesGateway
     @MessageBody() roomName: string,
   ) {
     socket.join(roomName); // join room
-	RoomNameBySocket[socket.id] = roomName;
+	RoomNameBySocketId[socket.id] = roomName;
     socket.broadcast
       .to(roomName)
       .emit('message', { message: `${socket.id} join room!` });
@@ -323,7 +351,8 @@ export class GamesGateway
     @MessageBody() roomName: string,
   ) {
     socket.leave(roomName); // leave room
-	RoomNameBySocket[socket.id] = undefined;
+	RoomNameBySocketId.delete(socket.id);
+
     //socket.broadcast
     //  .to(roomName)
     //  .emit('message', { message: `${socket.id} out room!` });

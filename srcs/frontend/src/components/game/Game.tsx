@@ -55,6 +55,10 @@ function Game({ mod }: gameComponent) {
 				socketa.emit('watching');
 				setIsWatch(true);
 			}
+			socketa.on('start-game', (res: any)=> {
+				setPlayer(res);
+				setStartGame(true);
+			})
 			// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
 			socketa.on('matching-success', () => {
 				console.log('매칭 성공');
@@ -65,9 +69,7 @@ function Game({ mod }: gameComponent) {
 					document.addEventListener('keydown', (e) => {
 						if (e.code === 'KeyR') {
 							socketa.emit('ready-rank');
-							socketa.on('start-game', ()=> {
-								setStartGame(true);
-						})
+
 					}
 					});
 				}
@@ -84,7 +86,7 @@ function Game({ mod }: gameComponent) {
 				});
 			}
 
-			if (mod === gameMod.rankGame || 
+			if (mod === gameMod.rankGame ||
 				mod === gameMod.normalGame ||
 				mod === gameMod.passwordGame) {
 				WaitPage(ctx, CanvasWidth, CanvasHeight);
@@ -95,13 +97,7 @@ function Game({ mod }: gameComponent) {
 						if (e.code === 'KeyR') {
 							socketa.emit('ready-rank');
 							console.log('ready !');
-							socketa.on('start-game', (res: any)=> {
-								console.log(res);
-								console.log(res.res);
-								console.log('WHY');
-								setPlayer(res);
-								setStartGame(true);
-							})
+
 						}
 					});
 				}

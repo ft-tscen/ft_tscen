@@ -218,19 +218,21 @@ export class GameService {
 		this.resetBall(Game);
 	}
 	if (Game.p1.score >= VictoryScore) {
-		Game.p1.socket.emit('end-game', true);
-		if (Game.p2.socket)
-			Game.p2.socket.emit('end-game', false);
-		Game.p2.socket.emit('end-game', false);
-		clearInterval(Game.interval);
+		//Game.p1.socket.emit('end-game', true);
+		//if (Game.p2.socket)
+		//	Game.p2.socket.emit('end-game', false);
+		//Game.p2.socket.emit('end-game', false);
+		//clearInterval(Game.interval);
+		this.finishGame(Game, true);
 		return ;
 	}
 	else if (Game.p2.score >= VictoryScore) {
-		Game.p2.socket.emit('end-game', true);
-		Game.p1.socket.emit('end-game', false);
-		if (Game.p2.socket)
-			Game.p2.socket.emit('end-game', true);
-		clearInterval(Game.interval);
+		//Game.p2.socket.emit('end-game', true);
+		//Game.p1.socket.emit('end-game', false);
+		//if (Game.p2.socket)
+		//	Game.p2.socket.emit('end-game', true);
+		//clearInterval(Game.interval);
+		this.finishGame(Game, false);
 		return ;
 	}
     // 패들 계산
@@ -330,4 +332,12 @@ export class GameService {
       this.update_v2(Game);
     }, 1000 / 45);
   }
+
+  finishGame(Game: GameDto, p1_win: boolean) {
+	if (p1_win) {
+		Game.p1.socket.to(Game.roomName).emit('end-game', true);
+		clearInterval(Game.interval);
+	}
+  }
 }
+
