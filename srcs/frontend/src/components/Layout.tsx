@@ -7,6 +7,7 @@ import { gameMod } from "./game/GameType";
 import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 
+
 type LayoutComponent = {
 	isLoggedIn: boolean;
 	userData: {

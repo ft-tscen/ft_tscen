@@ -6,6 +6,16 @@ export enum gameMod{
 	watchGame,
 }
 
+export const SOCKET_GAME_EVENT = {
+    MATCH: "matching",
+    MATCH_SUCCESS: "matching-success",
+    START: "start-game",
+    END: "end-game",
+    RANK_READY: "ready-rank",
+    SOLO_READY: "ready-solo",
+    UPDATE: "update",
+}
+
 type userType = {
 	x : number,
 	y : number,

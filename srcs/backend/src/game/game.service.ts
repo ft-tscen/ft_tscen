@@ -11,7 +11,7 @@ const CanvasHeight = 800;
 // // Laptop
 // const CanvasWidth = 600;
 // const CanvasHeight = 400;
-const VictoryScore = 10;
+const VictoryScore = 2;
 
 @Injectable()
 export class GameService {

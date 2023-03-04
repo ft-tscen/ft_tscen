@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, Button, Container, Card, CloseButton , Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { socketa } from "./game/Game";
+import { myGameSocket } from "../App";
 
 function CreatRoom() {
 	const navigate = useNavigate();
@@ -41,7 +41,7 @@ function CreatRoom() {
 	const handleSubmit = () => {
 		if (usePassword) {
 			if (roomName.length >= 4 && password.length >= 4) {
-				socketa.emit('create-room', roomName, password , (res: any)=> {
+				myGameSocket.socket.emit('create-room', roomName, password , (res: any)=> {
 					if (res.success) {
 						console.log('성공');
 						navigate("/privateGame");
@@ -51,11 +51,10 @@ function CreatRoom() {
 				setShowWarning(true);
 				setTimeout(() => setShowWarning(false), 3000);
 			}
-			// if (roomName.length >)
 		}
 		else {
 			if (roomName.length >= 4) {
-				socketa.emit('create-room', roomName, (res: any) => {
+				myGameSocket.socket.emit('create-room', roomName, (res: any) => {
 					if (res) {
 						navigate("/friendlyGame");
 						console.log('성공');
@@ -67,7 +66,6 @@ function CreatRoom() {
 				setTimeout(() => setShowWarning(false), 3000);
 			}
 		}
-		// navigate("/normalGame");
 	};
 
 	const handleClickClose = () => {

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 
-import { userType, netType, ballType, dataType } from './GameType';
+import { userType, netType, ballType, dataType, SOCKET_GAME_EVENT } from './GameType';
 
 import { io } from "socket.io-client"
 import EndPage from './PageEnd';
@@ -8,12 +8,14 @@ import ReadyPage from './PageReady';
 import WaitPage from './PageWait';
 import { gameMod } from './GameType';
 import Player from './PlayerBar';
+import { myGameSocket } from '../../App';
+
 
 type gameComponent = {
 	mod: gameMod;
 };
 
-export const socketa = io(`http://${process.env.REACT_APP_BACKEND_HOST}:3001/game`);
+// export const myGameSocket.socket = io(`http://${process.env.REACT_APP_BACKEND_HOST}:3001/game`);
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,27 +54,25 @@ function Game({ mod }: gameComponent) {
 		if (canvas && ctx) {
 			// watch모드 대비 추가 iswatch일시 paddle 작동 막아둠
 			if (mod === gameMod.watchGame) {
-				socketa.emit('watching');
+				// myGameSocket.socket.emit('watching');
 				setIsWatch(true);
 			}
-			socketa.on('start-game', (res: any)=> {
+			myGameSocket.socket.on('start-game', (res: any)=> {
 				setPlayer(res);
 				setStartGame(true);
 			})
 			// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
-			socketa.on('matching-success', () => {
+			myGameSocket.socket.on('matching-success', () => {
 				console.log('매칭 성공');
 				setMatch(true);
-				if (match) {
-					console.log('ssersr3');
-					ReadyPage(ctx, CanvasWidth, CanvasHeight);
-					document.addEventListener('keydown', (e) => {
-						if (e.code === 'KeyR') {
-							socketa.emit('ready-rank');
-
-					}
-					});
+				console.log('ssersr3');
+				ReadyPage(ctx, CanvasWidth, CanvasHeight);
+				document.addEventListener('keydown', (e) => {
+					if (e.code === 'KeyR') {
+						console.log('rank ready!');
+						myGameSocket.socket.emit('ready-rank');
 				}
+				});
 			})
 			// Sologame 특징: playerbar 컴포넌트 불러오지 않음
 			if (mod === gameMod.soloGame) {
@@ -80,7 +80,8 @@ function Game({ mod }: gameComponent) {
 				document.addEventListener('keydown', (e) => {
 					if (e.code === 'KeyR') {
 						console.log('solo ready!');
-						socketa.emit('ready-solo');
+						myGameSocket.socket.emit(SOCKET_GAME_EVENT.SOLO_READY);
+						// myGameSocket.socket.emit('ready-solo');
 						setStartGame(true);
 					}
 				});
@@ -90,23 +91,13 @@ function Game({ mod }: gameComponent) {
 				mod === gameMod.normalGame ||
 				mod === gameMod.passwordGame) {
 				WaitPage(ctx, CanvasWidth, CanvasHeight);
-				socketa.emit('matching');
-				if (startGame) {
-					ReadyPage(ctx, CanvasWidth, CanvasHeight);
-					document.addEventListener('keydown', (e) => {
-						if (e.code === 'KeyR') {
-							socketa.emit('ready-rank');
-							console.log('ready !');
-
-						}
-					});
-				}
+				myGameSocket.socket.emit('matching');
 				}
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
 			// 프론트에서 보여줄 데이터 받기 위한 소켓
 			// 받을 때마다 USEEffect를 통해 render함수를 계속 실행
-			socketa.on('update', (data: dataType) => {
+			myGameSocket.socket.on('update', (data: dataType) => {
 				setData({
 					leftPaddle : data.leftPaddle,
 					rightPaddle : data.rightPaddle,
@@ -116,14 +107,14 @@ function Game({ mod }: gameComponent) {
 					rightScore : data.rightScore,
 				})
 			})
-			socketa.on('end-game', (res: boolean) => {
+			myGameSocket.socket.on('end-game', (res: boolean) => {
 				const ctx = canvas?.getContext("2d");
 				if (ctx) {
 					EndPage(ctx, CanvasWidth, CanvasHeight, res);
 					// 여기에 경기 결과 db에 업데이트 하는 코드 추가 (watch상태 아닐시에만)
 					// if (mod !== gameMod.watchGame)
-					killSockets(socketa);
-					socketa.emit('end-game');
+					killSockets(myGameSocket.socket);
+					myGameSocket.socket.emit('end-game');
 				}
 			})
 	}, [ctx])
@@ -171,13 +162,13 @@ function Game({ mod }: gameComponent) {
 		if (startGame && !isWatch) {
 			console.log(player);
 			if (paddleUp === true) {
-				socketa.emit('PaddleUp', player);
+				myGameSocket.socket.emit('PaddleUp', player);
 			}
 			if (paddleDown === true) {
-				socketa.emit('PaddleDown', player);
+				myGameSocket.socket.emit('PaddleDown', player);
 			}
 			if (paddleDown === false && paddleUp === false) {
-				socketa.emit('PaddleStop', player);
+				myGameSocket.socket.emit('PaddleStop', player);
 			}
 		}
 	}, [paddleDown, paddleUp]);
@@ -216,7 +207,7 @@ function Game({ mod }: gameComponent) {
 		}
 	}
 
-///////////////////////////////render Event/////////////////////////////////////
+/////////////////////////////// render Event /////////////////////////////////////
 
 	useEffect(() => {
 		if (canvas && ctx)
