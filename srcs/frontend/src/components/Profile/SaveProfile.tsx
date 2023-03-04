@@ -23,6 +23,7 @@ function SaveProfile({
 	setChangedData,
 }: SaveProfileComponent) {
 	const navigate = useNavigate();
+	// const [file, setFile] = useState<string | Blob>();
 	const [nick_name, setNickName] = useState(userData.nickName || "");
 	const [phone_number, setPhoneNumber] = useState(userData.phone || "");
 	const [isDuplicated, setDuplicated] = useState("no_check");
@@ -82,6 +83,10 @@ function SaveProfile({
 		}
 	};
 
+	// const handleFileChange = (e: any) => {
+	// 	setFile(e.target.files[0]);
+	// };
+
 	const handleSubmit = async () => {
 		if (nick_name == "" || nick_name == null || nick_name == undefined) {
 			alert("닉네임을 작성해주세요.");
@@ -102,6 +107,11 @@ function SaveProfile({
 					phone: phone_number,
 					verified: isCertificated,
 				});
+				// if (file) {
+				// 	const formData = new FormData();
+				// 	formData.append("file", file!);
+				// 	await api.post("/user/avatar", formData);
+				// }
 				setChangedData(!isChangedData);
 				navigate("/");
 			} catch (e) {
@@ -127,15 +137,11 @@ function SaveProfile({
 									className="bg-transparent text-white"
 									// value={avatar}
 									accept="image/*"
-									onChange={(e) => {
-										const target = e.target as HTMLInputElement;
-										const file: File = (target.files as FileList)[0];
-										console.log(file);
-									}}
+									onChange={handleFileChange}
 								/>
 							</Form.Group> */}
 							<Form.Group className="mb-3" controlId="formIntraID">
-								<Form.Label className="text-white">인트라 ID</Form.Label>
+								<Form.Label className="text-white">Intra ID</Form.Label>
 								<Form.Control
 									type="text"
 									placeholder="Intra ID"

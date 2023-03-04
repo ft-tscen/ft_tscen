@@ -3,6 +3,7 @@ import { Container } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import Home from "./Home";
 import Profile from "./Profile/Profile";
+import Inform from "./Inform";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -45,8 +46,9 @@ function Layout({
 			<Container fluid style={{ height: "90vmin" }}>
 				<Row style={{ height: "90vmin" }}>
 					<Col xs={3}>
-						{userData.nickName === null || !isLoggedIn ? null : <div>asdf</div>}
-						{/* 정보 컴포넌트 들어올 자리 */}
+						{userData.nickName === null || !isLoggedIn ? null : (
+							<Inform userData={userData} />
+						)}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
 					<Col xs={3}>
