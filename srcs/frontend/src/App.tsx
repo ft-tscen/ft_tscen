@@ -12,22 +12,7 @@ interface MySocket {
 	enteredGameRoom: string;
 }
 
-export let myChatSocket: MySocket;
 export let myGameSocket: MySocket;
-
-export function setChatSocket(newName: string) {
-	myChatSocket = {
-		socket: io(`http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/chat`, {
-			withCredentials: true,
-			query: {
-				nickname: newName,
-			},
-	  	}),
-		name: newName,
-		enteredChannelName: "",
-		enteredGameRoom: "",
-	};
-}
 
 export function setGameSocket(newName: string) {
 	myGameSocket = {
@@ -42,7 +27,6 @@ export function setGameSocket(newName: string) {
 		enteredGameRoom: "",
 	};
 }
-
 
 function App() {
 	const navigate = useNavigate();
