@@ -12,7 +12,6 @@ type ShowProfileComponent = {
 };
 
 function ShowProfile({ userData, setEdit }: ShowProfileComponent) {
-	console.log("Hi");
 	return (
 		<>
 			<Container className="pt-5">
