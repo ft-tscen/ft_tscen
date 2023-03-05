@@ -16,12 +16,8 @@ type gameComponent = {
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	// Cluster
 	let CanvasWidth = 1200;
 	let CanvasHeight = 800;
-	// // Laptop
-	// let CanvasWidth = 600;
-	// let CanvasHeight = 400;
 
 	// const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
 	// const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
@@ -89,12 +85,7 @@ function Game({ mod }: gameComponent) {
 							avatarId : data.p2.avatarId,
 						}
 					}
-
-					console.log(data);
-					// console.log(PlayerInfo.p1);
-					// console.log(PlayerInfo.p2);
-					// console.log(data.p1.intra);
-					
+					setIsInfo(true);
 					setPlayerInfo(PlayerInfo);
 					setMatch(true);
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
@@ -111,7 +102,6 @@ function Game({ mod }: gameComponent) {
 					if (e.code === 'KeyR') {
 						console.log('solo ready!');
 						myGameSocket.socket.emit(SOCKET_GAME_EVENT.SOLO_READY);
-						// myGameSocket.socket.emit('ready-solo');
 						setStartGame(true);
 					}
 				});
@@ -163,12 +153,6 @@ function Game({ mod }: gameComponent) {
 			navigate('/');
 		}
 		}, [ctx])
-
-		useEffect(() => {
-			// game시작 했을 때만 적용되게
-			if (match)
-				setIsInfo(true);
-		}, [playerInfo]);
 
 		function killSockets(socket : any) {
 			socket.off('end-game');
@@ -289,12 +273,13 @@ function Game({ mod }: gameComponent) {
 			{isInfo && (
 			<Player mod={mod} playerInfo={playerInfo} ></Player>
 			)}
-			<Row className='canv border justify-content-md-center'>
+			<div className={isInfo ? 'canv2' : 'canv'}>
 				<canvas
+					className='border'
 					ref={canvasRef}
 					width={CanvasWidth}
 					height={CanvasHeight}/>
-			</Row>
+			</div>
 		</>
 	);
 }
@@ -307,6 +292,20 @@ const styles = `
     width: 100%;
     margin: 0 auto;
 	align-items: center;
+	justify-content:center;
 	vertical-align: center;
+	height: 100%;
 }
+
+.canv2 {
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+	align-items: flex-start;
+	justify-content:center;
+	vertical-align: center;
+	height: 100%;
+	margin-top: 95px 
+}
+
 `;
