@@ -143,7 +143,9 @@ function Game({ mod }: gameComponent) {
 							EndPage(ctx, CanvasWidth, CanvasHeight, "p2");
 					}
 					// 여기에 경기 결과 db에 업데이트 하는 코드 추가 (watch상태 아닐시에만)
-					// if (mod !== gameMod.watchGame)
+					if (mod !== gameMod.watchGame) {
+						
+					}
 					killSockets(myGameSocket.socket);
 					myGameSocket.socket.emit('end-game');
 				}
