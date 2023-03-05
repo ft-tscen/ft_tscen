@@ -8,15 +8,17 @@ import {
 	SocketInputDto,
 	SocketOutputDto,
 	SOCKET_EVENT,
+    UserData,
 } from "../../common/types";
 
 type ArgsType = {
     msg :SocketOutputDto,
     enterGame : (dto: SocketOutputDto) => void
     setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
+    setInform :React.Dispatch<React.SetStateAction<UserData>>,
 }
 
-export function Chat({msg, enterGame, setReceivedMsg} :ArgsType) {
+export function Chat({msg, enterGame, setReceivedMsg, setInform} :ArgsType) {
     let [isFriend, setIsFriend] : BoolType = useState<boolean>(false);
     let [show, setShow] : BoolType = useState<boolean>(false);
     let [active, setActive] : BoolType = useState<boolean>(true);
@@ -50,6 +52,7 @@ export function Chat({msg, enterGame, setReceivedMsg} :ArgsType) {
             setShow(false);
         }
         const showProfile = () => {
+            msg.user && setInform(msg.user);
             console.log("누른 상대 프로필 보기");
             setShow(false);
         }

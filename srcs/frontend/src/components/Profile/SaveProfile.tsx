@@ -2,18 +2,12 @@ import { useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../axios/api";
-import { BoolType } from "../../common/types";
+import { BoolType, UserData } from "../../common/types";
 import CheckVerifyingOffModal from "./CheckVerifyingOffModal";
 import VerifyingCodeModal from "./VerifyingCodeModal";
 
 type SaveProfileComponent = {
-	userData: {
-		intraID: string;
-		name: string;
-		nickName: string;
-		phone: string;
-		verified: boolean;
-	};
+	userData: UserData;
 	isChangedData: boolean;
 	setChangedData: (isChangedData: boolean) => any;
 };

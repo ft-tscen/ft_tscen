@@ -6,18 +6,13 @@ import Game from "./game/Game"
 import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
-import { gameMod } from "../common/types";
+import { gameMod, UserData } from "../common/types";
+import { useState } from "react";
 
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
-	userData: {
-		intraID: string;
-		name: string;
-		nickName: string;
-		phone: string;
-		verified: boolean;
-	};
+	userData: UserData;
 	imageURL: string;
 	isChangedData: boolean;
 	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
@@ -32,6 +27,7 @@ function Layout({
 }: LayoutComponent) {
 	const url = useParams();
 	const param = url["*"];
+	const [inform, setInform] = useState(userData);
 
 	const getComponent = () => {
 		if (param === "") return <Home isLoggedIn={isLoggedIn} />;
@@ -61,19 +57,20 @@ function Layout({
 		if (isLoggedIn) return "border";
 		else return "";
 	};
+
 	return (
 		<>
 			<Container fluid style={{ height: "90vmin" }}>
 				<Row style={{ height: "90vmin" }}>
 					<Col xs={3} className={getBorder()}>
 						{userData.nickName === null || !isLoggedIn ? null : (
-							<MyInform userData={userData} imageURL={imageURL} />
+							<MyInform userData={inform} />
 							// <OtherInform userData={userData} imageURL={imageURL} />
 						)}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
 					<Col xs={3} className={getBorder()}>
-						{isLoggedIn && <ChatPart />}
+						{isLoggedIn && <ChatPart setInform={setInform}/>}
 					</Col>
 				</Row>
 			</Container>

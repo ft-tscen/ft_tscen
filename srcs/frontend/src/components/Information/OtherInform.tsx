@@ -8,15 +8,10 @@ import {
 	Form,
 	Button,
 } from "react-bootstrap";
+import { UserData } from "../../common/types";
 
 type InformComponent = {
-	userData: {
-		intraID: string;
-		name: string;
-		nickName: string;
-		phone: string;
-		verified: boolean;
-	};
+	userData: UserData;
 	imageURL: string;
 };
 
