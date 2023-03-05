@@ -141,12 +141,10 @@ export class GamesGateway
   handlePaddleUp(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
     const na = RoomNameBySocketId[socket.id];
     const dto: GameDto = GameDtoByRoomName[na];
-	this.logger.log(`player1 ${is_p1}`);
     if (is_p1)
 		dto.p1.padleUp = true;
 	else
 		dto.p2.padleUp = true;
-    //this.logger.log('up');
   }
 
   @SubscribeMessage('PaddleDown')
@@ -157,7 +155,6 @@ export class GamesGateway
     	dto.p1.padleDown = true;
 	else
     	dto.p2.padleDown = true;
-    //this.logger.log('down');
   }
 
   @SubscribeMessage('PaddleStop')
@@ -184,12 +181,11 @@ export class GamesGateway
   @SubscribeMessage('friendly-match')
   handleFriendlyMatching(@ConnectedSocket() socket: Socket,
   @MessageBody() roomName: string) {
-	//if ()
+
   }
 
   @SubscribeMessage('matching')
   handleMatching(@ConnectedSocket() socket: Socket) {
-	//this.logger.log('matching');
 	const nickname = NicknameBySocketId[socket.id];
 
 	if (waitingPlayer.waiting) {
@@ -220,7 +216,6 @@ export class GamesGateway
 		this.logger.log('matching success!!!');
 
 		waitingPlayer.waiting = false;
-		//this.nsp.to(roomName).emit('message', { message: `${wait_socket.id} join room!` });
 	}
 	else {
 		waitingPlayer.nickname = nickname;
@@ -233,8 +228,7 @@ export class GamesGateway
   @SubscribeMessage('ready-rank')
   handleReadyRank(@ConnectedSocket() socket: Socket) {
 	const roomName = RoomNameBySocketId[socket.id];
-	//if (!roomName)  // 여기 조건문 달아서 중복 호출 막음
-	//	return;
+
 	const game: GameDto = GameDtoByRoomName[roomName];
 	if (game.p1Ready === true && game.p2Ready == true)
 		return { success: false, payload: `already started!` };
@@ -251,13 +245,9 @@ export class GamesGateway
     if (game.p1Ready === true && game.p2Ready == true) {
 		game.p1.socket.emit('start-game', true);
 		game.p2.socket.emit('start-game', false);
-		this.gameService.gameLoop_v2(game);
+		this.gameService.gameLoop(game);
 		this.logger.log(`Game Start!!!`);
     }
-    //socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
-    //createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
-
-    //socket.emit('test', `${socket.id}: test success!`);
   }
 
   @SubscribeMessage('ready-solo')
@@ -267,17 +257,13 @@ export class GamesGateway
     this.logger.log(`Ready !!!`);
     const Game: GameDto = this.gameService.init_test(
       socket,
-      'roomName',
+      socket.id,
       gameMod.soloGame,
     );
     GameDtoByRoomName[Game.roomName] = Game;
     RoomNameBySocketId[socket.id] = Game.roomName;
 
-    //socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
-    //createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
-
     this.gameService.gameLoop(GameDtoByRoomName[Game.roomName]);
-    //socket.emit('test', `${socket.id}: test success!`);
   }
 
   @SubscribeMessage('end-game')

@@ -328,11 +328,11 @@ export class GameService {
     }, 1000 / 45);
   }
 
-  gameLoop_v2(Game: GameDto) {
-    Game.interval = setInterval(() => {
-      this.update_v2(Game);
-    }, 1000 / 45);
-  }
+//  gameLoop_v2(Game: GameDto) {
+//    Game.interval = setInterval(() => {
+//      this.update_v2(Game);
+//    }, 1000 / 45);
+//  }
 
   finishGame(Game: GameDto, p1_win: boolean) {
 	if (p1_win) {
