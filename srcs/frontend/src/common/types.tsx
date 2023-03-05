@@ -17,7 +17,7 @@ export interface SocketInputDto {
     message?: string;
     password?: string;
 }
-  
+
 export interface SocketOutputDto {
     author?: string; // nickname
     target?: string; // nickname or channel name
@@ -186,4 +186,9 @@ type dataType = {
   rightScore: number,
 }
 
-export type { userType, netType, ballType, dataType }
+type playerType = {
+    p1 : UserData,
+    p2 : UserData
+}
+
+export type { userType, netType, ballType, dataType, playerType }

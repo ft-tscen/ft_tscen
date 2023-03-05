@@ -29,6 +29,9 @@ function MyInform({ inform, setInform, myData }: InformComponent) {
 				setImageURL("./Anonymous.jpeg");
 			}
 		}
+		else {
+			setImageURL("./Anonymous.jpeg");
+		}
 	};
 
 	const getMyData = () => {

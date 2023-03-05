@@ -9,7 +9,6 @@ function CreatRoom() {
 	const [roomName, setRoomName] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
 	const [usePassword, setUsePassword] :BoolType = useState<boolean>(false);
-	const [hasPassword, setHasPassword] :BoolType = useState<boolean>(false); // 사용하는가?
 	const [showWarning, setShowWarning] :BoolType = useState<boolean>(false);
 
 	const styleEl = document.createElement('style');
@@ -44,8 +43,9 @@ function CreatRoom() {
 			if (roomName.length >= 4 && password.length >= 4) {
 				myGameSocket.socket.emit('create-room', roomName, password , (res: any)=> {
 					if (res.success) {
-						console.log('성공');
 						navigate("/privateGame");
+						// 채팅에 게임 룸 이름 작성
+						console.log('성공');
 					}
 				})
 			} else {
@@ -58,6 +58,7 @@ function CreatRoom() {
 				myGameSocket.socket.emit('create-room', roomName, (res: any) => {
 					if (res) {
 						navigate("/friendlyGame");
+						// 채팅에 게임 룸 이름 작성
 						console.log('성공');
 					}
 				})

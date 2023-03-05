@@ -39,12 +39,15 @@ export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
 				})
 				.catch((error) => console.error(error));
 		}
+		else {
+			setImageDataUrl("./Anonymous.jpeg");
+		}
 	};
 	useEffect(() => {
 		if (msg.author !== 'server' && msg.author !== mySocket.name)
 			getUserData();
 	}, []);
-	
+
 	if (msg.author === "server") {
 		return (
 			<Row className="m-0 p-0 pb-1 h-auto text-left justify-content-center">

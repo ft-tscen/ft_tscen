@@ -1,4 +1,6 @@
-function EndPage (ctx: CanvasRenderingContext2D, CanvasWidth: number, CanvasHeight: number, res: boolean) {
+import { playerType } from "../../common/types";
+
+function EndPage (ctx: CanvasRenderingContext2D, CanvasWidth: number, CanvasHeight: number, name: string | undefined) {
 	ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 	ctx.fillStyle = "BLACK";
 	ctx.fillRect(0, 0, CanvasWidth, CanvasHeight);
@@ -6,10 +8,8 @@ function EndPage (ctx: CanvasRenderingContext2D, CanvasWidth: number, CanvasHeig
 	const fontSize = (CanvasWidth/15).toString();
 	ctx.font = fontSize + "px serif";
 	ctx.textAlign = "center";
-	if (res)
-		ctx.fillText("p1 win", CanvasWidth/2, CanvasHeight/2);
-	else
-		ctx.fillText("p2 win", CanvasWidth/2, CanvasHeight/2);
+	const res = name + " win";
+	ctx.fillText(res, CanvasWidth/2, CanvasHeight/2);
 }
 
 export default EndPage;

@@ -1,36 +1,76 @@
 import { useEffect, useState } from 'react';
-import { gameMod } from '../../common/types';
+import { api } from '../../axios/api';
+import { gameMod, playerType } from '../../common/types';
 
 type gameComponent = {
 	mod: gameMod;
+	playerInfo : playerType | undefined;
 };
 
-interface PlayerType {
-	name: string;
+interface player {
+	name: string | undefined;
 	wins: number;
 	losses: number;
 }
 
-function Player({ mod }: gameComponent) {
-	const [lplayer, setLPlayer] = useState<PlayerType | null>(null);
-	const [rplayer, setRPlayer] = useState<PlayerType | null>(null);
+function Player({ mod, playerInfo }: gameComponent) {
+	const [lplayer, setLPlayer] = useState<player | null>(null);
+	const [rplayer, setRPlayer] = useState<player | null>(null);
+	const [leftUrl, setLeftUrl] = useState<string>();
+	const [rightUrl, setRightUrl] = useState<string>();
 
 	useEffect(() => {
 	if (mod !== gameMod.soloGame) {
-		const getLPlayer = () => {
-			const name = "user";
+		const getLPlayer = async () => {
+			let name;
+			if (playerInfo?.p1.nickname)
+				name = playerInfo?.p1.nickname;
+			else
+				name = "user";
+			if (playerInfo?.p1.avatarId) {
+				await api
+				.get(`/user/avatar/${playerInfo?.p1.avatarId}`, { responseType: "arraybuffer" })
+				.then((response) => {
+					const arrayBufferView = new Uint8Array(response.data);
+					const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+					const urlCreator = window.URL || window.webkitURL;
+					const imageUrl = urlCreator.createObjectURL(blob);
+					setLeftUrl(imageUrl);
+				})
+				.catch((error) => console.error(error));
+			}
+			else
+				setLeftUrl("https://www.w3schools.com/howto/img_avatar.png");
 			const wins = 5;
 			const losses = 2;
 			setLPlayer({ name, wins, losses });
 		};
-	
-		const getRPlayer = () => {
-			const name = "user";
+
+		const getRPlayer = async () => {
+			let name;
+			if (playerInfo?.p2.nickname)
+				name = playerInfo?.p2.nickname;
+			else
+				name = "user";
+			if (playerInfo?.p2.avatarId) {
+				await api
+				.get(`/user/avatar/${playerInfo?.p2.avatarId}`, { responseType: "arraybuffer" })
+				.then((response) => {
+					const arrayBufferView = new Uint8Array(response.data);
+					const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+					const urlCreator = window.URL || window.webkitURL;
+					const imageUrl = urlCreator.createObjectURL(blob);
+					setRightUrl(imageUrl);
+				})
+				.catch((error) => console.error(error));
+			}
+			else
+				setRightUrl("https://www.w3schools.com/howto/img_avatar.png");
 			const wins = 5;
 			const losses = 2;
 			setRPlayer({ name, wins, losses });
 		};
-	
+
 		getLPlayer();
 		getRPlayer();
 	}
@@ -43,7 +83,7 @@ function Player({ mod }: gameComponent) {
 		<div style={{ display: "flex", height: "120px", color: "white" }}>
 		<div style={{ display: "flex", flex: "1" }}>
 		<div style={{ width: "120px", height: "120px", overflow: "hidden", borderRadius: "50%", marginRight: "20px" }}>
-			<img src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar" style={{ width: "100%" }} />
+			<img src={leftUrl} alt="Avatar" style={{ width: "100%" }} />
 		</div>
 		<div>
 			<h2 style={{ fontSize: '2rem', margin: 0 }}>{lplayer.name}</h2>
@@ -61,7 +101,7 @@ function Player({ mod }: gameComponent) {
 		</div>
 		</div>
 		<div style={{ width: "120px", height: "120px", overflow: "hidden", borderRadius: "50%" }}>
-			<img src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar" style={{ width: "100%" }} />
+			<img src={rightUrl} alt="Avatar" style={{ width: "100%" }} />
 		</div>
 		</div>
 		)}
