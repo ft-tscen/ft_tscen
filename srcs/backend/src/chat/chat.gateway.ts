@@ -10,6 +10,7 @@ import {
   OnGatewayInit,
 } from '@nestjs/websockets';
 import { UserService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
 
 // private: 비공개, protected: 비번으로 잠김
 export interface ChannelInfo {
@@ -99,6 +100,18 @@ export class ChatGateway
     }
     console.log(`${socket.id} 소켓 연결 해제 ❌`);
   } // 채널에서 나갔다고 알려줘야 함.
+
+  async hashPassword(password: string): Promise<string> {
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    return hashedPassword;
+  }
+  
+  async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+    const isMatch = await bcrypt.compare(password, hashedPassword);
+    return isMatch;
+  }
 
   @SubscribeMessage('channel-list')
   handleChannelList() {
@@ -314,18 +327,19 @@ export class ChatGateway
   }
 
   @SubscribeMessage('join-channel')
-  joinChannel(
+  async joinChannel(
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
-  ): SocketOutputDto {
+  ): Promise<SocketOutputDto> {
     if (this.channels.has(input.target)) {
       const channel = this.channels.get(input.target);
       const now = new Date().getTime();
+      const isMatch = await this.verifyPassword(channel.password, input.password);
+
       if (
         !(
           channel.banList.has(socket.id) && now < channel.banList.get(socket.id)
-        ) &&
-        channel.password === input.password
+        ) && isMatch
       ) {
         channel.members.add(socket.id);
       } else {
@@ -556,14 +570,15 @@ export class ChatGateway
   }
 
   @SubscribeMessage('password')
-  setPassword(
+  async setPassword(
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
-  ): SocketOutputDto {
+  ): Promise<SocketOutputDto> {
     const channel = this.users.get(socket.id).channel;
 
     if (this.checkOwner(input.author, channel)) { // socket.id -> input.author
-      this.channels.get(channel).password = input.password;
+      const hashedPassword = await this.hashPassword(input.password);
+      this.channels.get(channel).password = hashedPassword;
       const output = {
         author: 'server',
         target: input.target,
