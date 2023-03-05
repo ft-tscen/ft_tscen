@@ -2,11 +2,11 @@ import React from "react";
 
 //////////////////////////// CHAT TYPE /////////////////////////////////////
 export interface UserData {
-	intraID: string,
-	name: string,
-	nickName: string,
-	phone: string,
+	intra: string,
+	usual_full_name: string,
+	nickname: string,
 	verified: boolean,
+	phone: string,
     avatarId: number,
     // history: any,
 }

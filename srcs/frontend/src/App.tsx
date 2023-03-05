@@ -15,9 +15,9 @@ function App() {
 	const navigate = useNavigate();
 	const [loggedIn, setLoggedIn]: BoolType = useState<boolean>(false);
 	let [userData, setUserData] = useState<UserData>({
-		intraID: "",
-		name: "",
-		nickName: "",
+		intra: "",
+		usual_full_name: "",
+		nickname: "",
 		phone: "",
 		verified: false,
 		avatarId: 0,
@@ -29,9 +29,9 @@ function App() {
 			const res = await api.get("/user/me");
 			const { user } = res.data;
 			const data: UserData = {
-				intraID: user.intra,
-				name: user.usual_full_name,
-				nickName: user.nickname,
+				intra: user.intra,
+				usual_full_name: user.usual_full_name,
+				nickname: user.nickname,
 				phone: user.phone,
 				verified: user.verified,
 				avatarId: user.avatarId,
@@ -48,24 +48,24 @@ function App() {
 			const res = await api.get("/user/me");
 			const { user } = res.data;
 			const data: UserData = {
-				intraID: user.intra,
-				name: user.usual_full_name,
-				nickName: user.nickname,
+				intra: user.intra,
+				usual_full_name: user.usual_full_name,
+				nickname: user.nickname,
 				phone: user.phone,
 				verified: user.verified,
 				avatarId: user.avatarId,
 			};
 			setLoggedIn(true);
 			setUserData(data);
-			mySocket === undefined && SetSocket(data.nickName);
-			myGameSocket === undefined && setGameSocket(data.nickName);
-			if (data.nickName === null && data.phone === null) navigate("/profile");
+			mySocket === undefined && SetSocket(data.nickname);
+			myGameSocket === undefined && setGameSocket(data.nickname);
+			if (data.nickname === null && data.phone === null) navigate("/profile");
 		} catch (e) {
 			setLoggedIn(false);
 			setUserData({
-				intraID: "",
-				name: "",
-				nickName: "",
+				intra: "",
+				usual_full_name: "",
+				nickname: "",
 				phone: "",
 				verified: false,
 				avatarId: 0,

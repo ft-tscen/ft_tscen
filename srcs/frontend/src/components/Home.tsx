@@ -30,7 +30,6 @@ function Home({ isLoggedIn, userData, enteredChannel }: HomeComponent) {
 	}
 
 	const isDisable = () => {
-		console.log("asdf");
 		if (isLoggedIn && enteredChannel && userData.verified)
 			return false;
 		else

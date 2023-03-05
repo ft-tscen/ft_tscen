@@ -28,14 +28,14 @@ function MyInform({ inform }: InformComponent) {
 
 	useEffect(() => {
 		getAvatar();
-	}, []);
+	}, [inform]);
 	return (
 		<>
 			<Stack gap={5} className="mt-5" style={{ height: "40vmin" }}>
 				<Container>
 					<Row>
-						<Col className="d-flex justify-content-center align-items-center">
-							<Image src={imageURL} roundedCircle style={{ width: "15vmin" }} />
+						<Col className="vh-15 d-flex justify-content-center align-items-center">
+							<Image src={imageURL} roundedCircle style={{ width: "15vmin", height: "15vmin" }} />
 						</Col>
 					</Row>
 				</Container>
@@ -49,7 +49,7 @@ function MyInform({ inform }: InformComponent) {
 										type="text"
 										placeholder="Intra ID"
 										className="bg-transparent text-white"
-										value={inform.intraID}
+										value={inform.intra}
 										disabled
 									/>
 								</Form.Group>
@@ -59,7 +59,7 @@ function MyInform({ inform }: InformComponent) {
 										type="text"
 										placeholder="Name"
 										className="bg-transparent text-white"
-										value={inform.name}
+										value={inform.usual_full_name}
 										disabled
 									/>
 								</Form.Group>
@@ -71,7 +71,7 @@ function MyInform({ inform }: InformComponent) {
 												type="text"
 												placeholder="Nickname"
 												className="bg-transparent text-white"
-												value={inform.nickName}
+												value={inform.nickname}
 												disabled
 											/>
 										</Form.Group>

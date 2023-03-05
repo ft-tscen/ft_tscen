@@ -125,6 +125,7 @@ export class ChatGateway
     const { author, target } = input;
     const { user } = this.users.get(this.sockets.get(author));
 
+    console.log("asdf");
     if (author !== target) {
       if (this.channels.has(target)) {
         const { members, channelMute } = this.channels.get(target);
@@ -132,6 +133,7 @@ export class ChatGateway
           if (member !== socket.id) {
             const now = new Date().getTime();
             const authorID :string = this.sockets.get(author); // author -> this->sockets.get(author)
+            
             if (channelMute.has(authorID) && now < channelMute.get(authorID)) {
               return;
             }
@@ -696,7 +698,7 @@ export class ChatGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
-    const { user } = this.users.get(this.sockets.get(input.author));
+    const { user } = this.users.get(this.sockets.get(input.target));
 
     return {
       author: 'server',
