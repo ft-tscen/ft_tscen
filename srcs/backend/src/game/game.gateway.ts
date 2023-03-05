@@ -71,7 +71,7 @@ export class GamesGateway
 		const deletedRoom = createdRooms.find(
 			(createdRoom) => createdRoom === roomName,
 		);
-		if (!deletedRoom) return;
+		if (!deletedRoom) return { success: false, payload: `${roomName} room already existed!` };
 
 		this.nsp.emit('delete-room', deletedRoom);
 		createdRooms = createdRooms.filter(
@@ -97,7 +97,7 @@ export class GamesGateway
   handleDisconnect(@ConnectedSocket() socket: Socket) {
 	if (NicknameBySocketId[socket.id]) {
 		this.logger.log(`${socket.id} (${NicknameBySocketId[socket.id]}) -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
-		NicknameBySocketId.delete(socket.id);
+		NicknameBySocketId[socket.id] = undefined;
 	}
 	else
 		this.logger.log(`${socket.id} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
@@ -252,8 +252,10 @@ export class GamesGateway
 
   @SubscribeMessage('ready-solo')
   handleReadySolo(@ConnectedSocket() socket: Socket) {
-    if (RoomNameBySocketId[socket.id])  // 여기 조건문 달아서 중복 호출 막음
-      return;
+    if (RoomNameBySocketId[socket.id]) {
+		this.logger.log('exit solo mod');
+		return;
+	}  // 여기 조건문 달아서 중복 호출 막음
     this.logger.log(`Ready !!!`);
     const Game: GameDto = this.gameService.init_test(
       socket,
@@ -271,10 +273,14 @@ export class GamesGateway
 	const roomName = RoomNameBySocketId[socket.id];
 	const gameDto = GameDtoByRoomName[roomName];
 	if (roomName && gameDto) {
-		RoomNameBySocketId.delete(gameDto.p1.socket.id);
-		if (gameDto.gameMod != gameMod.soloGame)
-			RoomNameBySocketId.delete(gameDto.p2.socket.id);
-		GameDtoByRoomName.delete(roomName);
+		this.logger.log(RoomNameBySocketId[gameDto.p1.socket.id]);
+		RoomNameBySocketId[gameDto.p1.socket.id] = undefined;
+		this.logger.log(RoomNameBySocketId[gameDto.p1.socket.id]);
+		if (gameDto.gameMod != gameMod.soloGame) {
+			RoomNameBySocketId[gameDto.p2.socket.id] = undefined;
+		}
+		GameDtoByRoomName[roomName] = undefined;
+		this.logger.log(`gameDto: ${GameDtoByRoomName[roomName]}`);
 	}
   }
 
@@ -348,7 +354,7 @@ export class GamesGateway
       .to(roomName)
       .emit('message', { message: `${socket.id} join room!` });
 
-    return { success: true };
+    return { success: true, payload: roomName };
   }
 
   @SubscribeMessage('leave-room')
@@ -357,12 +363,12 @@ export class GamesGateway
     @MessageBody() roomName: string,
   ) {
     socket.leave(roomName); // leave room
-	RoomNameBySocketId.delete(socket.id);
+	RoomNameBySocketId[socket.id] = undefined;
 
     //socket.broadcast
     //  .to(roomName)
     //  .emit('message', { message: `${socket.id} out room!` });
 
-    return { success: true };
+    return { success: true, payload: roomName};
   }
 }
