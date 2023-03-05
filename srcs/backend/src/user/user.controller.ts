@@ -123,7 +123,7 @@ export class UserController {
   ) {
     const file = await this.userService.getAvatarById(id);
     const stream = Readable.from(file.data);
-    
+
     response.set({
       'Content-Disposition': `inline; filename="${file.filename}"`,
       'Content-Type': 'image',
@@ -183,5 +183,18 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<getUserByIdOutput> {
     return await this.userService.getUserById(id);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'get score by intra',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @Get('/score')
+  async getScoreByNickName(
+    @Query('nickname') nickname: string,
+  ): Promise<getUserByIdOutput> {
+    return await this.userService.getScoreByNickName(nickname);
   }
 }

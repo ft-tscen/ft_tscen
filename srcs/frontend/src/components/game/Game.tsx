@@ -6,7 +6,7 @@ import ReadyPage from './PageReady';
 import WaitPage from './PageWait';
 import Player from './PlayerBar';
 import { myGameSocket } from '../../common/MySocket';
-import { BoolType, dataType, gameMod, SOCKET_GAME_EVENT } from '../../common/types';
+import { BoolType, dataType, gameMod, playerType, SOCKET_GAME_EVENT, UserData } from '../../common/types';
 import { Row, Stack } from 'react-bootstrap';
 
 
@@ -16,12 +16,8 @@ type gameComponent = {
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	// Cluster
 	let CanvasWidth = 1200;
 	let CanvasHeight = 800;
-	// // Laptop
-	// let CanvasWidth = 600;
-	// let CanvasHeight = 400;
 
 	// const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
 	// const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
@@ -33,6 +29,8 @@ function Game({ mod }: gameComponent) {
 
 	const [startGame, setStartGame] :BoolType = useState<boolean>(false);
 	const [isWatch, setIsWatch] :BoolType = useState<boolean>(false);
+	const [isInfo, setIsInfo] :BoolType = useState<boolean>(false);
+	const [playerInfo, setPlayerInfo] = useState<playerType>();
 
 	let [data, setData] = useState<dataType>();
 
@@ -68,14 +66,31 @@ function Game({ mod }: gameComponent) {
 					setStartGame(true);
 				})
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
-				myGameSocket.socket.on('matching-success', () => {
-					console.log('매칭 성공');
+				myGameSocket.socket.on('matching-success', (data: any) => {
+					const PlayerInfo : playerType = {
+						p1 : {
+							intra: data.p1.intra,
+							usual_full_name : data.p1.usual_full_name,
+							nickname : data.p1.nickname,
+							phone : data.p1.phone,
+							verified : data.p1.verified,
+							avatarId : data.p1.avatarId,
+						},
+						p2 : {
+							intra: data.p2.intra,
+							usual_full_name : data.p2.usual_full_name,
+							nickname : data.p2.nickname,
+							phone : data.p2.phone,
+							verified : data.p2.verified,
+							avatarId : data.p2.avatarId,
+						}
+					}
+					setIsInfo(true);
+					setPlayerInfo(PlayerInfo);
 					setMatch(true);
-					console.log('ssersr3');
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
 					document.addEventListener('keydown', (e) => {
 						if (e.code === 'KeyR') {
-							console.log('rank ready!');
 							myGameSocket.socket.emit('ready-rank');
 						}
 					});
@@ -87,7 +102,6 @@ function Game({ mod }: gameComponent) {
 					if (e.code === 'KeyR') {
 						console.log('solo ready!');
 						myGameSocket.socket.emit(SOCKET_GAME_EVENT.SOLO_READY);
-						// myGameSocket.socket.emit('ready-solo');
 						setStartGame(true);
 					}
 				});
@@ -113,12 +127,25 @@ function Game({ mod }: gameComponent) {
 					rightScore : data.rightScore,
 				})
 			})
-			myGameSocket.socket.on('end-game', (res: boolean) => {
+			myGameSocket.socket.on('end-game', (p1win: boolean) => {
 				const ctx = canvas?.getContext("2d");
 				if (ctx) {
-					EndPage(ctx, CanvasWidth, CanvasHeight, res);
+					if (mod === gameMod.soloGame) {
+						if (p1win)
+							EndPage(ctx, CanvasWidth, CanvasHeight, "user");
+						else
+							EndPage(ctx, CanvasWidth, CanvasHeight, "com");
+					}
+					else {
+						if (p1win)
+							EndPage(ctx, CanvasWidth, CanvasHeight, "p1");
+						else
+							EndPage(ctx, CanvasWidth, CanvasHeight, "p2");
+					}
 					// 여기에 경기 결과 db에 업데이트 하는 코드 추가 (watch상태 아닐시에만)
-					// if (mod !== gameMod.watchGame)
+					if (mod !== gameMod.watchGame) {
+
+					}
 					killSockets(myGameSocket.socket);
 					myGameSocket.socket.emit('end-game');
 				}
@@ -143,7 +170,7 @@ function Game({ mod }: gameComponent) {
 
 		document.addEventListener('keydown', (e) => {
 			if (startGame) {
-			var code = e.code;
+	var code = e.code;
 
 			if (code === 'KeyS' && paddleDown === false) {
 				setPaddleDown(true);
@@ -239,15 +266,48 @@ function Game({ mod }: gameComponent) {
 		}
 	}
 
+	const styleEl = document.createElement('style');
+	styleEl.appendChild(document.createTextNode(styles));
+	document.head.appendChild(styleEl);
+
 	return (
 		<>
-			<Player mod={mod}></Player>
-			<canvas
-				ref={canvasRef}
-				width={CanvasWidth}
-				height={CanvasHeight}/>
+			{isInfo && (
+			<Player mod={mod} playerInfo={playerInfo} ></Player>
+			)}
+			<div className={isInfo ? 'canv2' : 'canv'}>
+				<canvas
+					className='border'
+					ref={canvasRef}
+					width={CanvasWidth}
+					height={CanvasHeight}/>
+			</div>
 		</>
 	);
 }
 
 export default Game;
+
+const styles = `
+.canv {
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+	align-items: center;
+	justify-content:center;
+	vertical-align: center;
+	height: 100%;
+}
+
+.canv2 {
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+	align-items: flex-start;
+	justify-content:center;
+	vertical-align: center;
+	height: 100%;
+	margin-top: 95px
+}
+
+`;

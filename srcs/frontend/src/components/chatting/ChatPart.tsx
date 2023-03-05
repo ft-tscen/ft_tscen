@@ -13,7 +13,7 @@ import {
 } from "../../common/types";
 import { useEffect, useState } from "react";
 import { ChatRoom } from "./ChatRoom";
-import { mySocket } from "../../common/MySocket";
+import { myGameSocket, mySocket } from "../../common/MySocket";
 import { InputMsg } from "./InputMsg";
 import { Channels } from "./Channels";
 
@@ -55,6 +55,7 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 	const enterGame = (dto: SocketOutputDto) => {
 		mySocket.enteredGameRoom = dto.target === undefined ? "" : dto.target;
 		setReceivedMsg(dto);
+		// 게임 소켓 사용해서 게임 서버에 전달.(채팅 소켓에서 게임 룸 바뀌었을때 변수 값 할당.)
 	};
 	const exitChannel = () => {
 		mySocket.socket.emit(

@@ -70,7 +70,7 @@ export class ChatGateway
   // 처음 접속시 user에 추가
   async handleConnection(@ConnectedSocket() socket: Socket) {
     const { nickname } = socket.handshake.query;
-    
+
     // 중복 접속 불허
     if (typeof nickname === 'string' && !this.users.has(nickname)) {
       const { user } = await this.userService.getUserByNickName(nickname);
