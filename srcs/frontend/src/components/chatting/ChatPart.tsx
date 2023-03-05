@@ -19,6 +19,7 @@ import { Channels } from "./Channels";
 
 type ArgsType = {
 	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
+	setEnteredChannel: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type MstList = [
@@ -32,7 +33,7 @@ type ReceivedMsg = [
 	>
 ];
 
-export default function ChatPart({ setInform }: ArgsType) {
+export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 	let [msgList, setMsgList]: MstList = useState<SocketOutputDto[]>([STARTMSG]);
 	let [receivedMsg, setReceivedMsg]: ReceivedMsg = useState<SocketOutputDto>();
 	let [flag, setFlag]: BoolType = useState<boolean>(SHOW_CHATROOM);
@@ -40,7 +41,14 @@ export default function ChatPart({ setInform }: ArgsType) {
 		useState<boolean>(LEAVE_CHANNEL);
 
 	const enterChannel = (dto: SocketOutputDto) => {
-		mySocket.enteredChannelName = dto.target === undefined ? "" : dto.target;
+		if (dto.target === undefined) {
+			mySocket.enteredGameRoom = "";
+			setEnteredChannel(false);
+		}
+		else {
+			mySocket.enteredGameRoom = dto.target;
+			setEnteredChannel(true);
+		}
 		setReceivedMsg(dto);
 	};
 	const enterGame = (dto: SocketOutputDto) => {

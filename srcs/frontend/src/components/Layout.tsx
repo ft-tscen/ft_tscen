@@ -8,6 +8,7 @@ import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
 import { gameMod, UserData } from "../common/types";
 import { useEffect, useState } from "react";
+import { mySocket } from "../common/MySocket";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -23,14 +24,13 @@ function Layout({
 	setChangedData,
 }: LayoutComponent) {
 	const [inform, setInform] = useState<UserData>();
+	const [enteredChannel, setEnteredChannel] = useState<boolean>(false);
 	const url = useParams();
 	const param = url["*"];
 
-	// console.log(inform);
-
 	const getComponent = () => {
 		if (param === "")
-			return <Home isLoggedIn={isLoggedIn} userData={userData} />;
+			return <Home isLoggedIn={isLoggedIn} userData={userData} enteredChannel={enteredChannel}/>;
 		else if (param === "profile")
 			return (
 				<Profile
@@ -70,7 +70,7 @@ function Layout({
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
 					<Col xs={3} className={getBorder()}>
-						{isLoggedIn && <ChatPart setInform={setInform} />}
+						{isLoggedIn && <ChatPart setInform={setInform} setEnteredChannel={setEnteredChannel}/>}
 					</Col>
 				</Row>
 			</Container>

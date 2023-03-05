@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -14,9 +13,10 @@ enum gameMod {
 type HomeComponent = {
 	isLoggedIn: boolean;
 	userData: UserData;
+	enteredChannel: boolean;
 };
 
-function Home({ isLoggedIn, userData }: HomeComponent) {
+function Home({ isLoggedIn, userData, enteredChannel }: HomeComponent) {
 	const navigate = useNavigate();
 
 	function gameModHandle(mode: gameMod) {
@@ -30,8 +30,11 @@ function Home({ isLoggedIn, userData }: HomeComponent) {
 	}
 
 	const isDisable = () => {
-		if (isLoggedIn && userData.verified) return false;
-		else return true;
+		console.log("asdf");
+		if (isLoggedIn && enteredChannel && userData.verified)
+			return false;
+		else
+			return true;
 	};
 	return (
 		<>
