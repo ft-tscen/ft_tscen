@@ -34,24 +34,9 @@ function Game({ mod }: gameComponent) {
 	const [startGame, setStartGame] :BoolType = useState<boolean>(false);
 	const [isWatch, setIsWatch] :BoolType = useState<boolean>(false);
 
-	const [playerInfo, setPlayerInfo] = useState<playerType>({
-		p1: {
-			intraID: "",
-			name: "",
-			nickName: "",
-			phone: "",
-			verified: false,
-			avatarId: 0,
-		},
-		p2: {
-			intraID: "",
-			name: "",
-			nickName: "",
-			phone: "",
-			verified: false,
-			avatarId: 0,
-		}
-	});
+	const [playerInfo, setPlayerInfo] = useState<playerType>();
+
+	const [lplayerInfo, setLPlayerInfo] = useState<UserData>();
 
 	let [data, setData] = useState<dataType>();
 
@@ -105,6 +90,14 @@ function Game({ mod }: gameComponent) {
 							verified : data.p2.verified,
 							avatarId : data.p2.avatarId,
 						}
+					})
+					setLPlayerInfo({
+						intraID: data.p1.intra,
+						name : data.p1.usual_full_name,
+						nickName : data.p1.nickname,
+						phone : data.p1.phone,
+						verified : data.p1.verified,
+						avatarId : data.p1.avatarId,
 					})
 					setMatch(true);
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
@@ -188,7 +181,7 @@ function Game({ mod }: gameComponent) {
 
 		document.addEventListener('keydown', (e) => {
 			if (startGame) {
-			var code = e.code;
+	var code = e.code;
 
 			if (code === 'KeyS' && paddleDown === false) {
 				setPaddleDown(true);
