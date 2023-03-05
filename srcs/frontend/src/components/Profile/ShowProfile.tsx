@@ -19,14 +19,6 @@ function ShowProfile({ userData, setEdit }: ShowProfileComponent) {
 					<Card.Body>
 						<Card.Title className="text-white">프로필</Card.Title>
 						<Form className="border-top p-4">
-							{/* <Form.Group className="mb-3" controlId="formAvatar">
-								<Form.Label className="text-white">프로필 사진</Form.Label>
-								<Form.Control
-									type="file"
-									placeholder="Intra ID"
-									className="bg-transparent text-white"
-								/>
-							</Form.Group> */}
 							<Form.Group className="mb-3" controlId="formIntraID">
 								<Form.Label className="text-white">인트라 ID</Form.Label>
 								<Form.Control
