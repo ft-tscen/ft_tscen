@@ -1,7 +1,7 @@
+import { useEffect, useState } from "react";
 import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { mySocket } from "../common/MySocket";
 import { UserData } from "../common/types";
 
 enum gameMod {
