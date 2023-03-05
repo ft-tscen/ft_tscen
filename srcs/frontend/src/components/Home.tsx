@@ -2,6 +2,7 @@ import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { mySocket } from "../common/MySocket";
+import { UserData } from "../common/types";
 
 enum gameMod {
 	normalGame,
@@ -12,9 +13,10 @@ enum gameMod {
 
 type HomeComponent = {
 	isLoggedIn: boolean;
+	userData: UserData;
 };
 
-function Home({ isLoggedIn }: HomeComponent) {
+function Home({ isLoggedIn, userData }: HomeComponent) {
 	const navigate = useNavigate();
 
 	function gameModHandle(mode: gameMod) {
@@ -27,6 +29,10 @@ function Home({ isLoggedIn }: HomeComponent) {
 		}
 	}
 
+	const isDisable = () => {
+		if (isLoggedIn && userData.verified) return false;
+		else return true;
+	};
 	return (
 		<>
 			<Container>
@@ -39,7 +45,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!isLoggedIn}
+							disabled={isDisable()}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.normalGame)}
 						>
@@ -54,7 +60,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!isLoggedIn && mySocket.enteredChannelName === ""}
+							disabled={isDisable()}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.rankGame)}
 						>
@@ -67,7 +73,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!isLoggedIn && mySocket.enteredChannelName === ""}
+							disabled={!isLoggedIn}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.soloGame)}
 						>

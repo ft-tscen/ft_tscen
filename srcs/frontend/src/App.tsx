@@ -4,11 +4,16 @@ import Layout from "./components/Layout";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { api } from "./axios/api";
 import { BoolType, UserData } from "./common/types";
-import { mySocket, myGameSocket, SetSocket, setGameSocket } from "./common/MySocket";
+import {
+	mySocket,
+	myGameSocket,
+	SetSocket,
+	setGameSocket,
+} from "./common/MySocket";
 
 function App() {
 	const navigate = useNavigate();
-	const [loggedIn, setLoggedIn] :BoolType = useState<boolean>(false);
+	const [loggedIn, setLoggedIn]: BoolType = useState<boolean>(false);
 	let [userData, setUserData] = useState<UserData>({
 		intraID: "",
 		name: "",
@@ -17,13 +22,13 @@ function App() {
 		verified: false,
 		avatarId: 0,
 	});
-	const [isChangedData, setChangedData] :BoolType = useState<boolean>(false);
+	const [isChangedData, setChangedData]: BoolType = useState<boolean>(false);
 
 	const getUserData = async () => {
 		try {
 			const res = await api.get("/user/me");
 			const { user } = res.data;
-			const data :UserData = {
+			const data: UserData = {
 				intraID: user.intra,
 				name: user.usual_full_name,
 				nickName: user.nickname,
@@ -42,7 +47,7 @@ function App() {
 		try {
 			const res = await api.get("/user/me");
 			const { user } = res.data;
-			const data :UserData = {
+			const data: UserData = {
 				intraID: user.intra,
 				name: user.usual_full_name,
 				nickName: user.nickname,
@@ -54,8 +59,7 @@ function App() {
 			setUserData(data);
 			mySocket === undefined && SetSocket(data.nickName);
 			myGameSocket === undefined && setGameSocket(data.nickName);
-			if (data.nickName === null && data.phone === null)
-				navigate("/profile");
+			if (data.nickName === null && data.phone === null) navigate("/profile");
 		} catch (e) {
 			setLoggedIn(false);
 			setUserData({

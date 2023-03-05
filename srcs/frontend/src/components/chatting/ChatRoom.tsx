@@ -5,14 +5,21 @@ import { Chat } from "./Chat";
 import "./Effect.css";
 
 type ArgsType = {
-    msgList :SocketOutputDto[],
-    enterGame : (dto: SocketOutputDto) => void,
-    setReceivedMsg :React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
-    setInform :React.Dispatch<React.SetStateAction<UserData>>
-}
+	msgList: SocketOutputDto[];
+	enterGame: (dto: SocketOutputDto) => void;
+	setReceivedMsg: React.Dispatch<
+		React.SetStateAction<SocketOutputDto | undefined>
+	>;
+	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
+};
 
-export function ChatRoom({msgList, enterGame, setReceivedMsg, setInform} :ArgsType) {
-    const chatWindow = useRef<HTMLDivElement>(null);
+export function ChatRoom({
+	msgList,
+	enterGame,
+	setReceivedMsg,
+	setInform,
+}: ArgsType) {
+	const chatWindow = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (chatWindow.current) {
@@ -20,18 +27,23 @@ export function ChatRoom({msgList, enterGame, setReceivedMsg, setInform} :ArgsTy
 		}
 	}, [msgList]);
 
-    return (
-        <Container
-            className="m-0 mt-auto p-0 Scrollable"
-            style={{ height:"75vmin" }}
-            ref={chatWindow}>
-            {
-                msgList.map((msg :SocketOutputDto, idx :number) => {
-                    return (
-                        <Chat key={idx} msg={msg} enterGame={enterGame} setReceivedMsg={setReceivedMsg} setInform={setInform}/>
-                    );
-                })
-            }
-        </Container>
-    );
+	return (
+		<Container
+			className="m-0 mt-auto p-0 Scrollable"
+			style={{ height: "75vmin" }}
+			ref={chatWindow}
+		>
+			{msgList.map((msg: SocketOutputDto, idx: number) => {
+				return (
+					<Chat
+						key={idx}
+						msg={msg}
+						enterGame={enterGame}
+						setReceivedMsg={setReceivedMsg}
+						setInform={setInform}
+					/>
+				);
+			})}
+		</Container>
+	);
 }
