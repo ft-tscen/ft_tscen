@@ -15,6 +15,7 @@ function App() {
 		nickName: "",
 		phone: "",
 		verified: false,
+		avatarId: 0,
 	});
 	const [imageDataUrl, setImageDataUrl] = useState<string>("");
 	const [isChangedData, setChangedData] :BoolType = useState<boolean>(false);
@@ -23,12 +24,13 @@ function App() {
 		try {
 			const res = await api.get("/user/me");
 			const { user } = res.data;
-			const data = {
+			const data :UserData = {
 				intraID: user.intra,
 				name: user.usual_full_name,
 				nickName: user.nickname,
 				phone: user.phone,
 				verified: user.verified,
+				avatarId: user.avatarId,
 			};
 			try {
 				const response = await api.get(`/user/avatar/${user.avatarId}`, {
@@ -54,12 +56,13 @@ function App() {
 		try {
 			const res = await api.get("/user/me");
 			const { user } = res.data;
-			const data = {
+			const data :UserData = {
 				intraID: user.intra,
 				name: user.usual_full_name,
 				nickName: user.nickname,
 				phone: user.phone,
 				verified: user.verified,
+				avatarId: user.avatarId,
 			};
 			try {
 				const response = await api.get(`/user/avatar/${user.avatarId}`, {
@@ -77,8 +80,6 @@ function App() {
 				setUserData(data);
 				mySocket === undefined && SetSocket(data.nickName);
 				myGameSocket === undefined && setGameSocket(data.nickName);
-				console.log(myGameSocket.name);
-				console.log(mySocket.name);
 				if (data.nickName === null && data.phone === null)
 					navigate("/profile");
 			}
@@ -90,6 +91,7 @@ function App() {
 				nickName: "",
 				phone: "",
 				verified: false,
+				avatarId: 0,
 			});
 		}
 	};

@@ -123,7 +123,7 @@ export class ChatGateway
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
     const { author, target } = input;
-    //const { user } = this.users.get(this.sockets.get(author));
+    const { user } = this.users.get(this.sockets.get(author));
 
     if (author !== target) {
       if (this.channels.has(target)) {

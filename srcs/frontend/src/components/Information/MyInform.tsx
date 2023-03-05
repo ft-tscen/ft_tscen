@@ -1,21 +1,33 @@
+import { useEffect, useState } from "react";
 import { Container, Col, Row, Image, Card, Stack, Form } from "react-bootstrap";
+import { api } from "../../axios/api";
+import { UserData } from "../../common/types";
 
 type InformComponent = {
-	userData: {
-		intraID: string;
-		name: string;
-		nickName: string;
-		phone: string;
-		verified: boolean;
-	};
-	imageURL: string;
+	userData: UserData;
 };
 
-function MyInform({ userData, imageURL }: InformComponent) {
-	const getAvatar = () => {
-		if (imageURL === "") return "./profile.jpeg";
-		else return imageURL;
+function MyInform({ userData }: InformComponent) {
+	const [imageURL, setImageURL] = useState("");
+
+	const getAvatar = async () => {
+		try {
+			const response = await api.get(`/user/avatar/${userData.avatarId}`, {
+				responseType: "arraybuffer",
+			});
+			const arrayBufferView = new Uint8Array(response.data);
+			const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+			const urlCreator = window.URL || window.webkitURL;
+			const imageUrl = urlCreator.createObjectURL(blob);
+			setImageURL(imageUrl);
+		} catch (e) {
+			setImageURL("./profile.jpeg");
+		}
 	};
+
+	useEffect(() => {
+		getAvatar();
+	}, []);
 	return (
 		<>
 			<Stack gap={5} className="mt-5" style={{ height: "40vmin" }}>
@@ -23,7 +35,7 @@ function MyInform({ userData, imageURL }: InformComponent) {
 					<Row>
 						<Col className="d-flex justify-content-center align-items-center">
 							<Image
-								src={getAvatar()}
+								src={imageURL}
 								roundedCircle
 								style={{ width: "15vmin" }}
 							/>

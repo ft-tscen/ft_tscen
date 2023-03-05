@@ -1,11 +1,15 @@
 import { ChatMenuBar } from "./ChatMenuBar";
 import { GameRooms } from "./GameRooms";
-import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, STARTMSG, SOCKET_EVENT, BoolType } from "../../common/types"
+import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, STARTMSG, SOCKET_EVENT, BoolType, UserData } from "../../common/types"
 import { useEffect, useState } from "react";
 import { ChatRoom } from "./ChatRoom";
 import { mySocket} from "../../common/MySocket";
 import { InputMsg } from "./InputMsg";
 import { Channels } from "./Channels";
+
+type ArgsType = {
+    setInform :React.Dispatch<React.SetStateAction<UserData>>
+}
 
 type MstList = [
     msgList :SocketOutputDto[],
@@ -16,7 +20,7 @@ type ReceivedMsg = [
     setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>
 ];
 
-export default function ChatPart() {
+export default function ChatPart({setInform} :ArgsType) {
     let [msgList, setMsgList] :MstList = useState<SocketOutputDto[]>([STARTMSG]);
     let [receivedMsg, setReceivedMsg] :ReceivedMsg = useState<SocketOutputDto>();
     let [flag, setFlag] : BoolType = useState<boolean>(SHOW_CHATROOM);
@@ -44,6 +48,12 @@ export default function ChatPart() {
     const connectFriendMsg = (dto :SocketOutputDto) => {
         dto.type = SOCKET_EVENT.BEFRIEND;
         setReceivedMsg(dto)};
+    const getOtherProfile = (dto :SocketOutputDto) => {
+        if (dto.author === "server")
+            setReceivedMsg(dto);
+        else
+            dto.user && setInform(dto.user);
+    }
 
     useEffect(() => {
         mySocket.enteredChannelName === "" ? setEnterChannelFlag(LEAVE_CHANNEL) : setEnterChannelFlag(ENTER_CHANNEL);
@@ -79,14 +89,15 @@ export default function ChatPart() {
             {
                 flag === SHOW_OTHER
                 ? (enterChannelFlag === ENTER_CHANNEL ? <GameRooms enterGame={enterGame}/> : <Channels enterChannel={enterChannel}/>)
-                : <ChatRoom msgList={msgList} enterGame={enterGame} setReceivedMsg={setReceivedMsg}/>
+                : <ChatRoom msgList={msgList} enterGame={enterGame} setReceivedMsg={setReceivedMsg} setInform={setInform}/>
             }
             {
                 flag === SHOW_CHATROOM
                 && <InputMsg setReceivedMsg={setReceivedMsg}
                             enterChannel={enterChannel}
                             setDMMsg={setDMMsg}
-                            setInviteMsg={setInviteMsg}/>
+                            setInviteMsg={setInviteMsg}
+                            getOtherProfile={getOtherProfile}/>
             }
         </>
 	);
