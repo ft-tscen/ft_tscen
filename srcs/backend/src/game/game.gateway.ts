@@ -99,10 +99,12 @@ export class GamesGateway
 	const gameDto = GameDtoByRoomName[roomName];
 
 	if (roomName && gameDto) {
-		if (gameDto.p1.socket.id != socket.id)
+		if (gameDto.p1.socket.id != socket.id) {
 			this.gameService.finishGame(gameDto, true)
-		else
+		}
+		else {
 			this.gameService.finishGame(gameDto, false)
+		}
 	}
 	if (waitingPlayer.socket && socket.id == waitingPlayer.socket.id)
 		waitingPlayer.waiting = false;
@@ -209,10 +211,10 @@ export class GamesGateway
 		waitingPlayer.socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
 
 		const p1 = await this.userService.getUserByNickName(
-			NicknameBySocketId[Game.p1.socket.id]
+			Game.p1.name
 		);
 		const p2 = await this.userService.getUserByNickName(
-			NicknameBySocketId[Game.p2.socket.id]
+			Game.p2.name
 		);
 
 		const playerInfo = {

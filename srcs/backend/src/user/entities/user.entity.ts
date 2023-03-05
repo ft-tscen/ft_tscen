@@ -29,6 +29,18 @@ export class User extends BaseEntity {
   @Column({ nullable: true, select: false })
   code?: string;
 
+  @Column({ default: 0, nullable: true })
+  f_win: number;
+
+  @Column({ default: 0, nullable: true })
+  f_lose: number;
+
+  @Column({ default: 0, nullable: true })
+  r_win: number;
+
+  @Column({ default: 0, nullable: true })
+  r_lose: number;
+
   @JoinColumn({ name: 'avatarId' })
   @OneToOne(() => Avatar, { nullable: true, onDelete: 'SET NULL', })
   public avatar?: Avatar;

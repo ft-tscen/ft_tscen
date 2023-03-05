@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Socket, Namespace } from 'socket.io';
-import type { GameDto } from './dtos/game.dto';
+import { UserService } from 'src/user/user.service';
+import { Repository } from 'typeorm';
+import type { GameDto, HistoryOutput } from './dtos/game.dto';
 import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
+import { History } from './entities/history.entity';
 
 //  Dto에 필요한 변수 : score, ball_x, ball_velocityX, ball_y, ball_velocityY, left_padle_y, right_padle_y, roomName
 // Cluster
@@ -15,6 +19,58 @@ const VictoryScore = 2;
 
 @Injectable()
 export class GameService {
+	constructor(
+		@InjectRepository(History) private readonly histories: Repository<History>,
+		private readonly userService: UserService
+		) {}
+
+	async createHistory(winner: string, loser: string, type: gameMod)
+	: Promise<HistoryOutput> {
+		try {
+			const existed = await this.histories.findOne({
+				where: {winner, loser, type},
+			});
+			if (existed)
+				return {ok: false, error: 'There is a History already'};
+			const history = await this.histories.save(
+				this.histories.create({ winner, loser, type})
+			);
+			return { ok: true, history };
+		} catch (error) {
+			return {ok: false, error: 'createHistory Error'};
+		}
+	}
+
+	async getWinHistory(winner: string): Promise<HistoryOutput> {
+		try {
+			const win_history = await this.histories.findOne({
+				where: { winner },
+			});
+			if (win_history)
+				return {ok: true, history: win_history};
+			return {ok: false, error: 'History not Found'};
+		} catch (error) {
+			return {ok: false, error: 'getWinHistory Error'};
+		}
+	}
+
+	async getLoseHistory(loser: string): Promise<HistoryOutput> {
+		try {
+			const lose_history = await this.histories.findOne({
+				where: { loser },
+			});
+			if (lose_history)
+				return {ok: true, history: lose_history};
+			return {ok: false, error: 'History not Found'};
+		} catch (error) {
+			return {ok: false, error: 'getloseHistory Error'};
+		}
+	}
+
+	async deleteHistory(id: number) {
+		await this.histories.delete(id);
+	}
+
     init_test(p1: Socket, roomName: string, GameMod: gameMod): GameDto {
     const params: GameDto = <GameDto>{
       roomName: roomName,
@@ -265,20 +321,31 @@ export class GameService {
     }, 1000 / 45);
   }
 
-  finishGame(Game: GameDto, p1_win: boolean) {
+//  gameLoop_v2(Game: GameDto) {
+//    Game.interval = setInterval(() => {
+//      this.update_v2(Game);
+//    }, 1000 / 45);
+//  }
+
+  async finishGame(Game: GameDto, p1_win: boolean) {
 	if (p1_win) {
-		if (Game.nsp)
+		if (Game.gameMod != gameMod.soloGame) {
+			let res = await this.createHistory(Game.p1.name, Game.p2.name, Game.gameMod);
+			res = await this.userService.winGame(Game.p1.name, Game.gameMod);
+			res = await this.userService.loseGame(Game.p2.name, Game.gameMod);
 			Game.nsp.in(Game.roomName).emit('end-game', true);
-		else if (Game.gameMod == gameMod.soloGame)
-      Game.p1.socket.emit('end-game', true);
-    else
+		}
+		else {
 			Game.p1.socket.emit('end-game', true);
+		}
 	}
 	else {
-		if (Game.nsp)
+		if (Game.gameMod != gameMod.soloGame) {
+			let res = await this.createHistory(Game.p2.name, Game.p1.name, Game.gameMod);
+			res = await this.userService.winGame(Game.p2.name, Game.gameMod);
+			res = await this.userService.loseGame(Game.p1.name, Game.gameMod);
 			Game.nsp.in(Game.roomName).emit('end-game', false);
-    else if (Game.gameMod == gameMod.soloGame)
-      Game.p1.socket.emit('end-game', false);
+		}
 		else
 			Game.p1.socket.emit('end-game', false);
 	}

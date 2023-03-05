@@ -3,6 +3,7 @@ import {
   Column,
   Entity,
 } from 'typeorm';
+import { gameMod } from 'src/game/dtos/game.dto';
 
 @Entity('histories')
 export class History extends BaseEntity {
@@ -13,5 +14,5 @@ export class History extends BaseEntity {
   loser: string;
 
   @Column({ unique: true })
-  type: string;
+  type: gameMod;
 }
