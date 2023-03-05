@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { mySocket } from "../common/MySocket";
+import { BoolType } from "../common/types";
 
 enum gameMod {
 	normalGame,
@@ -16,6 +18,7 @@ type HomeComponent = {
 
 function Home({ isLoggedIn }: HomeComponent) {
 	const navigate = useNavigate();
+	const [active, setActive] :BoolType = useState<boolean>(false);
 
 	function gameModHandle(mode: gameMod) {
 		if (mode === gameMod.normalGame) {
@@ -26,6 +29,18 @@ function Home({ isLoggedIn }: HomeComponent) {
 			navigate("/soloGame");
 		}
 	}
+
+	useEffect(() => {
+		if (isLoggedIn && mySocket !== undefined && mySocket.enteredChannelName !== "")
+		{
+			console.log(mySocket.enteredChannelName);
+			setActive(true);
+		}
+		else {
+			mySocket && console.log(mySocket.enteredChannelName);
+			setActive(false);
+		}
+	}, []);
 
 	return (
 		<>
@@ -39,7 +54,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!isLoggedIn}
+							disabled={!active}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.normalGame)}
 						>
@@ -54,7 +69,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!isLoggedIn && mySocket.enteredChannelName === ""}
+							disabled={!active}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.rankGame)}
 						>
@@ -67,7 +82,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!isLoggedIn && mySocket.enteredChannelName === ""}
+							disabled={!isLoggedIn}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.soloGame)}
 						>
