@@ -75,7 +75,7 @@ export function InputMsg({
 					enteredMSG.message = text;
 					mySocket.socket.emit(SOCKET_EVENT.DM, enteredMSG, setDMMsg);
 					break;
-				case "/INVITE": // 보류
+				case "/INVITE":
 					if (words.length !== 2) {
 						setReceivedMsg({
 							author: "server",
@@ -87,7 +87,7 @@ export function InputMsg({
 					}
 					// MySocket.instance.emit(SOCKET_EVENT.INVITE, enteredMSG);
 					break;
-				case "/PROFILE": // 보류
+				case "/PROFILE":
 					if (words.length !== 2) {
 						setReceivedMsg({
 							author: "server",

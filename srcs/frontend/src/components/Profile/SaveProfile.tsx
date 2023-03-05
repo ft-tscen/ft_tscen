@@ -19,7 +19,7 @@ function SaveProfile({
 }: SaveProfileComponent) {
 	const navigate = useNavigate();
 	const [file, setFile] = useState<string | Blob>();
-	const [nick_name, setNickName] = useState(userData.nickName || "");
+	const [nick_name, setNickName] = useState(userData.nickname || "");
 	const [phone_number, setPhoneNumber] = useState(userData.phone || "");
 	const [isDuplicated, setDuplicated] = useState("no_check");
 	const [isCertificated, setCertificated] = useState(
@@ -32,7 +32,7 @@ function SaveProfile({
 		if (nick_name === null || nick_name === "" || nick_name === undefined)
 			return;
 		else {
-			if (userData.nickName === nick_name) setDuplicated("same");
+			if (userData.nickname === nick_name) setDuplicated("same");
 			else {
 				try {
 					const res = await api.get(`/user/check?nickname=${nick_name}`);
@@ -100,7 +100,7 @@ function SaveProfile({
 		if (
 			isDuplicated === "same" ||
 			isDuplicated === "false" ||
-			nick_name === userData.nickName
+			nick_name === userData.nickname
 		) {
 			try {
 				await api.patch("/user/update", {
@@ -146,7 +146,7 @@ function SaveProfile({
 									type="text"
 									placeholder="Intra ID"
 									className="bg-transparent text-white"
-									value={`${userData.intraID}`}
+									value={`${userData.intra}`}
 									disabled
 								/>
 							</Form.Group>
@@ -156,7 +156,7 @@ function SaveProfile({
 									type="text"
 									placeholder="Name"
 									className="bg-transparent text-white"
-									value={`${userData.name}`}
+									value={`${userData.usual_full_name}`}
 									disabled
 								/>
 							</Form.Group>

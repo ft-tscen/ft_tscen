@@ -42,12 +42,13 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 
 	const enterChannel = (dto: SocketOutputDto) => {
 		if (dto.target === undefined) {
-			mySocket.enteredGameRoom = "";
+			mySocket.enteredChannelName = "";
 			setEnteredChannel(false);
 		}
 		else {
-			mySocket.enteredGameRoom = dto.target;
+			mySocket.enteredChannelName = dto.target;
 			setEnteredChannel(true);
+			setEnterChannelFlag(ENTER_CHANNEL);
 		}
 		setReceivedMsg(dto);
 	};
@@ -63,6 +64,7 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 			setReceivedMsg
 		);
 		mySocket.enteredChannelName = "";
+		setEnteredChannel(false);
 		setEnterChannelFlag(LEAVE_CHANNEL);
 	};
 	const setDMMsg = (dto: SocketOutputDto) => {
@@ -78,8 +80,10 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 		setReceivedMsg(dto);
 	};
 	const getOtherProfile = (dto: SocketOutputDto) => {
-		if (dto.author === "server") setReceivedMsg(dto);
-		else dto.user && setInform(dto.user);
+		if (dto.user) {
+			dto.user && setInform(dto.user);
+			setReceivedMsg(dto);
+		}
 	};
 
 	useEffect(() => {

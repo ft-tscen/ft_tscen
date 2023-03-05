@@ -7,8 +7,7 @@ import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
 import { gameMod, UserData } from "../common/types";
-import { useEffect, useState } from "react";
-import { mySocket } from "../common/MySocket";
+import { useState } from "react";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -53,18 +52,13 @@ function Layout({
 		else return "";
 	};
 
-	// useEffect(() => {
-	// 	console.log("hi");
-	// 	setInform(userData);
-	// }, []);
-
 	return (
 		<>
 			<Container fluid style={{ height: "90vmin" }}>
 				<Row style={{ height: "90vmin" }}>
 					<Col xs={3} className={getBorder()}>
-						{userData.nickName === null || !isLoggedIn ? null : (
-							<MyInform inform={inform ?? userData} />
+						{userData.nickname === null || !isLoggedIn ? null : (
+							<MyInform inform={inform ?? userData} setInform={setInform} myData={userData}/>
 							// <OtherInform userData={userData} imageURL={imageURL} />
 						)}
 					</Col>

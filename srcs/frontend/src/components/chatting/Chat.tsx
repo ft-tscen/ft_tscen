@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Row, Image, OverlayTrigger, Popover } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import { api } from "../../axios/api";
@@ -24,6 +24,30 @@ export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
 	let [isFriend, setIsFriend]: BoolType = useState<boolean>(false);
 	let [show, setShow]: BoolType = useState<boolean>(false);
 	let [active, setActive]: BoolType = useState<boolean>(true);
+	const [imageDataUrl, setImageDataUrl] = useState<string>();
+
+	const getUserData = async () => {
+		if (msg.user?.avatarId) {
+			await api
+				.get(`/user/avatar/${msg.user?.avatarId}`, { responseType: "arraybuffer" })
+				.then((response) => {
+					const arrayBufferView = new Uint8Array(response.data);
+					const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+					const urlCreator = window.URL || window.webkitURL;
+					const imageUrl = urlCreator.createObjectURL(blob);
+					setImageDataUrl(imageUrl);
+				})
+				.catch((error) => console.error(error));
+		}
+		else {
+			setImageDataUrl("./Anonymous.jpeg");
+		}
+	};
+	useEffect(() => {
+		if (msg.author !== 'server' && msg.author !== mySocket.name)
+			getUserData();
+	}, []);
+
 	if (msg.author === "server") {
 		return (
 			<Row className="m-0 p-0 pb-1 h-auto text-left justify-content-center">
@@ -55,7 +79,6 @@ export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
 		};
 		const showProfile = () => {
 			msg.user && setInform(msg.user);
-			console.log("누른 상대 프로필 보기");
 			setShow(false);
 		};
 		const joinGame = () => {
@@ -133,7 +156,7 @@ export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
 						>
 							<Image
 								roundedCircle
-								src="/img/Anonymous.jpeg"
+								src={imageDataUrl ?? "/img/Anonymous.jpeg"}
 								style={{ width: "50px", height: "50px" }}
 								className="p-0 me-2"
 								onClick={checkFriend}

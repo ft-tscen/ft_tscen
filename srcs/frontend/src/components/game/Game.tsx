@@ -69,17 +69,17 @@ function Game({ mod }: gameComponent) {
 				myGameSocket.socket.on('matching-success', (data: any) => {
 					const PlayerInfo : playerType = {
 						p1 : {
-							intraID: data.p1.intra,
-							name : data.p1.usual_full_name,
-							nickName : data.p1.nickname,
+							intra: data.p1.intra,
+							usual_full_name : data.p1.usual_full_name,
+							nickname : data.p1.nickname,
 							phone : data.p1.phone,
 							verified : data.p1.verified,
 							avatarId : data.p1.avatarId,
 						},
 						p2 : {
-							intraID: data.p2.intra,
-							name : data.p2.usual_full_name,
-							nickName : data.p2.nickname,
+							intra: data.p2.intra,
+							usual_full_name : data.p2.usual_full_name,
+							nickname : data.p2.nickname,
 							phone : data.p2.phone,
 							verified : data.p2.verified,
 							avatarId : data.p2.avatarId,

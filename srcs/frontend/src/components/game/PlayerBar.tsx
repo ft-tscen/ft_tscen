@@ -23,8 +23,8 @@ function Player({ mod, playerInfo }: gameComponent) {
 	if (mod !== gameMod.soloGame) {
 		const getLPlayer = async () => {
 			let name;
-			if (playerInfo?.p1.nickName)
-				name = playerInfo?.p1.nickName;
+			if (playerInfo?.p1.nickname)
+				name = playerInfo?.p1.nickname;
 			else
 				name = "user";
 			if (playerInfo?.p1.avatarId) {
@@ -48,8 +48,8 @@ function Player({ mod, playerInfo }: gameComponent) {
 
 		const getRPlayer = async () => {
 			let name;
-			if (playerInfo?.p2.nickName)
-				name = playerInfo?.p2.nickName;
+			if (playerInfo?.p2.nickname)
+				name = playerInfo?.p2.nickname;
 			else
 				name = "user";
 			if (playerInfo?.p2.avatarId) {

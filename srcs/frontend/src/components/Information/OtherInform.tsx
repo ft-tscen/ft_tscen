@@ -47,7 +47,7 @@ function OtherInform({ userData, imageURL }: InformComponent) {
 										type="text"
 										placeholder="Intra ID"
 										className="bg-transparent text-white"
-										value={`${userData.intraID}`}
+										value={`${userData.intra}`}
 										disabled
 									/>
 								</Form.Group>
@@ -57,7 +57,7 @@ function OtherInform({ userData, imageURL }: InformComponent) {
 										type="text"
 										placeholder="Name"
 										className="bg-transparent text-white"
-										value={`${userData.name}`}
+										value={`${userData.usual_full_name}`}
 										disabled
 									/>
 								</Form.Group>
@@ -69,7 +69,7 @@ function OtherInform({ userData, imageURL }: InformComponent) {
 												type="text"
 												placeholder="Nickname"
 												className="bg-transparent text-white"
-												value={userData.nickName}
+												value={userData.nickname}
 												disabled
 											/>
 										</Form.Group>

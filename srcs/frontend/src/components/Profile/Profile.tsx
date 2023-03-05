@@ -22,7 +22,7 @@ function Profile({
 	useEffect(() => {}, [edit]);
 
 	if (isLoggedIn) {
-		if (edit === true || userData.nickName === null) {
+		if (edit === true || userData.nickname === null) {
 			return (
 				<SaveProfile
 					userData={userData}
