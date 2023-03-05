@@ -15,6 +15,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UserService } from 'src/user/user.service';
 import { GameDto, gameMod } from './dtos/game.dto';
 import { GameService } from './game.service';
+import * as bcrypt from 'bcrypt';
 
 //export class GameRoom {
 //  nsp: Namespace;
@@ -108,6 +109,18 @@ export class GamesGateway
 	}
 	if (waitingPlayer.socket && socket.id == waitingPlayer.socket.id)
 		waitingPlayer.waiting = false;
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    return hashedPassword;
+  }
+  
+  async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+    const isMatch = await bcrypt.compare(password, hashedPassword);
+    return isMatch;
   }
 
   @SubscribeMessage('nickname')
@@ -304,7 +317,7 @@ export class GamesGateway
   }
 
   @SubscribeMessage('create-room')
-  handleCreateRoom(
+  async handleCreateRoom(
     @ConnectedSocket() socket: Socket,
     @MessageBody() roomName: string,
     @MessageBody() password: string
@@ -323,7 +336,7 @@ export class GamesGateway
 	);
 	if (password) {
 		Game.gameMod = gameMod.passwordGame;
-		Game.password = password;
+		Game.password = await this.hashPassword(password);
 	}
 	GameDtoByRoomName[roomName] = Game;
 
@@ -335,6 +348,7 @@ export class GamesGateway
 
     return { success: true, payload: roomName };
   }
+
 
   @SubscribeMessage('join-room')
   async handleEnterRoom(
@@ -348,7 +362,8 @@ export class GamesGateway
     }
 
 	const Game: GameDto =  GameDtoByRoomName[roomName];
-	if (Game.gameMod === gameMod.passwordGame && Game.password !== password) {
+  const isMatch = await this.verifyPassword(password, Game.password);
+	if (Game.gameMod === gameMod.passwordGame && !isMatch) {
 		return { success: false, payload: `${roomName} password wrong!` };
 	}
 
