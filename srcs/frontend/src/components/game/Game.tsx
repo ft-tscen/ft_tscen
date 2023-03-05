@@ -36,6 +36,8 @@ function Game({ mod }: gameComponent) {
 	const [isInfo, setIsInfo] :BoolType = useState<boolean>(false);
 
 	//const [playerInfo, setPlayerInfo] = useState<playerType>();
+	const [playerInfo, setPlayerInfo] = useState<playerType>();
+
 	const [lplayerInfo, setLPlayerInfo] = useState<UserData>();
 
 	let [data, setData] = useState<dataType>();
@@ -198,7 +200,7 @@ function Game({ mod }: gameComponent) {
 
 		document.addEventListener('keydown', (e) => {
 			if (startGame) {
-			var code = e.code;
+	var code = e.code;
 
 			if (code === 'KeyS' && paddleDown === false) {
 				setPaddleDown(true);
