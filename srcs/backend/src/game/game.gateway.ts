@@ -10,9 +10,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { subscribeOn } from 'rxjs';
 import { Namespace, Socket } from 'socket.io';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UserService } from 'src/user/user.service';
 import { GameDto, gameMod } from './dtos/game.dto';
 import { GameService } from './game.service';
 
@@ -60,7 +60,7 @@ const waitingPlayer: WaitingPlayer = {
 export class GamesGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private gameService: GameService) {}
+  constructor(private gameService: GameService, private userService: UserService) {}
   private logger = new Logger('Game Gateway');
 
   @WebSocketServer() nsp: Namespace;
@@ -71,26 +71,19 @@ export class GamesGateway
 		const deletedRoom = createdRooms.find(
 			(createdRoom) => createdRoom === roomName,
 		);
-		if (!deletedRoom) return { success: false, payload: `${roomName} room already existed!` };
+		if (!deletedRoom) return { success: false, payload: `${roomName} not found!` };
 
 		this.nsp.emit('delete-room', deletedRoom);
 		createdRooms = createdRooms.filter(
 			(createdRoom) => createdRoom !== deletedRoom,
 		); // 유저가 생성한 room 목록 중에 삭제되는 room 있으면 제거
+		return { success: true, payload: `${roomName} deleted!` };
     });
 
     this.logger.log('+=+=+=+=+=+= WebSever init Success +=+=+=+=+=+=');
   }
 
   handleConnection(@ConnectedSocket() socket: Socket) {
-	//const { nickname } = socket.handshake.query;
-	//this.logger.log(socket.handshake);
-	//this.logger.log(test);
-	//NicknameBySocketId[socket.id] = nickname;
-
-	//if (NicknameBySocketId[socket.id] == undefined)
-	//	NicknameBySocketId[socket.id] = socket.id;
-
 	this.logger.log(`${socket.id} +=+=+=+=+=+= Socket Connected +=+=+=+=+=+=`);
   }
 
@@ -113,13 +106,13 @@ export class GamesGateway
 	}
 	if (waitingPlayer.socket && socket.id == waitingPlayer.socket.id)
 		waitingPlayer.waiting = false;
-
   }
 
   @SubscribeMessage('nickname')
   handleNickname(@ConnectedSocket() socket: Socket, @MessageBody() nickname: string) {
 	this.logger.log(`Nickname Registration ${nickname}`);
 	NicknameBySocketId[socket.id] = nickname;
+	return { success: true, payload: `${nickname} change success!` };
   }
 
   @SubscribeMessage('test')
@@ -145,6 +138,7 @@ export class GamesGateway
 		dto.p1.padleUp = true;
 	else
 		dto.p2.padleUp = true;
+	return { success: true, payload: `Paddle Up` };
   }
 
   @SubscribeMessage('PaddleDown')
@@ -155,6 +149,7 @@ export class GamesGateway
     	dto.p1.padleDown = true;
 	else
     	dto.p2.padleDown = true;
+	return { success: true, payload: `Paddle Down` };
   }
 
   @SubscribeMessage('PaddleStop')
@@ -171,6 +166,7 @@ export class GamesGateway
 		dto.p2.padleUp = false;
 		dto.p2.padleDown = false;
 	}
+	return { success: true, payload: `Paddle Stop` };
   }
 
   @SubscribeMessage('room-list')
@@ -178,14 +174,14 @@ export class GamesGateway
     return createdRooms;
   }
 
-  @SubscribeMessage('friendly-match')
-  handleFriendlyMatching(@ConnectedSocket() socket: Socket,
-  @MessageBody() roomName: string) {
+//  @SubscribeMessage('friendly-match')
+//  handleFriendlyMatching(@ConnectedSocket() socket: Socket,
+//  @MessageBody() roomName: string) {
 
-  }
+//  }
 
   @SubscribeMessage('matching')
-  handleMatching(@ConnectedSocket() socket: Socket) {
+  async handleMatching(@ConnectedSocket() socket: Socket) {
 	const nickname = NicknameBySocketId[socket.id];
 
 	if (waitingPlayer.waiting) {
@@ -200,8 +196,8 @@ export class GamesGateway
 			gameMod.rankGame, // game mod
 			this.nsp,
 		);
-		Game.p2.name = socket.id;
 		Game.p2.socket = socket;
+		Game.p2.name = nickname;
 		GameDtoByRoomName[roomName] = Game;
 
 		createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
@@ -212,7 +208,19 @@ export class GamesGateway
 		socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
 		waitingPlayer.socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
 
-		this.nsp.emit('matching-success'); // 대기실 방 생성을 연결된 클라들에게 알림
+		const p1 = await this.userService.getUserByNickName(
+			NicknameBySocketId[Game.p1.socket.id]
+		);
+		const p2 = await this.userService.getUserByNickName(
+			NicknameBySocketId[Game.p2.socket.id]
+		);
+
+		const playerInfo = {
+			p1: p1.user,
+			p2: p2.user,
+		};
+
+		this.nsp.emit('matching-success', playerInfo); // 대기실 방 생성을 연결된 클라들에게 알림
 		this.logger.log('matching success!!!');
 
 		waitingPlayer.waiting = false;
@@ -228,8 +236,8 @@ export class GamesGateway
   @SubscribeMessage('ready-rank')
   handleReadyRank(@ConnectedSocket() socket: Socket) {
 	const roomName = RoomNameBySocketId[socket.id];
-
 	const game: GameDto = GameDtoByRoomName[roomName];
+
 	if (game.p1Ready === true && game.p2Ready == true)
 		return { success: false, payload: `already started!` };
 
@@ -264,6 +272,7 @@ export class GamesGateway
     );
     GameDtoByRoomName[Game.roomName] = Game;
     RoomNameBySocketId[socket.id] = Game.roomName;
+	createdRooms.push(Game.roomName); // 유저가 생성한 room 목록에 추가
 
     this.gameService.gameLoop(GameDtoByRoomName[Game.roomName]);
   }
@@ -272,16 +281,24 @@ export class GamesGateway
   handleEndGame(@ConnectedSocket() socket: Socket) {
 	const roomName = RoomNameBySocketId[socket.id];
 	const gameDto = GameDtoByRoomName[roomName];
+	// RoomName, GameDto Map 초기화
 	if (roomName && gameDto) {
-		this.logger.log(RoomNameBySocketId[gameDto.p1.socket.id]);
 		RoomNameBySocketId[gameDto.p1.socket.id] = undefined;
-		this.logger.log(RoomNameBySocketId[gameDto.p1.socket.id]);
-		if (gameDto.gameMod != gameMod.soloGame) {
+		if (gameDto.gameMod != gameMod.soloGame)
 			RoomNameBySocketId[gameDto.p2.socket.id] = undefined;
-		}
 		GameDtoByRoomName[roomName] = undefined;
-		this.logger.log(`gameDto: ${GameDtoByRoomName[roomName]}`);
 	}
+	// createdRoom 배열 초기화
+	const deletedRoom = createdRooms.find(
+		(createdRoom) => createdRoom === roomName,
+	);
+	if (!deletedRoom) return { success: false, payload: `${roomName} not found!` };
+
+	this.nsp.emit('delete-room', deletedRoom);
+	createdRooms = createdRooms.filter(
+		(createdRoom) => createdRoom !== deletedRoom,
+	); // 유저가 생성한 room 목록 중에 삭제되는 room 있으면 제거
+	return { success: true, payload: `${roomName} deleted!` };
   }
 
   @SubscribeMessage('create-room')
@@ -317,8 +334,8 @@ export class GamesGateway
     return { success: true, payload: roomName };
   }
 
-  @SubscribeMessage('enter-room')
-  handleEnterRoom(
+  @SubscribeMessage('join-room')
+  async handleEnterRoom(
 	  @ConnectedSocket() socket: Socket,
 	  @MessageBody() roomName: string,
 	  @MessageBody() password: string,
@@ -333,12 +350,27 @@ export class GamesGateway
 		return { success: false, payload: `${roomName} password wrong!` };
 	}
 
+	if (Game.p2.name)
+		return { success: false, payload: `${NicknameBySocketId[socket.id]} is not player!` };
+
 	socket.join(roomName); // join room
 	RoomNameBySocketId[socket.id] = roomName;
-	Game.p2.name = socket.id;
 	Game.p2.socket = socket;
+	Game.p2.name = NicknameBySocketId[socket.id];
 
-	this.nsp.emit('matching-success');
+	const p1 = await this.userService.getUserByNickName(
+		NicknameBySocketId[Game.p1.socket.id]
+	);
+	const p2 = await this.userService.getUserByNickName(
+		NicknameBySocketId[Game.p2.socket.id]
+	);
+
+	const playerInfo = {
+		p1: p1.user,
+		p2: p2.user,
+	};
+
+	this.nsp.emit('matching-success', playerInfo);
 
 	return { success: true, payload: roomName };
   }

@@ -7,7 +7,7 @@ type gameComponent = {
 };
 
 interface player {
-	name: string;
+	name: string | undefined;
 	wins: number;
 	losses: number;
 }
@@ -19,19 +19,27 @@ function Player({ mod, playerInfo }: gameComponent) {
 	useEffect(() => {
 	if (mod !== gameMod.soloGame) {
 		const getLPlayer = () => {
-			const name = playerInfo?.p1.nickName;
+			let name;
+			if (playerInfo?.p1.nickName)
+				name = playerInfo?.p1.nickName;
+			else
+				name = "user";
 			const wins = 5;
 			const losses = 2;
 			setLPlayer({ name, wins, losses });
 		};
-	
+
 		const getRPlayer = () => {
-			const name = playerInfo?.p2.nickName;
+			let name;
+			if (playerInfo?.p2.nickName)
+				name = playerInfo?.p2.nickName;
+			else
+				name = "user";
 			const wins = 5;
 			const losses = 2;
 			setRPlayer({ name, wins, losses });
 		};
-	
+
 		getLPlayer();
 		getRPlayer();
 	}

@@ -33,27 +33,31 @@ function Game({ mod }: gameComponent) {
 
 	const [startGame, setStartGame] :BoolType = useState<boolean>(false);
 	const [isWatch, setIsWatch] :BoolType = useState<boolean>(false);
+	const [isInfo, setIsInfo] :BoolType = useState<boolean>(false);
 
-	const [playerInfo, setPlayerInfo] = useState<playerType>({
-		p1: {
-			intraID: "",
-			name: "",
-			nickName: "",
-			phone: "",
-			verified: false,
-			avatarId: 0,
-		},
-		p2: {
-			intraID: "",
-			name: "",
-			nickName: "",
-			phone: "",
-			verified: false,
-			avatarId: 0,
-		}
-	});
+	//const [playerInfo, setPlayerInfo] = useState<playerType>();
+	const [lplayerInfo, setLPlayerInfo] = useState<UserData>();
 
 	let [data, setData] = useState<dataType>();
+
+	let PlayerInfo : playerType = {
+		p1 : {
+			intraID:"",
+			name : "",
+			nickName : "",
+			phone : "",
+			verified : false,
+			avatarId : 0,
+		},
+		p2 : {
+			intraID:"",
+			name : "",
+			nickName : "",
+			phone : "",
+			verified : false,
+			avatarId : 0,
+		}
+	};
 
 	useEffect(()=> {
 		try {
@@ -87,8 +91,8 @@ function Game({ mod }: gameComponent) {
 					setStartGame(true);
 				})
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
-				myGameSocket.socket.on('matching-success', (data: playerType) => {
-					setPlayerInfo({
+				myGameSocket.socket.on('matching-success', (data: any) => {
+					PlayerInfo = {
 						p1 : {
 							intraID: data.p1.intra,
 							name : data.p1.usual_full_name,
@@ -105,7 +109,13 @@ function Game({ mod }: gameComponent) {
 							verified : data.p2.verified,
 							avatarId : data.p2.avatarId,
 						}
-					})
+					}
+
+					console.log(data);
+					console.log(PlayerInfo.p1);
+					console.log(PlayerInfo.p2);
+					console.log(data.p1.intra);
+					setIsInfo(true);
 					setMatch(true);
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
 					document.addEventListener('keydown', (e) => {
@@ -158,9 +168,9 @@ function Game({ mod }: gameComponent) {
 					}
 					else {
 						if (p1win)
-							EndPage(ctx, CanvasWidth, CanvasHeight, playerInfo?.p1.nickName);
+							EndPage(ctx, CanvasWidth, CanvasHeight, PlayerInfo.p1.nickName);
 						else
-							EndPage(ctx, CanvasWidth, CanvasHeight, playerInfo?.p2.nickName);
+							EndPage(ctx, CanvasWidth, CanvasHeight, PlayerInfo.p2.nickName);
 					}
 					// 여기에 경기 결과 db에 업데이트 하는 코드 추가 (watch상태 아닐시에만)
 					// if (mod !== gameMod.watchGame)
@@ -290,7 +300,9 @@ function Game({ mod }: gameComponent) {
 
 	return (
 		<>
-		<Player mod={mod} playerInfo={playerInfo} ></Player>
+		{isInfo && (
+			<Player mod={mod} playerInfo={PlayerInfo} ></Player>
+		)}
 		<Row className='canv border justify-content-md-center'>
 			<canvas
 				ref={canvasRef}

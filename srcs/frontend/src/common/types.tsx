@@ -17,7 +17,7 @@ export interface SocketInputDto {
     message?: string;
     password?: string;
 }
-  
+
 export interface SocketOutputDto {
     author?: string; // nickname
     target?: string; // nickname or channel name
