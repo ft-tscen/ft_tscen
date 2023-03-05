@@ -25,8 +25,8 @@ function SaveProfile({
 	const [isCertificated, setCertificated] = useState(
 		userData.verified || false
 	);
-	const [vcmShow, setVCModalShow] :BoolType = useState<boolean>(false);
-	const [cvomShow, setCVOModalShow] :BoolType = useState<boolean>(false);
+	const [vcmShow, setVCModalShow]: BoolType = useState<boolean>(false);
+	const [cvomShow, setCVOModalShow]: BoolType = useState<boolean>(false);
 
 	const checkDuplicate = async () => {
 		if (nick_name === null || nick_name === "" || nick_name === undefined)
@@ -80,6 +80,12 @@ function SaveProfile({
 
 	const handleFileChange = (e: any) => {
 		setFile(e.target.files[0]);
+	};
+
+	const handleChangeNickName = (e: any) => {
+		setNickName(e.target.value);
+		if (isDuplicated !== "no_check" && isDuplicated !== "same")
+			setDuplicated("no_check");
 	};
 
 	const handleSubmit = async () => {
@@ -163,7 +169,7 @@ function SaveProfile({
 											placeholder="Nickname"
 											className="bg-transparent text-white"
 											value={nick_name}
-											onChange={(e) => setNickName(e.target.value)}
+											onChange={handleChangeNickName}
 										/>
 									</Form.Group>
 								</Col>

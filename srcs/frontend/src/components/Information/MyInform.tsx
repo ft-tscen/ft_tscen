@@ -4,15 +4,16 @@ import { api } from "../../axios/api";
 import { UserData } from "../../common/types";
 
 type InformComponent = {
-	userData: UserData;
+	inform: UserData;
 };
 
-function MyInform({ userData }: InformComponent) {
+function MyInform({ inform }: InformComponent) {
+	// console.log(userData);
 	const [imageURL, setImageURL] = useState("");
 
 	const getAvatar = async () => {
 		try {
-			const response = await api.get(`/user/avatar/${userData.avatarId}`, {
+			const response = await api.get(`/user/avatar/${inform.avatarId}`, {
 				responseType: "arraybuffer",
 			});
 			const arrayBufferView = new Uint8Array(response.data);
@@ -34,11 +35,7 @@ function MyInform({ userData }: InformComponent) {
 				<Container>
 					<Row>
 						<Col className="d-flex justify-content-center align-items-center">
-							<Image
-								src={imageURL}
-								roundedCircle
-								style={{ width: "15vmin" }}
-							/>
+							<Image src={imageURL} roundedCircle style={{ width: "15vmin" }} />
 						</Col>
 					</Row>
 				</Container>
@@ -52,7 +49,7 @@ function MyInform({ userData }: InformComponent) {
 										type="text"
 										placeholder="Intra ID"
 										className="bg-transparent text-white"
-										value={`${userData.intraID}`}
+										value={inform.intraID}
 										disabled
 									/>
 								</Form.Group>
@@ -62,7 +59,7 @@ function MyInform({ userData }: InformComponent) {
 										type="text"
 										placeholder="Name"
 										className="bg-transparent text-white"
-										value={`${userData.name}`}
+										value={inform.name}
 										disabled
 									/>
 								</Form.Group>
@@ -74,7 +71,7 @@ function MyInform({ userData }: InformComponent) {
 												type="text"
 												placeholder="Nickname"
 												className="bg-transparent text-white"
-												value={userData.nickName}
+												value={inform.nickName}
 												disabled
 											/>
 										</Form.Group>

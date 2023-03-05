@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { mySocket } from "../common/MySocket";
-import { BoolType } from "../common/types";
+import { UserData } from "../common/types";
 
 enum gameMod {
 	normalGame,
@@ -14,11 +13,11 @@ enum gameMod {
 
 type HomeComponent = {
 	isLoggedIn: boolean;
+	userData: UserData;
 };
 
-function Home({ isLoggedIn }: HomeComponent) {
+function Home({ isLoggedIn, userData }: HomeComponent) {
 	const navigate = useNavigate();
-	const [active, setActive] :BoolType = useState<boolean>(false);
 
 	function gameModHandle(mode: gameMod) {
 		if (mode === gameMod.normalGame) {
@@ -30,18 +29,10 @@ function Home({ isLoggedIn }: HomeComponent) {
 		}
 	}
 
-	useEffect(() => {
-		if (isLoggedIn && mySocket !== undefined && mySocket.enteredChannelName !== "")
-		{
-			console.log(mySocket.enteredChannelName);
-			setActive(true);
-		}
-		else {
-			mySocket && console.log(mySocket.enteredChannelName);
-			setActive(false);
-		}
-	}, []);
-
+	const isDisable = () => {
+		if (isLoggedIn && userData.verified) return false;
+		else return true;
+	};
 	return (
 		<>
 			<Container>
@@ -54,7 +45,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!active}
+							disabled={isDisable()}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.normalGame)}
 						>
@@ -69,7 +60,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!active}
+							disabled={isDisable()}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.rankGame)}
 						>
