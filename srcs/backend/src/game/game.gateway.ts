@@ -286,7 +286,8 @@ export class GamesGateway
 	const gameDto = GameDtoByRoomName[roomName];
 	if (roomName && gameDto) {
 		RoomNameBySocketId.delete(gameDto.p1.socket.id);
-		RoomNameBySocketId.delete(gameDto.p2.socket.id);
+		if (gameDto.gameMod != gameMod.soloGame)
+			RoomNameBySocketId.delete(gameDto.p2.socket.id);
 		GameDtoByRoomName.delete(roomName);
 	}
   }

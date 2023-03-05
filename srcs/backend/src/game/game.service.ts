@@ -146,124 +146,121 @@ export class GameService {
     );
   }
 
-  private update(Game: GameDto) {
-    // ready 확인 추가 자리 //
-    if (Game.ball.x - Game.ball.radius < 0) {
-      Game.p2.score++;
-      this.resetBall(Game);
-    } else if (Game.ball.x + Game.ball.radius > CanvasWidth) {
-      Game.p1.score++;
-      this.resetBall(Game);
-    }
-    if (Game.p1.score >= VictoryScore) {
-		Game.p1.socket.emit('end-game', true);
-    if (Game.p2.socket)
-			Game.p2.socket.emit('end-game', false);
-		//Game.p2.socket.emit('end-game', false);
-		clearInterval(Game.interval);
-		return ;
-	}
-    else if (Game.p2.score >= VictoryScore) {
-		//Game.p2.socket.emit('end-game', true);
-		Game.p1.socket.emit('end-game', false);
-    if (Game.p2.socket)
-			Game.p2.socket.emit('end-game', true);
-		clearInterval(Game.interval);
-		return ;
-	}
-    // 패들 계산
-    this.paddleCalculate(Game);
-    // 공 계산
-    Game.ball.x += Game.ball.velocityX;
-    Game.ball.y += Game.ball.velocityY;
-    // soloMod
-    // if (Game.gameMod === gameMod.soloGame)
-    Game.p2.padleY +=
-      (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
-    const player =
-      Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? Game.p1 : Game.p2;
-    //  if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height)
-    //	ball.velocityY = -ball.velocityY;
-    if (
-      Game.ball.y + Game.ball.radius < 0 ||
-      Game.ball.y + Game.ball.radius > CanvasHeight
-    )
-      Game.ball.velocityY = -Game.ball.velocityY;
-    if (this.collision(Game, player)) {
-      let collidePoint = Game.ball.y - (player.padleY + player.padleH / 2);
-      collidePoint = collidePoint / (player.padleH / 2);
-      let angleRad = (Math.PI / 4) * collidePoint;
-      let direction =
-        Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? 1 : -1;
-      Game.ball.velocityX = direction * Game.ball.speed * Math.cos(angleRad);
-      Game.ball.velocityY = Game.ball.speed * Math.sin(angleRad);
-      Game.ball.speed += 1;
-    }
-    Game.front.leftPaddle = Game.p1.padleY;
-    Game.front.rightPaddle = Game.p2.padleY;
-    Game.front.ballX = Game.ball.x;
-    Game.front.ballY = Game.ball.y;
-    Game.front.leftScore = Game.p1.score;
-    Game.front.rightScore = Game.p2.score;
-    // render 호출하는 socket 추가
-    Game.p1.socket.emit('update', Game.front);
-  }
+//  private update(Game: GameDto) {
+//    // ready 확인 추가 자리 //
+//    if (Game.ball.x - Game.ball.radius < 0) {
+//      Game.p2.score++;
+//      this.resetBall(Game);
+//    } else if (Game.ball.x + Game.ball.radius > CanvasWidth) {
+//      Game.p1.score++;
+//      this.resetBall(Game);
+//    }
+//    if (Game.p1.score >= VictoryScore) {
+//		Game.p1.socket.emit('end-game', true);
+//    if (Game.p2.socket)
+//			Game.p2.socket.emit('end-game', false);
+//		//Game.p2.socket.emit('end-game', false);
+//		clearInterval(Game.interval);
+//		return ;
+//	}
+//    else if (Game.p2.score >= VictoryScore) {
+//		//Game.p2.socket.emit('end-game', true);
+//		Game.p1.socket.emit('end-game', false);
+//    if (Game.p2.socket)
+//			Game.p2.socket.emit('end-game', true);
+//		clearInterval(Game.interval);
+//		return ;
+//	}
+//    // 패들 계산
+//    this.paddleCalculate(Game);
+//    // 공 계산
+//    Game.ball.x += Game.ball.velocityX;
+//    Game.ball.y += Game.ball.velocityY;
+//    // soloMod
+//    // if (Game.gameMod === gameMod.soloGame)
+//    Game.p2.padleY +=
+//      (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
+//    const player =
+//      Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? Game.p1 : Game.p2;
+//    //  if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height)
+//    //	ball.velocityY = -ball.velocityY;
+//    if (
+//      Game.ball.y + Game.ball.radius < 0 ||
+//      Game.ball.y + Game.ball.radius > CanvasHeight
+//    )
+//      Game.ball.velocityY = -Game.ball.velocityY;
+//    if (this.collision(Game, player)) {
+//      let collidePoint = Game.ball.y - (player.padleY + player.padleH / 2);
+//      collidePoint = collidePoint / (player.padleH / 2);
+//      let angleRad = (Math.PI / 4) * collidePoint;
+//      let direction =
+//        Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? 1 : -1;
+//      Game.ball.velocityX = direction * Game.ball.speed * Math.cos(angleRad);
+//      Game.ball.velocityY = Game.ball.speed * Math.sin(angleRad);
+//      Game.ball.speed += 1;
+//    }
+//    Game.front.leftPaddle = Game.p1.padleY;
+//    Game.front.rightPaddle = Game.p2.padleY;
+//    Game.front.ballX = Game.ball.x;
+//    Game.front.ballY = Game.ball.y;
+//    Game.front.leftScore = Game.p1.score;
+//    Game.front.rightScore = Game.p2.score;
+//    // render 호출하는 socket 추가
+//    Game.p1.socket.emit('update', Game.front);
+//  }
 
   private update_v2(Game: GameDto) {
-    // ready 확인 추가 자리 //
-	if (Game.ball.x - Game.ball.radius < 0) {
+    // 공이 양쪽 벽에 닿아서 점수 발생했는지 체크
+	if (Game.ball.x + Game.ball.radius < 0) {
 		Game.p2.score++;
 		this.resetBall(Game);
-	} else if (Game.ball.x + Game.ball.radius > CanvasWidth) {
+	} else if (Game.ball.x - Game.ball.radius > CanvasWidth) {
 		Game.p1.score++;
 		this.resetBall(Game);
 	}
+	// 게임이 끝났는지 체크
 	if (Game.p1.score >= VictoryScore) {
-		Game.p1.socket.emit('end-game', true);
-		if (Game.p2.socket)
-			Game.p2.socket.emit('end-game', false);
-		Game.p2.socket.emit('end-game', false);
-		//clearInterval(Game.interval);
 		this.finishGame(Game, true);
 		return ;
 	}
 	else if (Game.p2.score >= VictoryScore) {
-		//Game.p2.socket.emit('end-game', true);
-		//Game.p1.socket.emit('end-game', false);
-		//if (Game.p2.socket)
-		//	Game.p2.socket.emit('end-game', true);
-		//clearInterval(Game.interval);
 		this.finishGame(Game, false);
 		return ;
 	}
-    // 패들 계산
+    // 패들 움직임 계산
     this.paddleCalculate(Game);
-    // 공 계산
+    // 공 위치 계산
     Game.ball.x += Game.ball.velocityX;
     Game.ball.y += Game.ball.velocityY;
-    // soloMod
-     if (Game.gameMod === gameMod.soloGame)
-    Game.p2.padleY +=
-      (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
-    const player =
-      Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? Game.p1 : Game.p2;
-    // if(Game.ball.y - Game.ball.radius < 0 || Game.ball.y + Game.ball.radius > CanvasHeight)
-    //  Game.ball.velocityY = -Game.ball.velocityY;
-    if (
-      Game.ball.y + Game.ball.radius < 0 ||
-      Game.ball.y + Game.ball.radius > CanvasHeight
-    )
-      Game.ball.velocityY = -Game.ball.velocityY;
+	// 공의 y좌표가 화면을 벗어나면 수정
+	if (Game.ball.y < 0)
+		Game.ball.y = 0;
+	else if (Game.ball.y > CanvasHeight)
+		Game.ball.y = CanvasHeight;
+    // soloMod 컴퓨터 패들 조종
+    if (Game.gameMod == gameMod.soloGame) {
+    	Game.p2.padleY += (Game.ball.y - (Game.p2.padleY + Game.p2.padleH / 2)) * 0.1;
+		if (Game.p2.padleY + Game.p2.padleH > CanvasHeight)
+			Game.p2.padleY = CanvasHeight - Game.p2.padleH;
+		else if (Game.p2.padleY < 0)
+			Game.p2.padleY = 0;
+	}
+    // 공에 가까운 플레이어 선택
+	const player =  Game.ball.x < CanvasWidth / 2 ? Game.p1 : Game.p2;
+	// 공이 천장과 바닥에 닿았으면 y축 방향을 반전
+    if (Game.ball.y - Game.ball.radius <= 0 || Game.ball.y + Game.ball.radius >= CanvasHeight)
+		Game.ball.velocityY = -Game.ball.velocityY;
+	// 공이 플레이어의 패들에 충돌시
     if (this.collision(Game, player)) {
-      let collidePoint = Game.ball.y - (player.padleY + player.padleH / 2);
-      collidePoint = collidePoint / (player.padleH / 2);
-      let angleRad = (Math.PI / 4) * collidePoint;
-      let direction =
-        Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? 1 : -1;
-      Game.ball.velocityX = direction * Game.ball.speed * Math.cos(angleRad);
-      Game.ball.velocityY = Game.ball.speed * Math.sin(angleRad);
-      Game.ball.speed += 1;
+		let collidePoint = Game.ball.y - (player.padleY + player.padleH / 2);
+		collidePoint = collidePoint / (player.padleH / 2);
+		let angleRad = (Math.PI / 4) * collidePoint;
+		let direction = Game.ball.x + Game.ball.radius < CanvasWidth / 2 ? 1 : -1;
+		Game.ball.velocityX = direction * Game.ball.speed * Math.cos(angleRad);
+		Game.ball.velocityY = Game.ball.speed * Math.sin(angleRad);
+		Game.ball.speed += 1;
     }
+	// 프론트로 보낼 데이터 저장
     Game.front.leftPaddle = Game.p1.padleY;
     Game.front.rightPaddle = Game.p2.padleY;
     Game.front.ballX = Game.ball.x;
@@ -271,7 +268,10 @@ export class GameService {
     Game.front.leftScore = Game.p1.score;
     Game.front.rightScore = Game.p2.score;
     // render 호출하는 socket 추가
-	  Game.nsp.to(Game.roomName).emit('update', Game.front);
+	if (Game.gameMod == gameMod.soloGame)
+		Game.p1.socket.emit('update', Game.front);
+	else
+		Game.nsp.in(Game.roomName).emit('update', Game.front);
   }
 
   paddleUp(client: Socket, Game: GameDto) {
@@ -324,7 +324,7 @@ export class GameService {
 
   gameLoop(Game: GameDto) {
     Game.interval = setInterval(() => {
-      this.update(Game);
+      this.update_v2(Game);
     }, 1000 / 45);
   }
 
