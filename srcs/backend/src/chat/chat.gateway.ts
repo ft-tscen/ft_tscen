@@ -139,12 +139,12 @@ export class ChatGateway
             if (userMute.has(authorID) && now < userMute.get(authorID)) {
               return;
             }
-            socket.to(member).emit('channel-msg', { ...input });
+            socket.to(member).emit('channel-msg', { ...input, user });
           }
         });
       }
     }
-    return { ...input };
+    return { ...input, user };
   }
 
   @SubscribeMessage('channel-mute')
@@ -226,7 +226,7 @@ export class ChatGateway
     @MessageBody() chat: SocketInputDto,
   ): SocketOutputDto {
     const { author, target } = chat;
-    //const { user } = this.users.get(this.sockets.get(author));
+    const { user } = this.users.get(this.sockets.get(author));
 
     if (author !== target) {
       if (this.sockets.has(target)) {
@@ -235,11 +235,11 @@ export class ChatGateway
         const now = new Date().getTime();
         const authorID :string = this.sockets.get(author); // author -> this->sockets.get(author)
         if (!(userMute.has(authorID) && now < userMute.get(authorID))) {
-          socket.to(targetSocket).emit('direct-msg', { ...chat });
+          socket.to(targetSocket).emit('direct-msg', { ...chat, user });
         }
       }
     }
-    return { ...chat };
+    return { ...chat, user };
   }
 
   @SubscribeMessage('direct-mute')
@@ -641,11 +641,14 @@ export class ChatGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
-    if (input.target) {
+    const { user } = this.users.get(this.sockets.get(input.author));
+
+    if (this.sockets.has(input.target)) {
       const output = {
         author: input.author,
         target: input.target,
         message: `${input.author} wants to be friend with you`,
+        user
       };
       const targetSocket :string = this.sockets.get(input.target);
       socket.to(targetSocket).emit('be-friend', output);
@@ -685,6 +688,49 @@ export class ChatGateway
       author: 'server',
       target: null,
       message: `fails to response to ${input.target}`,
+    };
+  }
+
+  @SubscribeMessage('get-profile')
+  getProfile(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto,
+  ): SocketOutputDto {
+    const { user } = this.users.get(this.sockets.get(input.author));
+
+    return {
+      author: 'server',
+      target: null,
+      message: `get ${input.target}'s profile`,
+      user
+    };
+  }
+
+  @SubscribeMessage('invite')
+  inviteGame(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketInputDto,
+  ): SocketOutputDto {
+    const { user } = this.users.get(this.sockets.get(input.author));
+
+    if (this.sockets.has(input.target)) {
+      const output = {
+        author: input.author,
+        target: input.target,
+        message: `you are invited from ${input.author}`,
+        user
+      };
+      socket.to(this.sockets.get(input.target)).emit('invite', output);
+      return {
+        author: 'server',
+        target: null,
+        message: `send invitation to ${input.target}`,
+      };
+    }
+    return {
+      author: 'server',
+      target: null,
+      message: `fails to send friend request to ${input.target}`,
     };
   }
 }

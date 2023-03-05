@@ -1,6 +1,7 @@
 import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { UserData } from "../common/types";
 
 enum gameMod {
 	normalGame,
@@ -11,9 +12,11 @@ enum gameMod {
 
 type HomeComponent = {
 	isLoggedIn: boolean;
+	userData: UserData;
+	enteredChannel: boolean;
 };
 
-function Home({ isLoggedIn }: HomeComponent) {
+function Home({ isLoggedIn, userData, enteredChannel }: HomeComponent) {
 	const navigate = useNavigate();
 
 	function gameModHandle(mode: gameMod) {
@@ -26,6 +29,13 @@ function Home({ isLoggedIn }: HomeComponent) {
 		}
 	}
 
+	const isDisable = () => {
+		console.log("asdf");
+		if (isLoggedIn && enteredChannel && userData.verified)
+			return false;
+		else
+			return true;
+	};
 	return (
 		<>
 			<Container>
@@ -38,7 +48,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!isLoggedIn}
+							disabled={isDisable()}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.normalGame)}
 						>
@@ -53,7 +63,7 @@ function Home({ isLoggedIn }: HomeComponent) {
 					<Col className="d-flex justify-content-center">
 						<Button
 							variant="outline-light"
-							disabled={!isLoggedIn}
+							disabled={isDisable()}
 							style={{ width: "100px", height: "50px" }}
 							onClick={() => gameModHandle(gameMod.rankGame)}
 						>

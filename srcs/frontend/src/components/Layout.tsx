@@ -2,18 +2,17 @@ import { Col, Row, Container } from "react-bootstrap";
 import ChatPart from "./chatting/ChatPart";
 import { useParams } from "react-router-dom";
 import Home from "./Home";
-import Game from "./game/Game"
+import Game from "./game/Game";
 import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
 import { gameMod, UserData } from "../common/types";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { mySocket } from "../common/MySocket";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
 	userData: UserData;
-	imageURL: string;
 	isChangedData: boolean;
 	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -21,16 +20,17 @@ type LayoutComponent = {
 function Layout({
 	isLoggedIn,
 	userData,
-	imageURL,
 	isChangedData,
 	setChangedData,
 }: LayoutComponent) {
+	const [inform, setInform] = useState<UserData>();
+	const [enteredChannel, setEnteredChannel] = useState<boolean>(false);
 	const url = useParams();
 	const param = url["*"];
-	const [inform, setInform] = useState(userData);
 
 	const getComponent = () => {
-		if (param === "") return <Home isLoggedIn={isLoggedIn} />;
+		if (param === "")
+			return <Home isLoggedIn={isLoggedIn} userData={userData} enteredChannel={enteredChannel}/>;
 		else if (param === "profile")
 			return (
 				<Profile
@@ -40,17 +40,12 @@ function Layout({
 					setChangedData={setChangedData}
 				/>
 			);
-		else if (param === "soloGame")
-			return ( <Game mod={gameMod.soloGame} /> );
-		else if (param === "rankGame")
-			return ( <Game mod={gameMod.rankGame} /> );
-		else if (param === "friendlyGame")
-			return ( <Game mod={gameMod.normalGame} /> );
+		else if (param === "soloGame") return <Game mod={gameMod.soloGame} />;
+		else if (param === "rankGame") return <Game mod={gameMod.rankGame} />;
+		else if (param === "friendlyGame") return <Game mod={gameMod.normalGame} />;
 		else if (param === "privateGame")
-			return ( <Game mod={gameMod.passwordGame} /> );
-		else if (param === "creatGame")
-			return ( <CreatRoom /> );
-
+			return <Game mod={gameMod.passwordGame} />;
+		else if (param === "creatGame") return <CreatRoom />;
 	};
 
 	const getBorder = () => {
@@ -58,19 +53,24 @@ function Layout({
 		else return "";
 	};
 
+	// useEffect(() => {
+	// 	console.log("hi");
+	// 	setInform(userData);
+	// }, []);
+
 	return (
 		<>
 			<Container fluid style={{ height: "90vmin" }}>
 				<Row style={{ height: "90vmin" }}>
 					<Col xs={3} className={getBorder()}>
 						{userData.nickName === null || !isLoggedIn ? null : (
-							<MyInform userData={inform} />
+							<MyInform inform={inform ?? userData} />
 							// <OtherInform userData={userData} imageURL={imageURL} />
 						)}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
 					<Col xs={3} className={getBorder()}>
-						{isLoggedIn && <ChatPart setInform={setInform}/>}
+						{isLoggedIn && <ChatPart setInform={setInform} setEnteredChannel={setEnteredChannel}/>}
 					</Col>
 				</Row>
 			</Container>
