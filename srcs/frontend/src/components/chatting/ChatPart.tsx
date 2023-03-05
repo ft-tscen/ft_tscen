@@ -1,6 +1,6 @@
 import { ChatMenuBar } from "./ChatMenuBar";
 import { GameRooms } from "./GameRooms";
-import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, STARTMSG, SOCKET_EVENT } from "../../common/types"
+import { LEAVE_CHANNEL, ENTER_CHANNEL, SocketOutputDto, SHOW_OTHER, SHOW_CHATROOM, STARTMSG, SOCKET_EVENT, BoolType } from "../../common/types"
 import { useEffect, useState } from "react";
 import { ChatRoom } from "./ChatRoom";
 import { mySocket} from "../../common/MySocket";
@@ -15,20 +15,12 @@ type ReceivedMsg = [
     receivedMsg :SocketOutputDto|undefined,
     setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>
 ];
-type Flag = [
-    flag :boolean,
-    setFlage :React.Dispatch<React.SetStateAction<boolean>>
-];
-type EnterChannelFlag = [
-    enterChannelFlag :boolean,
-    setEnterChannelFlag :React.Dispatch<React.SetStateAction<boolean>>
-]
 
 export default function ChatPart() {
     let [msgList, setMsgList] :MstList = useState<SocketOutputDto[]>([STARTMSG]);
     let [receivedMsg, setReceivedMsg] :ReceivedMsg = useState<SocketOutputDto>();
-    let [flag, setFlag] : Flag = useState<boolean>(SHOW_CHATROOM);
-    let [enterChannelFlag, setEnterChannelFlag] :EnterChannelFlag = useState<boolean>(LEAVE_CHANNEL);
+    let [flag, setFlag] : BoolType = useState<boolean>(SHOW_CHATROOM);
+    let [enterChannelFlag, setEnterChannelFlag] :BoolType = useState<boolean>(LEAVE_CHANNEL);
 
     const enterChannel = (dto :SocketOutputDto) => {
         mySocket.enteredChannelName = dto.target === undefined ? "" : dto.target;

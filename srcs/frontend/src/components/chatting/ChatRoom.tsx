@@ -13,11 +13,11 @@ type ArgsType = {
 export function ChatRoom({msgList, enterGame, setReceivedMsg} :ArgsType) {
     const chatWindow = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (chatWindow.current) {
-            chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
-        }
-    }, [msgList]);
+	useEffect(() => {
+		if (chatWindow.current) {
+			chatWindow.current.scrollTop = chatWindow.current.scrollHeight;
+		}
+	}, [msgList]);
 
     return (
         <Container

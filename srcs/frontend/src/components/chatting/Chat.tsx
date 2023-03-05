@@ -3,7 +3,12 @@ import { Card, Row, Image, OverlayTrigger, Popover } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import { api } from "../../axios/api";
 import { mySocket } from "../../common/MySocket";
-import { SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import {
+    BoolType,
+	SocketInputDto,
+	SocketOutputDto,
+	SOCKET_EVENT,
+} from "../../common/types";
 
 type ArgsType = {
     msg :SocketOutputDto,
@@ -11,23 +16,10 @@ type ArgsType = {
     setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
 }
 
-type FlagType = [
-    isFriend :boolean,
-    setIsFriend :React.Dispatch<React.SetStateAction<boolean>>
-]
-type ShowType = [
-    show :boolean,
-    setShow :React.Dispatch<React.SetStateAction<boolean>>
-]
-type ActiveType = [
-    active :boolean,
-    setActive :React.Dispatch<React.SetStateAction<boolean>>
-]
-
 export function Chat({msg, enterGame, setReceivedMsg} :ArgsType) {
-    let [isFriend, setIsFriend] : FlagType = useState<boolean>(false);
-    let [show, setShow] : ShowType = useState<boolean>(false);
-    let [active, setActive] : ActiveType = useState<boolean>(true);
+    let [isFriend, setIsFriend] : BoolType = useState<boolean>(false);
+    let [show, setShow] : BoolType = useState<boolean>(false);
+    let [active, setActive] : BoolType = useState<boolean>(true);
     if (msg.author === "server"){
         return (
             <Row className="m-0 p-0 pb-1 h-auto text-left justify-content-center">

@@ -60,14 +60,3 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 }
 
 export default NavBar;
-
-{
-	/* <Nav.Link
-onClick={() =>
-	(window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login`)
-}
-className="text-light"
->
-로그인
-</Nav.Link> */
-}

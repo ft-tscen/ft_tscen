@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
-import { GameRoomType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import { BoolType, GameRoomType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
 import { mySocket } from "../../common/MySocket";
 import "./Effect.css"
 
@@ -9,13 +9,8 @@ type ArgsType = {
     enterGame : (dto: SocketOutputDto) => void
 }
 
-type Visible = [
-    visible :boolean,
-    setVisible:React.Dispatch<React.SetStateAction<boolean>>
-];
-
 export function GameRoom({obj, enterGame} :ArgsType) {
-    let [visible, setVisible] :Visible = useState<boolean>(false);
+    let [visible, setVisible] :BoolType = useState<boolean>(false);
     
     let name :string = (obj.password ? `🔒 ${obj.name} 🔒` : obj.name);
     const pwInputRef = useRef<HTMLInputElement>(null);

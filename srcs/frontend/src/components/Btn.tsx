@@ -8,7 +8,8 @@ type BtnProps = {
 function Btn({ text, disable }: BtnProps) {
 	return (
 		<>
-			<Button variant="outline-light" size="lg" disabled={!disable}>
+			<Button variant="outline-light" disabled={!disable}
+			style={{ width: "100px", height: "50px",}} >
 				{text}
 			</Button>
 		</>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../axios/api";
+import { BoolType } from "../../common/types";
 import CheckVerifyingOffModal from "./CheckVerifyingOffModal";
 import VerifyingCodeModal from "./VerifyingCodeModal";
 
@@ -23,14 +24,15 @@ function SaveProfile({
 	setChangedData,
 }: SaveProfileComponent) {
 	const navigate = useNavigate();
+	const [file, setFile] = useState<string | Blob>();
 	const [nick_name, setNickName] = useState(userData.nickName || "");
 	const [phone_number, setPhoneNumber] = useState(userData.phone || "");
 	const [isDuplicated, setDuplicated] = useState("no_check");
 	const [isCertificated, setCertificated] = useState(
 		userData.verified || false
 	);
-	const [vcmShow, setVCModalShow] = useState(false);
-	const [cvomShow, setCVOModalShow] = useState(false);
+	const [vcmShow, setVCModalShow] :BoolType = useState<boolean>(false);
+	const [cvomShow, setCVOModalShow] :BoolType = useState<boolean>(false);
 
 	const checkDuplicate = async () => {
 		if (nick_name === null || nick_name === "" || nick_name === undefined)
@@ -82,8 +84,12 @@ function SaveProfile({
 		}
 	};
 
+	const handleFileChange = (e: any) => {
+		setFile(e.target.files[0]);
+	};
+
 	const handleSubmit = async () => {
-		if (nick_name == "" || nick_name == null || nick_name == undefined) {
+		if (nick_name === "" || nick_name === null || nick_name === undefined) {
 			alert("닉네임을 작성해주세요.");
 			return;
 		}
@@ -102,6 +108,11 @@ function SaveProfile({
 					phone: phone_number,
 					verified: isCertificated,
 				});
+				if (file) {
+					const formData = new FormData();
+					formData.append("file", file!);
+					await api.post("/user/avatar", formData);
+				}
 				setChangedData(!isChangedData);
 				navigate("/");
 			} catch (e) {
@@ -119,23 +130,18 @@ function SaveProfile({
 					<Card.Body>
 						<Card.Title className="text-white">프로필</Card.Title>
 						<Form className="border-top p-4">
-							{/* <Form.Group className="mb-3" controlId="formAvatar">
+							<Form.Group className="mb-3" controlId="formAvatar">
 								<Form.Label className="text-white">프로필 사진</Form.Label>
 								<Form.Control
 									type="file"
 									placeholder="Intra ID"
 									className="bg-transparent text-white"
-									// value={avatar}
 									accept="image/*"
-									onChange={(e) => {
-										const target = e.target as HTMLInputElement;
-										const file: File = (target.files as FileList)[0];
-										console.log(file);
-									}}
+									onChange={handleFileChange}
 								/>
-							</Form.Group> */}
+							</Form.Group>
 							<Form.Group className="mb-3" controlId="formIntraID">
-								<Form.Label className="text-white">인트라 ID</Form.Label>
+								<Form.Label className="text-white">Intra ID</Form.Label>
 								<Form.Control
 									type="text"
 									placeholder="Intra ID"

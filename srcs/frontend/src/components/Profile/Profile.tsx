@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BoolType } from "../../common/types";
 import SaveProfile from "./SaveProfile";
 import ShowProfile from "./ShowProfile";
 
@@ -22,7 +23,7 @@ function Profile({
 	isChangedData,
 	setChangedData,
 }: ProfileComponent) {
-	const [edit, setEdit] = useState(false);
+	const [edit, setEdit] :BoolType = useState<boolean>(false);
 	const navigate = useNavigate();
 	useEffect(() => {}, [edit]);
 

@@ -36,3 +36,28 @@
 		transform: rotate(360deg);
 	}
 }
+
+.warning-alert {
+	border: 2px solid white;
+	background-color: black;
+	color: white;
+	opacity: 1;
+	transition: opacity 0.5s ease-in-out;
+}
+
+.warning-alert .alert-heading {
+	color: white;
+}
+
+.warning-alert .close {
+	color: white;
+}
+
+.warning-alert .close:hover {
+	color: white;
+	opacity: 0.75;
+}
+
+.warning-alert.fade-out {
+	opacity: 0;
+}

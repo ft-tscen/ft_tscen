@@ -3,12 +3,12 @@ import NavBar from "./components/NavBar";
 import Layout from "./components/Layout";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { api } from "./axios/api";
-import { UserData } from "./common/types";
-import { mySocket, SetSocket } from "./common/MySocket";
+import { BoolType, UserData } from "./common/types";
+import { mySocket, myGameSocket, SetSocket, setGameSocket } from "./common/MySocket";
 
 function App() {
 	const navigate = useNavigate();
-	const [loggedIn, setLoggedIn] = useState(false);
+	const [loggedIn, setLoggedIn] :BoolType = useState<boolean>(false);
 	let [userData, setUserData] = useState<UserData>({
 		intraID: "",
 		name: "",
@@ -16,7 +16,8 @@ function App() {
 		phone: "",
 		verified: false,
 	});
-	const [isChangedData, setChangedData] = useState<boolean>(false);
+	const [imageDataUrl, setImageDataUrl] = useState<string>("");
+	const [isChangedData, setChangedData] :BoolType = useState<boolean>(false);
 
 	const getUserData = async () => {
 		try {
@@ -29,8 +30,21 @@ function App() {
 				phone: user.phone,
 				verified: user.verified,
 			};
-			setUserData(data);
-			mySocket.name = user.nickname;
+			try {
+				const response = await api.get(`/user/avatar/${user.avatarId}`, {
+					responseType: "arraybuffer",
+				});
+				const arrayBufferView = new Uint8Array(response.data);
+				const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+				const urlCreator = window.URL || window.webkitURL;
+				const imageUrl = urlCreator.createObjectURL(blob);
+				setImageDataUrl(imageUrl);
+			} catch (e) {
+				console.error(e);
+			} finally {
+				setUserData(data);
+				mySocket.name = user.nickname;
+			}
 		} catch (e) {
 			console.error(e);
 		}
@@ -47,11 +61,27 @@ function App() {
 				phone: user.phone,
 				verified: user.verified,
 			};
-			setLoggedIn(true);
-			setUserData(data);
-			mySocket === undefined && SetSocket(data.nickName);
-			if (data.nickName === null && data.phone === null)
-				navigate("/profile");
+			try {
+				const response = await api.get(`/user/avatar/${user.avatarId}`, {
+					responseType: "arraybuffer",
+				});
+				const arrayBufferView = new Uint8Array(response.data);
+				const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+				const urlCreator = window.URL || window.webkitURL;
+				const imageUrl = urlCreator.createObjectURL(blob);
+				setImageDataUrl(imageUrl);
+			} catch (e) {
+				console.error(e);
+			} finally {
+				setLoggedIn(true);
+				setUserData(data);
+				mySocket === undefined && SetSocket(data.nickName);
+				myGameSocket === undefined && setGameSocket(data.nickName);
+				console.log(myGameSocket.name);
+				console.log(mySocket.name);
+				if (data.nickName === null && data.phone === null)
+					navigate("/profile");
+			}
 		} catch (e) {
 			setLoggedIn(false);
 			setUserData({
@@ -63,7 +93,7 @@ function App() {
 			});
 		}
 	};
-	
+
 	useEffect(() => {
 		intraLogin();
 	}, [loggedIn]);
@@ -82,6 +112,7 @@ function App() {
 						<Layout
 							isLoggedIn={loggedIn}
 							userData={userData}
+							imageURL={imageDataUrl}
 							isChangedData={isChangedData}
 							setChangedData={setChangedData}
 						/>
