@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
-import { Form, Button, Container, Card, CloseButton , Row, Col, Alert } from "react-bootstrap";
+import { useState } from "react";
+import { Form, Button, Container, Card, CloseButton, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { myGameSocket } from "../App";
+import { myGameSocket } from "../common/MySocket";
+import { BoolType } from "../common/types";
 
 function CreatRoom() {
 	const navigate = useNavigate();
 	const [roomName, setRoomName] = useState<string>('');
-	const [hasPassword, setHasPassword] = useState<boolean>(false);
 	const [password, setPassword] = useState<string>('');
-	const [usePassword, setUsePassword] = useState<boolean>(false);
-	const [showWarning, setShowWarning] = useState<boolean>(false);
+	const [usePassword, setUsePassword] :BoolType = useState<boolean>(false);
+	const [hasPassword, setHasPassword] :BoolType = useState<boolean>(false); // 사용하는가?
+	const [showWarning, setShowWarning] :BoolType = useState<boolean>(false);
 
 	const styleEl = document.createElement('style');
 	styleEl.appendChild(document.createTextNode(styles));

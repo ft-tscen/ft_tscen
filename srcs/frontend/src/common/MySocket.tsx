@@ -8,6 +8,8 @@ interface MySocket {
 }
 
 export let mySocket: MySocket;
+export let myGameSocket: MySocket;
+
 
 export function SetSocket(newName: string) {
   mySocket = {
@@ -21,4 +23,21 @@ export function SetSocket(newName: string) {
     enteredChannelName: "",
     enteredGameRoom: "",
   };
+}
+
+export function setGameSocket(newName: string) {
+	myGameSocket = {
+		socket: io(
+			`http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/game`,
+			{
+				withCredentials: true,
+				query: {
+					nickname: newName,
+				},
+			}
+		),
+		name: newName,
+		enteredChannelName: "",
+		enteredGameRoom: "",
+	};
 }

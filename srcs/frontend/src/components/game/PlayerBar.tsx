@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { gameMod } from './GameType';
+import { useEffect, useState } from 'react';
+import { gameMod } from '../../common/types';
 
 type gameComponent = {
 	mod: gameMod;
 };
 
-interface Player {
+interface PlayerType {
 	name: string;
 	wins: number;
 	losses: number;
 }
 
 function Player({ mod }: gameComponent) {
-	const [lplayer, setLPlayer] = useState<Player | null>(null);
-	const [rplayer, setRPlayer] = useState<Player | null>(null);
+	const [lplayer, setLPlayer] = useState<PlayerType | null>(null);
+	const [rplayer, setRPlayer] = useState<PlayerType | null>(null);
 
 	useEffect(() => {
 	if (mod !== gameMod.soloGame) {

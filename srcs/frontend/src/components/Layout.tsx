@@ -1,13 +1,12 @@
 import { Col, Row, Container } from "react-bootstrap";
 import ChatPart from "./chatting/ChatPart";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Home from "./Home";
 import Game from "./game/Game"
-import { gameMod } from "./game/GameType";
 import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
-import OtherInform from "./Information/OtherInform";
+import { gameMod } from "../common/types";
 
 
 type LayoutComponent = {
@@ -33,7 +32,6 @@ function Layout({
 }: LayoutComponent) {
 	const url = useParams();
 	const param = url["*"];
-	const navigate = useNavigate();
 
 	const getComponent = () => {
 		if (param === "") return <Home isLoggedIn={isLoggedIn} />;

@@ -2,9 +2,6 @@ import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-// import style from "../css/Home.module.css";
-// import Btn from "./Btn";
-
 enum gameMod {
 	normalGame,
 	passwordGame,

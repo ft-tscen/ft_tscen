@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
-import { ChannelType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import { BoolType, ChannelType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
 import { mySocket } from "../../common/MySocket";
 import "./Effect.css"
 
@@ -8,13 +8,9 @@ type ArgsType = {
     obj: ChannelType,
     enterChannel : (dto: SocketOutputDto) => void
 };
-type Visible = [
-    visible :boolean,
-    setVisible:React.Dispatch<React.SetStateAction<boolean>>
-];
 
 export function Channel({obj, enterChannel} :ArgsType) {
-    let [visible, setVisible] :Visible = useState<boolean>(false);
+    let [visible, setVisible] :BoolType = useState<boolean>(false);
     let name :string = (obj.password ? `🔒 ${obj.name} 🔒` : obj.name);
     const pwInputRef = useRef<HTMLInputElement>(null);
 

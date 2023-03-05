@@ -78,15 +78,3 @@ function MyInform({ userData, imageURL }: InformComponent) {
 }
 
 export default MyInform;
-
-/* <Container fluid className="mt-4" style={{ height: "10vmin" }}>
-<Row>
-	<Col className="d-flex justify-content-center align-items-center">
-		<Image
-			src="./profile.jpeg"
-			roundedCircle
-			style={{ width: "15vmin" }}
-		/>
-	</Col>
-</Row>
-</Container> */

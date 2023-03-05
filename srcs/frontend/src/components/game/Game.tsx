@@ -1,22 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
-import { userType, netType, ballType, dataType, SOCKET_GAME_EVENT } from './GameType';
 
-import { io } from "socket.io-client"
 import EndPage from './PageEnd';
 import ReadyPage from './PageReady';
 import WaitPage from './PageWait';
-import { gameMod } from './GameType';
 import Player from './PlayerBar';
-import { myGameSocket } from '../../App';
-import { Navigate } from 'react-router-dom';
+import { myGameSocket } from '../../common/MySocket';
+import { BoolType, dataType, gameMod, SOCKET_GAME_EVENT } from '../../common/types';
 
 
 type gameComponent = {
 	mod: gameMod;
 };
-
-// export const myGameSocket.socket = io(`http://${process.env.REACT_APP_BACKEND_HOST}:3001/game`);
 
 function Game({ mod }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -32,11 +27,11 @@ function Game({ mod }: gameComponent) {
 	const navigate = useNavigate();
 	const [canvas, setCanvas] = useState<any>();
 	const [ctx, setCtx] = useState<any>();
-	const [match,setMatch] = useState<boolean>(false);
-	const [player,setPlayer] = useState<boolean>(true);
+	const [match,setMatch] :BoolType = useState<boolean>(false);
+	const [player,setPlayer] :BoolType = useState<boolean>(true);
 
-	const [startGame, setStartGame] = useState<boolean>(false);
-	const [isWatch, setIsWatch] = useState<boolean>(false);
+	const [startGame, setStartGame] :BoolType = useState<boolean>(false);
+	const [isWatch, setIsWatch] :BoolType = useState<boolean>(false);
 
 	let [data, setData] = useState<dataType>();
 

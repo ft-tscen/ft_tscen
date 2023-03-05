@@ -8,7 +8,6 @@ import {
 	Form,
 	Button,
 } from "react-bootstrap";
-import MyInform from "./MyInform";
 
 type InformComponent = {
 	userData: {

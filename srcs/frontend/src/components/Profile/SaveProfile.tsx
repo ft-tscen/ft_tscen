@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../axios/api";
+import { BoolType } from "../../common/types";
 import CheckVerifyingOffModal from "./CheckVerifyingOffModal";
 import VerifyingCodeModal from "./VerifyingCodeModal";
 
@@ -30,8 +31,8 @@ function SaveProfile({
 	const [isCertificated, setCertificated] = useState(
 		userData.verified || false
 	);
-	const [vcmShow, setVCModalShow] = useState(false);
-	const [cvomShow, setCVOModalShow] = useState(false);
+	const [vcmShow, setVCModalShow] :BoolType = useState<boolean>(false);
+	const [cvomShow, setCVOModalShow] :BoolType = useState<boolean>(false);
 
 	const checkDuplicate = async () => {
 		if (nick_name === null || nick_name === "" || nick_name === undefined)
@@ -88,7 +89,7 @@ function SaveProfile({
 	};
 
 	const handleSubmit = async () => {
-		if (nick_name == "" || nick_name == null || nick_name == undefined) {
+		if (nick_name === "" || nick_name === null || nick_name === undefined) {
 			alert("닉네임을 작성해주세요.");
 			return;
 		}

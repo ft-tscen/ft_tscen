@@ -5,12 +5,13 @@ import { Chat } from "./Chat";
 import "./Effect.css";
 
 type ArgsType = {
-	msgList: SocketOutputDto[];
-	enterGame: (dto: SocketOutputDto) => void;
-};
+    msgList :SocketOutputDto[],
+    enterGame : (dto: SocketOutputDto) => void
+    setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
+}
 
-export function ChatRoom({ msgList, enterGame }: ArgsType) {
-	const chatWindow = useRef<HTMLDivElement>(null);
+export function ChatRoom({msgList, enterGame, setReceivedMsg} :ArgsType) {
+    const chatWindow = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (chatWindow.current) {
@@ -18,15 +19,18 @@ export function ChatRoom({ msgList, enterGame }: ArgsType) {
 		}
 	}, [msgList]);
 
-	return (
-		<Container
-			className="m-0 mt-auto p-0 Scrollable"
-			style={{ height: "75vmin" }}
-			ref={chatWindow}
-		>
-			{msgList.map((msg: SocketOutputDto, idx: number) => {
-				return <Chat key={idx} msg={msg} enterGame={enterGame} />;
-			})}
-		</Container>
-	);
+    return (
+        <Container
+            className="m-0 mt-auto p-0 Scrollable"
+            style={{ height:"75vmin" }}
+            ref={chatWindow}>
+            {
+                msgList.map((msg :SocketOutputDto, idx :number) => {
+                    return (
+                        <Chat key={idx} msg={msg} enterGame={enterGame} setReceivedMsg={setReceivedMsg}/>
+                    );
+                })
+            }
+        </Container>
+    );
 }

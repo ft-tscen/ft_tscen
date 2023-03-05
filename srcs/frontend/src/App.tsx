@@ -3,39 +3,12 @@ import NavBar from "./components/NavBar";
 import Layout from "./components/Layout";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { api } from "./axios/api";
-import { UserData } from "./common/types";
-import { mySocket, SetSocket } from "./common/MySocket";
-import { io, Socket } from "socket.io-client";
-
-interface MySocket {
-	socket: Socket;
-	name: string;
-	enteredChannelName: string;
-	enteredGameRoom: string;
-}
-
-export let myGameSocket: MySocket;
-
-export function setGameSocket(newName: string) {
-	myGameSocket = {
-		socket: io(
-			`http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/game`,
-			{
-				withCredentials: true,
-				query: {
-					nickname: newName,
-				},
-			}
-		),
-		name: newName,
-		enteredChannelName: "",
-		enteredGameRoom: "",
-	};
-}
+import { BoolType, UserData } from "./common/types";
+import { mySocket, myGameSocket, SetSocket, setGameSocket } from "./common/MySocket";
 
 function App() {
 	const navigate = useNavigate();
-	const [loggedIn, setLoggedIn] = useState(false);
+	const [loggedIn, setLoggedIn] :BoolType = useState<boolean>(false);
 	let [userData, setUserData] = useState<UserData>({
 		intraID: "",
 		name: "",
@@ -44,7 +17,7 @@ function App() {
 		verified: false,
 	});
 	const [imageDataUrl, setImageDataUrl] = useState<string>("");
-	const [isChangedData, setChangedData] = useState<boolean>(false);
+	const [isChangedData, setChangedData] :BoolType = useState<boolean>(false);
 
 	const getUserData = async () => {
 		try {
@@ -102,9 +75,12 @@ function App() {
 			} finally {
 				setLoggedIn(true);
 				setUserData(data);
-				myGameSocket === undefined && setGameSocket(data.intraID);
-				mySocket === undefined && SetSocket(data.intraID);
-				if (data.nickName === null && data.phone === null) navigate("/profile");
+				mySocket === undefined && SetSocket(data.nickName);
+				myGameSocket === undefined && setGameSocket(data.nickName);
+				console.log(myGameSocket.name);
+				console.log(mySocket.name);
+				if (data.nickName === null && data.phone === null)
+					navigate("/profile");
 			}
 		} catch (e) {
 			setLoggedIn(false);
