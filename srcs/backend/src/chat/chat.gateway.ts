@@ -334,7 +334,7 @@ export class ChatGateway
     if (this.channels.has(input.target)) {
       const channel = this.channels.get(input.target);
       const now = new Date().getTime();
-      const isMatch = await this.verifyPassword(channel.password, input.password);
+      const isMatch = await this.verifyPassword(input.password, channel.password);
 
       if (
         !(
