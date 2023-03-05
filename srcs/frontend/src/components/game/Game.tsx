@@ -36,8 +36,6 @@ function Game({ mod }: gameComponent) {
 
 	const [playerInfo, setPlayerInfo] = useState<playerType>();
 
-	const [leftInfo, setLeftInfo] = useState<playerType>();
-
 	let [data, setData] = useState<dataType>();
 
 	useEffect(()=> {
@@ -74,8 +72,22 @@ function Game({ mod }: gameComponent) {
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
 				myGameSocket.socket.on('matching-success', (data: playerType) => {
 					setPlayerInfo({
-						p1 : data.p1,
-						p2 : data.p2
+						p1 : {
+							intraID: data.p1.intra,
+							name : data.p1.usual_full_name,
+							nickName : data.p1.nickname,
+							phone : data.p1.phone,
+							verified : data.p1.verified,
+							avatarId : data.p1.avatarId,
+						},
+						p2 : {
+							intraID: data.p2.intra,
+							name : data.p2.usual_full_name,
+							nickName : data.p2.nickname,
+							phone : data.p2.phone,
+							verified : data.p2.verified,
+							avatarId : data.p2.avatarId,
+						}
 					})
 					setMatch(true);
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
