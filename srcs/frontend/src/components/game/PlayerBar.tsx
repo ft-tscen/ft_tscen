@@ -1,31 +1,32 @@
 import { useEffect, useState } from 'react';
-import { gameMod } from '../../common/types';
+import { gameMod, playerType } from '../../common/types';
 
 type gameComponent = {
 	mod: gameMod;
+	playerInfo : playerType | undefined;
 };
 
-interface PlayerType {
+interface player {
 	name: string;
 	wins: number;
 	losses: number;
 }
 
-function Player({ mod }: gameComponent) {
-	const [lplayer, setLPlayer] = useState<PlayerType | null>(null);
-	const [rplayer, setRPlayer] = useState<PlayerType | null>(null);
+function Player({ mod, playerInfo }: gameComponent) {
+	const [lplayer, setLPlayer] = useState<player | null>(null);
+	const [rplayer, setRPlayer] = useState<player | null>(null);
 
 	useEffect(() => {
 	if (mod !== gameMod.soloGame) {
 		const getLPlayer = () => {
-			const name = "user";
+			const name = playerInfo?.p1.nickName;
 			const wins = 5;
 			const losses = 2;
 			setLPlayer({ name, wins, losses });
 		};
 	
 		const getRPlayer = () => {
-			const name = "user";
+			const name = playerInfo?.p2.nickName;
 			const wins = 5;
 			const losses = 2;
 			setRPlayer({ name, wins, losses });

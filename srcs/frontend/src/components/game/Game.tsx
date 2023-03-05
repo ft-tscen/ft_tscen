@@ -34,7 +34,24 @@ function Game({ mod }: gameComponent) {
 	const [startGame, setStartGame] :BoolType = useState<boolean>(false);
 	const [isWatch, setIsWatch] :BoolType = useState<boolean>(false);
 
-	const [playerInfo, setPlayerInfo] = useState<playerType>();
+	const [playerInfo, setPlayerInfo] = useState<playerType>({
+		p1: {
+			intraID: "",
+			name: "",
+			nickName: "",
+			phone: "",
+			verified: false,
+			avatarId: 0,
+		},
+		p2: {
+			intraID: "",
+			name: "",
+			nickName: "",
+			phone: "",
+			verified: false,
+			avatarId: 0,
+		}
+	});
 
 	let [data, setData] = useState<dataType>();
 
@@ -273,7 +290,7 @@ function Game({ mod }: gameComponent) {
 
 	return (
 		<>
-		<Player mod={mod}></Player>
+		<Player mod={mod} playerInfo={playerInfo} ></Player>
 		<Row className='canv border justify-content-md-center'>
 			<canvas
 				ref={canvasRef}
