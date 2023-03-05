@@ -16,6 +16,7 @@ type ArgsType = {
 	enterChannel: (dto: SocketOutputDto) => void;
 	setDMMsg: (dto: SocketOutputDto) => void;
 	setInviteMsg: (dto: SocketOutputDto) => void;
+    getOtherProfile: (dto: SocketOutputDto) => void;
 };
 
 export function InputMsg({
@@ -23,6 +24,7 @@ export function InputMsg({
 	enterChannel,
 	setDMMsg,
 	setInviteMsg,
+	getOtherProfile,
 }: ArgsType) {
 	const chatInputRef = useRef<HTMLInputElement>(null);
 
@@ -95,7 +97,7 @@ export function InputMsg({
 					} else {
 						enteredMSG.target = words[1];
 					}
-					// MySocket.instance.emit(SOCKET_EVENT.PROFILE, enteredMSG);
+					mySocket.socket.emit(SOCKET_EVENT.PROFILE, enteredMSG, getOtherProfile);
 					break;
 				case "/BLOCK":
 					if (words.length !== 2) {

@@ -1,18 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BoolType } from "../../common/types";
+import { BoolType, UserData } from "../../common/types";
 import SaveProfile from "./SaveProfile";
 import ShowProfile from "./ShowProfile";
 
 type ProfileComponent = {
 	isLoggedIn: boolean;
-	userData: {
-		intraID: string;
-		name: string;
-		nickName: string;
-		phone: string;
-		verified: boolean;
-	};
+	userData: UserData;
 	isChangedData: boolean;
 	setChangedData: (isChangedData: boolean) => any;
 };

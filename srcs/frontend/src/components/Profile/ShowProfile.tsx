@@ -1,13 +1,8 @@
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
+import { UserData } from "../../common/types";
 
 type ShowProfileComponent = {
-	userData: {
-		intraID: string;
-		name: string;
-		nickName: string;
-		phone: string;
-		verified: boolean;
-	};
+	userData: UserData;
 	setEdit: (edit: boolean) => any;
 };
 

@@ -1,16 +1,17 @@
 import { useEffect, useRef } from "react";
 import { Container } from "react-bootstrap";
-import { SocketOutputDto } from "../../common/types";
+import { SocketOutputDto, UserData } from "../../common/types";
 import { Chat } from "./Chat";
 import "./Effect.css";
 
 type ArgsType = {
     msgList :SocketOutputDto[],
-    enterGame : (dto: SocketOutputDto) => void
-    setReceivedMsg:React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
+    enterGame : (dto: SocketOutputDto) => void,
+    setReceivedMsg :React.Dispatch<React.SetStateAction<SocketOutputDto|undefined>>,
+    setInform :React.Dispatch<React.SetStateAction<UserData>>
 }
 
-export function ChatRoom({msgList, enterGame, setReceivedMsg} :ArgsType) {
+export function ChatRoom({msgList, enterGame, setReceivedMsg, setInform} :ArgsType) {
     const chatWindow = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -27,7 +28,7 @@ export function ChatRoom({msgList, enterGame, setReceivedMsg} :ArgsType) {
             {
                 msgList.map((msg :SocketOutputDto, idx :number) => {
                     return (
-                        <Chat key={idx} msg={msg} enterGame={enterGame} setReceivedMsg={setReceivedMsg}/>
+                        <Chat key={idx} msg={msg} enterGame={enterGame} setReceivedMsg={setReceivedMsg} setInform={setInform}/>
                     );
                 })
             }

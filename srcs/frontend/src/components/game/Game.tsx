@@ -7,6 +7,7 @@ import WaitPage from './PageWait';
 import Player from './PlayerBar';
 import { myGameSocket } from '../../common/MySocket';
 import { BoolType, dataType, gameMod, SOCKET_GAME_EVENT } from '../../common/types';
+import { Row, Stack } from 'react-bootstrap';
 
 
 type gameComponent = {
@@ -239,13 +240,13 @@ function Game({ mod }: gameComponent) {
 	}
 
 	return (
-		<div>
+		<>
 			<Player mod={mod}></Player>
 			<canvas
 				ref={canvasRef}
 				width={CanvasWidth}
 				height={CanvasHeight}/>
-		</div>
+		</>
 	);
 }
 

@@ -7,6 +7,8 @@ export interface UserData {
 	nickName: string,
 	phone: string,
 	verified: boolean,
+    avatarId: number,
+    // history: any,
 }
 
 export interface SocketInputDto {
@@ -21,7 +23,7 @@ export interface SocketOutputDto {
     target?: string; // nickname or channel name
     message?: string;
     type?: string;
-    // user?: User;
+    user?: UserData;
 }
 
 export interface ChannelType {
@@ -62,7 +64,8 @@ export const SOCKET_EVENT = {
     RESFRIEND: "res-friend",
     NOTICE: "notice",
     ENTER_GAME: "enter-game",
-    WATCH_GAME: "watch-gaem",
+    WATCH_GAME: "watch-game",
+    PROFILE: "get-profile",
 }
 
 export const SHOW_CHATROOM :boolean = true;
