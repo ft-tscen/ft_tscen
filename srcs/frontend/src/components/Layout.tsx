@@ -13,7 +13,6 @@ import { useState } from "react";
 type LayoutComponent = {
 	isLoggedIn: boolean;
 	userData: UserData;
-	imageURL: string;
 	isChangedData: boolean;
 	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -21,7 +20,6 @@ type LayoutComponent = {
 function Layout({
 	isLoggedIn,
 	userData,
-	imageURL,
 	isChangedData,
 	setChangedData,
 }: LayoutComponent) {
