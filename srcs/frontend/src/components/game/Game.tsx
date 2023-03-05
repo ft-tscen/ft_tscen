@@ -34,32 +34,9 @@ function Game({ mod }: gameComponent) {
 	const [startGame, setStartGame] :BoolType = useState<boolean>(false);
 	const [isWatch, setIsWatch] :BoolType = useState<boolean>(false);
 	const [isInfo, setIsInfo] :BoolType = useState<boolean>(false);
-
-	//const [playerInfo, setPlayerInfo] = useState<playerType>();
 	const [playerInfo, setPlayerInfo] = useState<playerType>();
 
-	const [lplayerInfo, setLPlayerInfo] = useState<UserData>();
-
 	let [data, setData] = useState<dataType>();
-
-	let PlayerInfo : playerType = {
-		p1 : {
-			intraID:"",
-			name : "",
-			nickName : "",
-			phone : "",
-			verified : false,
-			avatarId : 0,
-		},
-		p2 : {
-			intraID:"",
-			name : "",
-			nickName : "",
-			phone : "",
-			verified : false,
-			avatarId : 0,
-		}
-	};
 
 	useEffect(()=> {
 		try {
@@ -94,7 +71,7 @@ function Game({ mod }: gameComponent) {
 				})
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
 				myGameSocket.socket.on('matching-success', (data: any) => {
-					PlayerInfo = {
+					const PlayerInfo : playerType = {
 						p1 : {
 							intraID: data.p1.intra,
 							name : data.p1.usual_full_name,
@@ -114,10 +91,11 @@ function Game({ mod }: gameComponent) {
 					}
 
 					console.log(data);
-					console.log(PlayerInfo.p1);
-					console.log(PlayerInfo.p2);
-					console.log(data.p1.intra);
-					setIsInfo(true);
+					// console.log(PlayerInfo.p1);
+					// console.log(PlayerInfo.p2);
+					// console.log(data.p1.intra);
+					
+					setPlayerInfo(PlayerInfo);
 					setMatch(true);
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
 					document.addEventListener('keydown', (e) => {
@@ -170,9 +148,9 @@ function Game({ mod }: gameComponent) {
 					}
 					else {
 						if (p1win)
-							EndPage(ctx, CanvasWidth, CanvasHeight, PlayerInfo.p1.nickName);
+							EndPage(ctx, CanvasWidth, CanvasHeight, "p1");
 						else
-							EndPage(ctx, CanvasWidth, CanvasHeight, PlayerInfo.p2.nickName);
+							EndPage(ctx, CanvasWidth, CanvasHeight, "p2");
 					}
 					// 여기에 경기 결과 db에 업데이트 하는 코드 추가 (watch상태 아닐시에만)
 					// if (mod !== gameMod.watchGame)
@@ -185,6 +163,12 @@ function Game({ mod }: gameComponent) {
 			navigate('/');
 		}
 		}, [ctx])
+
+		useEffect(() => {
+			// game시작 했을 때만 적용되게
+			if (match)
+				setIsInfo(true);
+		}, [playerInfo]);
 
 		function killSockets(socket : any) {
 			socket.off('end-game');
@@ -302,15 +286,15 @@ function Game({ mod }: gameComponent) {
 
 	return (
 		<>
-		{isInfo && (
-			<Player mod={mod} playerInfo={PlayerInfo} ></Player>
-		)}
-		<Row className='canv border justify-content-md-center'>
-			<canvas
-				ref={canvasRef}
-				width={CanvasWidth}
-				height={CanvasHeight}/>
-		</Row>
+			{isInfo && (
+			<Player mod={mod} playerInfo={playerInfo} ></Player>
+			)}
+			<Row className='canv border justify-content-md-center'>
+				<canvas
+					ref={canvasRef}
+					width={CanvasWidth}
+					height={CanvasHeight}/>
+			</Row>
 		</>
 	);
 }

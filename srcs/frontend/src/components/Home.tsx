@@ -30,8 +30,8 @@ function Home({ isLoggedIn, userData, enteredChannel }: HomeComponent) {
 	}
 
 	const isDisable = () => {
-		console.log("asdf");
-		if (isLoggedIn && enteredChannel && userData.verified)
+		// if (isLoggedIn && enteredChannel && userData.verified)
+		if (isLoggedIn)
 			return false;
 		else
 			return true;
