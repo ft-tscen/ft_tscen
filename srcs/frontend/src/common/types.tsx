@@ -186,4 +186,9 @@ type dataType = {
   rightScore: number,
 }
 
-export type { userType, netType, ballType, dataType }
+type playerType = {
+    p1 : UserData,
+    p2 : UserData
+}
+
+export type { userType, netType, ballType, dataType, playerType }

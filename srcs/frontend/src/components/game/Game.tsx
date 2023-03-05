@@ -6,7 +6,7 @@ import ReadyPage from './PageReady';
 import WaitPage from './PageWait';
 import Player from './PlayerBar';
 import { myGameSocket } from '../../common/MySocket';
-import { BoolType, dataType, gameMod, SOCKET_GAME_EVENT } from '../../common/types';
+import { BoolType, dataType, gameMod, playerType, SOCKET_GAME_EVENT, UserData } from '../../common/types';
 import { Row, Stack } from 'react-bootstrap';
 
 
@@ -33,6 +33,10 @@ function Game({ mod }: gameComponent) {
 
 	const [startGame, setStartGame] :BoolType = useState<boolean>(false);
 	const [isWatch, setIsWatch] :BoolType = useState<boolean>(false);
+
+	const [playerInfo, setPlayerInfo] = useState<playerType>();
+
+	const [leftInfo, setLeftInfo] = useState<playerType>();
 
 	let [data, setData] = useState<dataType>();
 
@@ -68,14 +72,15 @@ function Game({ mod }: gameComponent) {
 					setStartGame(true);
 				})
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
-				myGameSocket.socket.on('matching-success', () => {
-					console.log('매칭 성공');
+				myGameSocket.socket.on('matching-success', (data: playerType) => {
+					setPlayerInfo({
+						p1 : data.p1,
+						p2 : data.p2
+					})
 					setMatch(true);
-					console.log('ssersr3');
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
 					document.addEventListener('keydown', (e) => {
 						if (e.code === 'KeyR') {
-							console.log('rank ready!');
 							myGameSocket.socket.emit('ready-rank');
 						}
 					});
@@ -113,10 +118,21 @@ function Game({ mod }: gameComponent) {
 					rightScore : data.rightScore,
 				})
 			})
-			myGameSocket.socket.on('end-game', (res: boolean) => {
+			myGameSocket.socket.on('end-game', (p1win: boolean) => {
 				const ctx = canvas?.getContext("2d");
 				if (ctx) {
-					EndPage(ctx, CanvasWidth, CanvasHeight, res);
+					if (mod === gameMod.soloGame) {
+						if (p1win)
+							EndPage(ctx, CanvasWidth, CanvasHeight, "user");
+						else
+							EndPage(ctx, CanvasWidth, CanvasHeight, "com");
+					}
+					else {
+						if (p1win)
+							EndPage(ctx, CanvasWidth, CanvasHeight, playerInfo?.p1.nickName);
+						else
+							EndPage(ctx, CanvasWidth, CanvasHeight, playerInfo?.p2.nickName);
+					}
 					// 여기에 경기 결과 db에 업데이트 하는 코드 추가 (watch상태 아닐시에만)
 					// if (mod !== gameMod.watchGame)
 					killSockets(myGameSocket.socket);
@@ -239,15 +255,31 @@ function Game({ mod }: gameComponent) {
 		}
 	}
 
+	const styleEl = document.createElement('style');
+	styleEl.appendChild(document.createTextNode(styles));
+	document.head.appendChild(styleEl);
+
 	return (
 		<>
-			<Player mod={mod}></Player>
+		<Player mod={mod}></Player>
+		<Row className='canv border justify-content-md-center'>
 			<canvas
 				ref={canvasRef}
 				width={CanvasWidth}
 				height={CanvasHeight}/>
+		</Row>
 		</>
 	);
 }
 
 export default Game;
+
+const styles = `
+.canv {
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+	align-items: center;
+	vertical-align: center;
+}
+`;
