@@ -1,36 +1,54 @@
 import { useEffect, useState } from "react";
-import { Container, Col, Row, Image, Card, Stack, Form } from "react-bootstrap";
+import { Container, Col, Row, Image, Card, Stack, Form, Button } from "react-bootstrap";
 import { api } from "../../axios/api";
+import { mySocket } from "../../common/MySocket";
 import { UserData } from "../../common/types";
 
 type InformComponent = {
 	inform: UserData;
+	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
+	myData: UserData;
 };
 
-function MyInform({ inform }: InformComponent) {
+function MyInform({ inform, setInform, myData }: InformComponent) {
 	// console.log(userData);
 	const [imageURL, setImageURL] = useState("");
 
 	const getAvatar = async () => {
-		try {
-			const response = await api.get(`/user/avatar/${inform.avatarId}`, {
-				responseType: "arraybuffer",
-			});
-			const arrayBufferView = new Uint8Array(response.data);
-			const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
-			const urlCreator = window.URL || window.webkitURL;
-			const imageUrl = urlCreator.createObjectURL(blob);
-			setImageURL(imageUrl);
-		} catch (e) {
-			setImageURL("./profile.jpeg");
+		if (inform.avatarId) {
+			try {
+				const response = await api.get(`/user/avatar/${inform.avatarId}`, {
+					responseType: "arraybuffer",
+				});
+				const arrayBufferView = new Uint8Array(response.data);
+				const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+				const urlCreator = window.URL || window.webkitURL;
+				const imageUrl = urlCreator.createObjectURL(blob);
+				setImageURL(imageUrl);
+			} catch (e) {
+				setImageURL("./Anonymous.jpeg");
+			}
 		}
 	};
+
+	const getMyData = () => {
+		setInform(myData);
+	}
+
+	const isDisable = () => {
+		if (inform.nickname !== mySocket.name)
+			return false;
+		return true;
+	}
 
 	useEffect(() => {
 		getAvatar();
 	}, [inform]);
 	return (
 		<>
+			<Button className="mt-3" variant="outline-light" onClick={getMyData} disabled={isDisable()}>
+				Back
+			</Button>
 			<Stack gap={5} className="mt-5" style={{ height: "40vmin" }}>
 				<Container>
 					<Row>

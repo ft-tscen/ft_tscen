@@ -58,7 +58,7 @@ function Layout({
 				<Row style={{ height: "90vmin" }}>
 					<Col xs={3} className={getBorder()}>
 						{userData.nickname === null || !isLoggedIn ? null : (
-							<MyInform inform={inform ?? userData} />
+							<MyInform inform={inform ?? userData} setInform={setInform} myData={userData}/>
 							// <OtherInform userData={userData} imageURL={imageURL} />
 						)}
 					</Col>

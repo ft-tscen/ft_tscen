@@ -27,16 +27,18 @@ export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
 	const [imageDataUrl, setImageDataUrl] = useState<string>();
 
 	const getUserData = async () => {
-		await api
-			.get(`/user/avatar/${msg.user?.avatarId}`, { responseType: "arraybuffer" })
-			.then((response) => {
-				const arrayBufferView = new Uint8Array(response.data);
-				const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
-				const urlCreator = window.URL || window.webkitURL;
-				const imageUrl = urlCreator.createObjectURL(blob);
-				setImageDataUrl(imageUrl);
-			})
-			.catch((error) => console.error(error));
+		if (msg.user?.avatarId) {
+			await api
+				.get(`/user/avatar/${msg.user?.avatarId}`, { responseType: "arraybuffer" })
+				.then((response) => {
+					const arrayBufferView = new Uint8Array(response.data);
+					const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+					const urlCreator = window.URL || window.webkitURL;
+					const imageUrl = urlCreator.createObjectURL(blob);
+					setImageDataUrl(imageUrl);
+				})
+				.catch((error) => console.error(error));
+		}
 	};
 	useEffect(() => {
 		if (msg.author !== 'server' && msg.author !== mySocket.name)
