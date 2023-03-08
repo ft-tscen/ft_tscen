@@ -30,3 +30,7 @@ export class UpdateUserDto {
   phone?: string;
   code?: string;
 }
+
+export class getScoreByNickNameOutput extends BaseOutput {
+	score?: any;
+}

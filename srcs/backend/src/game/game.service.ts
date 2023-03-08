@@ -8,7 +8,6 @@ import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
 import { History } from './entities/history.entity';
 
-//  Dto에 필요한 변수 : score, ball_x, ball_velocityX, ball_y, ball_velocityY, left_padle_y, right_padle_y, roomName
 // Cluster
 const CanvasWidth = 1200;
 const CanvasHeight = 800;
@@ -320,12 +319,6 @@ export class GameService {
       this.update_v2(Game);
     }, 1000 / 45);
   }
-
-//  gameLoop_v2(Game: GameDto) {
-//    Game.interval = setInterval(() => {
-//      this.update_v2(Game);
-//    }, 1000 / 45);
-//  }
 
   async finishGame(Game: GameDto, p1_win: boolean) {
 	if (p1_win) {

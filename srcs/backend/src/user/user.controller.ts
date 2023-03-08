@@ -2,6 +2,7 @@ import {
   changeAvatarOutput,
   CheckNickNameOutput,
   getMeOutput,
+  getScoreByNickNameOutput,
   getUserByIdOutput,
   getUserByNickNameOutput,
   UpdateUserDto,
@@ -188,13 +189,13 @@ export class UserController {
   @UseGuards(AuthGuard)
   @ApiResponse({
     status: 200,
-    description: 'get score by intra',
+    description: 'get score by nickname',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Get('/score')
   async getScoreByNickName(
     @Query('nickname') nickname: string,
-  ): Promise<getUserByIdOutput> {
+  ): Promise<getScoreByNickNameOutput> {
     return await this.userService.getScoreByNickName(nickname);
   }
 }
