@@ -1,8 +1,30 @@
 import { useEffect, useState } from "react";
-import { Container, Col, Row, Image, Card, Stack, Form, Button } from "react-bootstrap";
+import { Container, Col, Row, Image, Card, Stack, Form, Button, ListGroup } from "react-bootstrap";
 import { api } from "../../axios/api";
 import { mySocket } from "../../common/MySocket";
 import { UserData } from "../../common/types";
+
+type Record = {
+	timestamp: string;
+	nickname: string;
+	isRank: boolean;
+	isWin: boolean;
+};
+
+function createDummyData(): Record[] {
+	const record: Record[] = [];
+	for (let i = 0; i < 50; i++) {
+		const isRank = Math.random() < 0.5;
+		const isWin = Math.random() < 0.5;
+		record.push({
+			timestamp: new Date().toLocaleTimeString(),
+			nickname: `${i}usertesttesttesttesttest`,
+			isRank,
+			isWin,
+		});
+	}
+	return record;
+}
 
 type InformComponent = {
 	inform: UserData;
@@ -101,6 +123,25 @@ function MyInform({ inform, setInform, myData }: InformComponent) {
 							</Form>
 						</Card.Body>
 					</Card>
+					<Form.Group className="mb-2" controlId="formName">
+						<Form.Label className="text-white">최근 전적(최대 30게임)</Form.Label>
+					</Form.Group>
+					<Container style={{ height: "10%", overflowY: "scroll" }}>
+						<Card className="border-0">
+						<Card.Body className="p-0">
+						<ListGroup variant="flush">
+							{createDummyData().slice(0, 30).map((res, index) => (
+							<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
+								<span className="fw-bold">{res.timestamp}</span>
+								<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>
+								<span className="ms-2 text-white fw-bold">{res.nickname.slice(0, 10)}</span>
+								<span className="text-white float-end">{res.isWin ? "🏆승리🏆" : "패배"}</span>
+							</ListGroup.Item>
+							))}
+						</ListGroup>
+						</Card.Body>
+					</Card>
+					</Container>
 				</Container>
 			</Stack>
 		</>
