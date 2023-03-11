@@ -1,14 +1,17 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
-import { BoolType, GameRoomType, SocketInputDto } from "../../common/types";
-import { mySocket } from "../../common/MySocket";
+import { BoolType, GameRoomType, SocketOutputDto, SOCKET_GAME_EVENT } from "../../common/types";
+import { myGameSocket, mySocket } from "../../common/MySocket";
 import "./Effect.css"
 
 type ArgsType = {
     obj :GameRoomType,
+    setReceivedMsg: React.Dispatch<
+        React.SetStateAction<SocketOutputDto | undefined>
+    >;
 }
 
-export function GameRoom({obj} :ArgsType) {
+export function GameRoom({obj, setReceivedMsg} :ArgsType) {
     let [visible, setVisible] :BoolType = useState<boolean>(false);
     
     let name :string = (obj.password ? `🔒 ${obj.name} 🔒` : obj.name);
@@ -16,12 +19,10 @@ export function GameRoom({obj} :ArgsType) {
 
     const toWatchTheGame = () => {
         let pw :string|undefined = pwInputRef.current!.value;
-        let dto :SocketInputDto = {
-            author :mySocket.name,
-            target :obj.name,
-            password :pw
-        }
-        
+        myGameSocket.socket.emit(SOCKET_GAME_EVENT.WATCH, obj.name, pw,
+            ({success, payload} :{success :boolean, payload :string}) => {
+                setReceivedMsg({author:'server', message:payload})
+            });
         offVisible();
         pwInputRef.current!.value = "";
     }

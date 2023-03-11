@@ -148,7 +148,9 @@ export const SOCKET_GAME_EVENT = {
     SOLO_READY: "ready-solo",
     UPDATE: "update",
 	NICK: "nickname",
-    JOIN: "join-room"
+    JOIN: "join-room",
+    LIST: "room-list",
+    WATCH: "watch-room"
 }
 
 type userType = {

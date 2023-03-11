@@ -1,20 +1,24 @@
 import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import { GameRoom } from "./GameRoom";
-import { GameRoomType, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
-import { mySocket } from "../../common/MySocket";
+import { GameRoomType, SocketOutputDto, SOCKET_GAME_EVENT } from "../../common/types";
+import { myGameSocket } from "../../common/MySocket";
 import "./Effect.css";
 
 type GameRoomListType = [
     gameRoomList: GameRoomType[],
     setGameRoomList: React.Dispatch<React.SetStateAction<GameRoomType[]>>
 ];
-
-export function GameRooms() {
+type ArgsType = {
+    setReceivedMsg: React.Dispatch<
+        React.SetStateAction<SocketOutputDto | undefined>
+    >;
+}
+export function GameRooms({setReceivedMsg} : ArgsType) {
     let [gameRoomList, setGameRoomList] : GameRoomListType = useState<GameRoomType[]>([]);
 
     useEffect(() => {
-        mySocket.socket.emit(SOCKET_EVENT.GET_GAMEROOM, setGameRoomList);
+        myGameSocket.socket.emit(SOCKET_GAME_EVENT.LIST, setGameRoomList);
     }, []);
 
 	return (
@@ -22,7 +26,7 @@ export function GameRooms() {
         {
             gameRoomList.map((obj :GameRoomType, idx :number) => {
                 return (
-                    <GameRoom key={idx} obj={obj}/>
+                    <GameRoom key={idx} obj={obj} setReceivedMsg={setReceivedMsg}/>
                 );
             })
         }

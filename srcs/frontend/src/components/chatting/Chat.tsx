@@ -82,7 +82,6 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 			setShow(false);
 		};
 		const joinGame = () => {
-			console.log("초대한 게임에 참여함");
 			myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, msg.author,
 				({success, payload}: {success :boolean, payload :string}) => {
 					setReceivedMsg({author:"server", message:payload})
