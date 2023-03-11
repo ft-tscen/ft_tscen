@@ -63,8 +63,6 @@ export const SOCKET_EVENT = {
     BEFRIEND: "be-friend",
     RESFRIEND: "res-friend",
     NOTICE: "notice",
-    ENTER_GAME: "enter-game",
-    WATCH_GAME: "watch-game",
     PROFILE: "get-profile",
 }
 
@@ -150,7 +148,8 @@ export const SOCKET_GAME_EVENT = {
 	NICK: "nickname",
     JOIN: "join-room",
     LIST: "room-list",
-    WATCH: "watch-room"
+    WATCH: "watch-room",
+    GET_ROOM_NAME: "find-room",
 }
 
 type userType = {
