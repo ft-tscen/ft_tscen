@@ -1,4 +1,4 @@
-import { Button, Container, Nav, Navbar } from "react-bootstrap";
+import { Button, Col, Container, Nav, Navbar, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { api } from "../axios/api";
 
@@ -35,7 +35,8 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 									onClick={() =>
 										(window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login`)
 									}
-								>로그인
+								>
+									로그인
 								</Button>
 							) : (
 								<>
