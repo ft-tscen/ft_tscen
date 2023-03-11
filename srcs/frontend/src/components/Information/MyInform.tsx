@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Container, Col, Row, Image, Card, Stack, Form, Button, ListGroup } from "react-bootstrap";
+import { Container, Col, Row, Image, Card, Stack, Form, Button, ListGroup, Offcanvas } from "react-bootstrap";
 import { api } from "../../axios/api";
 import { mySocket } from "../../common/MySocket";
 import { UserData } from "../../common/types";
+import Friends from "../Friends";
 
 type Record = {
 	timestamp: string;
@@ -33,8 +34,14 @@ type InformComponent = {
 };
 
 function MyInform({ inform, setInform, myData }: InformComponent) {
-	// console.log(userData);
 	const [imageURL, setImageURL] = useState("");
+	const [show, setShow] = useState(false);
+	const [myFriends, setMyFriends] = useState([]);
+	const handleClose = () => setShow(false);
+	const handleShow = () => {
+		setShow(true);
+		getMyFriends();
+	};
 
 	const getAvatar = async () => {
 		if (inform.avatarId) {
@@ -50,35 +57,68 @@ function MyInform({ inform, setInform, myData }: InformComponent) {
 			} catch (e) {
 				setImageURL("./Anonymous.jpeg");
 			}
-		}
-		else {
+		} else {
 			setImageURL("./Anonymous.jpeg");
 		}
 	};
 
 	const getMyData = () => {
 		setInform(myData);
-	}
+	};
 
-	const isDisable = () => {
-		if (inform.nickname !== mySocket.name)
-			return false;
+	const isDisable_back = () => {
+		if (inform.nickname !== mySocket.name) return false;
 		return true;
-	}
+	};
+
+	const isDisable_friends = () => {
+		if (inform.nickname !== mySocket.name) return true;
+		return false;
+	};
+
+	const getMyFriends = async () => {
+		try {
+			const res = await api.get("/user/friends");
+			const { friends } = res.data;
+			setMyFriends(friends);
+		} catch (e) {
+			console.error(e);
+		}
+	};
 
 	useEffect(() => {
 		getAvatar();
 	}, [inform]);
 	return (
 		<>
-			<Button className="mt-3" variant="outline-light" onClick={getMyData} disabled={isDisable()}>
-				Back
-			</Button>
+			<Container className="d-flex justify-content-between">
+				<Button
+					className="mt-3"
+					variant="outline-light"
+					onClick={getMyData}
+					disabled={isDisable_back()}
+				>
+					◀️
+				</Button>
+				<Button
+					className="mt-3"
+					variant="outline-light"
+					onClick={handleShow}
+					disabled={isDisable_friends()}
+				>
+					친구 목록
+				</Button>
+				<Friends show={show} handleClose={handleClose} friends={myFriends} />
+			</Container>
 			<Stack gap={5} className="mt-5" style={{ height: "40vmin" }}>
 				<Container>
 					<Row>
 						<Col className="vh-15 d-flex justify-content-center align-items-center">
-							<Image src={imageURL} roundedCircle style={{ width: "15vmin", height: "15vmin" }} />
+							<Image
+								src={imageURL}
+								roundedCircle
+								style={{ width: "15vmin", height: "15vmin" }}
+							/>
 						</Col>
 					</Row>
 				</Container>

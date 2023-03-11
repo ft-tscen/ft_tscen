@@ -12,13 +12,13 @@ export class GameController {
   @UseGuards(AuthGuard)
   @ApiResponse({
     status: 200,
-    description: 'search user by nickname',
+    description: 'search history by nickname',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @Get('/online')
-  async isOnline(
+  @Get('/history')
+  async getHistory(
     @Query('nickname') nickname: string,
   ) {
-    return ;
+	  return await this.gameService.getHistory(nickname);
   }
 }

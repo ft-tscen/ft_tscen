@@ -235,7 +235,6 @@ export class UserService {
 
   async getScoreByNickName(nickname: string) {
     try {
-	  console.log(nickname);
 	  const user = await this.users.findOne({
 	    where: { nickname },
 	  });

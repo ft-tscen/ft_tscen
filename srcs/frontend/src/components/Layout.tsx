@@ -1,6 +1,6 @@
 import { Col, Row, Container } from "react-bootstrap";
 import ChatPart from "./chatting/ChatPart";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Home from "./Home";
 import Game from "./game/Game";
 import CreatRoom from "./Room";
@@ -26,10 +26,17 @@ function Layout({
 	const [enteredChannel, setEnteredChannel] = useState<boolean>(false);
 	const url = useParams();
 	const param = url["*"];
+	const navigate = useNavigate();
 
 	const getComponent = () => {
 		if (param === "")
-			return <Home isLoggedIn={isLoggedIn} userData={userData} enteredChannel={enteredChannel}/>;
+			return (
+				<Home
+					isLoggedIn={isLoggedIn}
+					userData={userData}
+					enteredChannel={enteredChannel}
+				/>
+			);
 		else if (param === "profile")
 			return (
 				<Profile
@@ -45,6 +52,7 @@ function Layout({
 		else if (param === "privateGame")
 			return <Game mod={gameMod.passwordGame} />;
 		else if (param === "creatGame") return <CreatRoom />;
+		else navigate("/");
 	};
 
 	const getBorder = () => {
@@ -58,13 +66,21 @@ function Layout({
 				<Row style={{ height: "90vmin" }}>
 					<Col xs={3} className={getBorder()}>
 						{userData.nickname === null || !isLoggedIn ? null : (
-							<MyInform inform={inform ?? userData} setInform={setInform} myData={userData}/>
-							// <OtherInform userData={userData} imageURL={imageURL} />
+							<MyInform
+								inform={inform ?? userData}
+								setInform={setInform}
+								myData={userData}
+							/>
 						)}
 					</Col>
 					<Col xs={6}>{getComponent()}</Col>
 					<Col xs={3} className={getBorder()}>
-						{isLoggedIn && <ChatPart setInform={setInform} setEnteredChannel={setEnteredChannel}/>}
+						{isLoggedIn && (
+							<ChatPart
+								setInform={setInform}
+								setEnteredChannel={setEnteredChannel}
+							/>
+						)}
 					</Col>
 				</Row>
 			</Container>

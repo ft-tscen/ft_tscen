@@ -101,18 +101,6 @@ export class GamesGateway
 		waitingPlayer.waiting = false;
   }
 
-  async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    return hashedPassword;
-  }
-
-  async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-    const isMatch = await bcrypt.compare(password, hashedPassword);
-    return isMatch;
-  }
-
   @SubscribeMessage('nickname')
   handleNickname(@ConnectedSocket() socket: Socket, @MessageBody() nickname: string) {
 	this.logger.log(`Nickname Registration ${nickname}`);
@@ -180,11 +168,6 @@ export class GamesGateway
 		dto.p2.padleDown = false;
 	}
 	return { success: true, payload: `Paddle Stop` };
-  }
-
-  @SubscribeMessage('room-list')
-  handleRoomList() {
-    return createdRooms;
   }
 
   @SubscribeMessage('matching')
@@ -313,6 +296,19 @@ export class GamesGateway
 	return { success: true, payload: `${roomName} deleted!` };
   }
 
+  @SubscribeMessage('find-room')
+  handleFindRoom(@MessageBody() nickname: string) {
+	const roomName = RoomNameByNickname[nickname];
+	if (!roomName)
+		return { success: false, payload: `${nickname} Jimmy doesn't have a room`};
+	return {success: true, payload: roomName};
+  }
+
+  @SubscribeMessage('room-list')
+  handleRoomList() {
+    return createdRooms;
+  }
+
   @SubscribeMessage('create-room')
   async handleCreateRoom(
     @ConnectedSocket() socket: Socket,
@@ -333,7 +329,7 @@ export class GamesGateway
 	);
 	if (password) {
 		Game.gameMod = gameMod.passwordGame;
-		Game.password = await this.hashPassword(password);
+		Game.password = await this.gameService.hashPassword(password);
 	}
 	GameDtoByRoomName[roomName] = Game;
 
@@ -351,7 +347,6 @@ export class GamesGateway
   async handleEnterRoom(
 	  @ConnectedSocket() socket: Socket,
 	  @MessageBody() roomName: string,
-	  @MessageBody() password: string,
   ) {
 	const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
     if (exists == undefined) {
@@ -359,10 +354,6 @@ export class GamesGateway
     }
 
 	const Game: GameDto =  GameDtoByRoomName[roomName];
-    const isMatch = await this.verifyPassword(password, Game.password);
-	if (Game.gameMod === gameMod.passwordGame && !isMatch) {
-		return { success: false, payload: `${roomName} password wrong!` };
-	}
 
 	if (Game.p2.name)
 		return { success: false, payload: `${NicknameBySocketId[socket.id]} is not player!` };
@@ -401,7 +392,7 @@ export class GamesGateway
     }
 
 	const Game: GameDto =  GameDtoByRoomName[roomName];
-    const isMatch = await this.verifyPassword(password, Game.password);
+    const isMatch = await this.gameService.verifyPassword(password, Game.password);
 	if (Game.gameMod === gameMod.passwordGame && !isMatch) {
 		return { success: false, payload: `${roomName} password wrong!` };
 	}

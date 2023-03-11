@@ -7,6 +7,7 @@ import type { GameDto, HistoryOutput } from './dtos/game.dto';
 import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
 import { History } from './entities/history.entity';
+import * as bcrypt from 'bcrypt';
 
 // Cluster
 const CanvasWidth = 1200;
@@ -31,18 +32,35 @@ export class GameService {
 			});
 			if (existed)
 				return {ok: false, error: 'There is a History already'};
-			const history = await this.histories.save(
+			const history: History = await this.histories.save(
 				this.histories.create({ winner, loser, type})
 			);
-			return { ok: true, history };
+			let h: History[];
+			h.push(history);
+			return { ok: true, history: h };
 		} catch (error) {
 			return {ok: false, error: 'createHistory Error'};
 		}
 	}
 
+	async getHistory(nickname: string): Promise<HistoryOutput> {
+		try {
+			const winner = nickname;
+			const loser = nickname;
+			const history = await this.histories.find({
+				where: { winner, loser },
+			});
+			if (history)
+				return {ok: true, history: history};
+			return {ok: false, error: 'History not Found'};
+		} catch (error) {
+			return {ok: false, error: 'getWinHistory Error'};
+		}
+	}
+
 	async getWinHistory(winner: string): Promise<HistoryOutput> {
 		try {
-			const win_history = await this.histories.findOne({
+			const win_history = await this.histories.find({
 				where: { winner },
 			});
 			if (win_history)
@@ -55,7 +73,7 @@ export class GameService {
 
 	async getLoseHistory(loser: string): Promise<HistoryOutput> {
 		try {
-			const lose_history = await this.histories.findOne({
+			const lose_history = await this.histories.find({
 				where: { loser },
 			});
 			if (lose_history)
@@ -312,6 +330,22 @@ export class GameService {
         Game.p2.padleY += Game.p2.speed;
       }
     }
+  }
+
+  async hashPassword(password: string): Promise<string> {
+	if (!password)
+	  return undefined;
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    return hashedPassword;
+  }
+
+  async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+	if (!password && !hashedPassword)
+	  return true;
+    const isMatch = await bcrypt.compare(password, hashedPassword);
+    return isMatch;
   }
 
   gameLoop(Game: GameDto) {
