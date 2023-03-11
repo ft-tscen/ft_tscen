@@ -59,8 +59,9 @@ export class UserService {
     }
   }
 
-  async getUserByNickName(nickname: string): Promise<getUserByNickNameOutput> {
+  async getUserByNickName(nickname: string): Promise<any> {
     try {
+		console.log(nickname);
       const user = await this.users.findOne({
         where: { nickname },
       });
@@ -232,12 +233,17 @@ export class UserService {
     }
   }
 
-  async getScoreByNickName(intra: string) {
+  async getScoreByNickName(nickname: string) {
     try {
-      const user = await this.users.findOne({
-        where: { intra },
-      });
-      if (user) {
+	  const user = await this.users.findOne({
+	    where: { nickname },
+	  });
+	  if (user == undefined) {
+		return {
+		  ok: false,
+		  error: 'User Not Found',
+		};
+	  }
 		const score = {
 		  f_win: user.f_win,
 		  f_lose: user.f_lose,
@@ -245,11 +251,8 @@ export class UserService {
 		  r_lose: user.r_lose,
 		}
         return { ok: true, score };
-      }
-      return { ok: false, error: 'User not Found' };
     } catch (error) {
       return { ok: false, error };
     }
   }
-
 }
