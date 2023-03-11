@@ -2,38 +2,17 @@ import { useEffect, useState } from "react";
 import { Container, Col, Row, Image, Card, Stack, Form, Button, ListGroup, Offcanvas } from "react-bootstrap";
 import { api } from "../../axios/api";
 import { mySocket } from "../../common/MySocket";
-import { UserData } from "../../common/types";
+import { GameData, UserData } from "../../common/types";
 import Friends from "../Friends";
-
-type Record = {
-	timestamp: string;
-	nickname: string;
-	isRank: boolean;
-	isWin: boolean;
-};
-
-function createDummyData(): Record[] {
-	const record: Record[] = [];
-	for (let i = 0; i < 50; i++) {
-		const isRank = Math.random() < 0.5;
-		const isWin = Math.random() < 0.5;
-		record.push({
-			timestamp: new Date().toLocaleTimeString(),
-			nickname: `${i}usertesttesttesttesttest`,
-			isRank,
-			isWin,
-		});
-	}
-	return record;
-}
 
 type InformComponent = {
 	inform: UserData;
 	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
 	myData: UserData;
+	gameData: any[];
 };
 
-function MyInform({ inform, setInform, myData }: InformComponent) {
+function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 	const [imageURL, setImageURL] = useState("");
 	const [show, setShow] = useState(false);
 	const [myFriends, setMyFriends] = useState([]);
@@ -170,14 +149,18 @@ function MyInform({ inform, setInform, myData }: InformComponent) {
 						<Card className="border-0">
 						<Card.Body className="p-0">
 						<ListGroup variant="flush">
-							{createDummyData().slice(0, 30).map((res, index) => (
-							<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
-								<span className="fw-bold">{res.timestamp}</span>
-								<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>
-								<span className="ms-2 text-white fw-bold">{res.nickname.slice(0, 10)}</span>
-								<span className="text-white float-end">{res.isWin ? "🏆승리🏆" : "패배"}</span>
-							</ListGroup.Item>
-							))}
+							{
+								gameData.length === 0 ? <ListGroup.Item className="py-2 d-flex justify-content-center" style={{backgroundColor: "black"}}>
+									<span className="fw-bold text-white">게임 전적이 없습니다!</span> </ListGroup.Item>: 
+								(gameData.map((res: GameData, index: any) => (
+									<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
+										<span className="fw-bold">{res.timestamp}</span>
+										<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>
+										<span className="ms-2 text-white fw-bold">{res.nickname.slice(0, 10)}</span>
+										<span className="text-white float-end">{res.isWin ? "🏆승리🏆" : "패배"}</span>
+									</ListGroup.Item>
+									)))
+							}
 						</ListGroup>
 						</Card.Body>
 					</Card>

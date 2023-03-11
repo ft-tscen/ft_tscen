@@ -73,10 +73,10 @@ function App() {
 				}
 				record.push(rec);
 			}
-			for (let i = 0; i < record.length; i++) {
-				console.log("record[i]");
-				console.log(record[i]);
-			}
+			// for (let i = 0; i < record.length; i++) {
+			// 	console.log("record[i]");
+			// 	console.log(record[i]);
+			// }
 			setGameData(record);
 		} catch (e) {
 			console.error(e);
@@ -167,6 +167,7 @@ function App() {
 							userData={userData}
 							isChangedData={isChangedData}
 							setChangedData={setChangedData}
+							gameData={gameData ?? []}
 							isChangedGameData={isChangedGameData}
 							setChangedGameData={setChangedGameData}
 						/>

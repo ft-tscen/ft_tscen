@@ -14,6 +14,7 @@ type LayoutComponent = {
 	userData: UserData;
 	isChangedData: boolean;
 	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
+	gameData: any[];
 	isChangedGameData: boolean;
 	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -23,6 +24,7 @@ function Layout({
 	userData,
 	isChangedData,
 	setChangedData,
+	gameData,
 	isChangedGameData,
 	setChangedGameData,
 }: LayoutComponent) {
@@ -74,6 +76,7 @@ function Layout({
 								inform={inform ?? userData}
 								setInform={setInform}
 								myData={userData}
+								gameData={gameData}
 							/>
 						)}
 					</Col>
