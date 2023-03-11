@@ -129,6 +129,13 @@ export const STARTMSG : SocketOutputDto = {
 
 //////////////////////////// GAME TYPE ////////////////////////////////////
 
+export interface GameData {
+	timestamp: string;
+	nickname: string;
+	isRank: boolean;
+	isWin: boolean;
+}
+
 export enum gameMod{
 	normalGame,
 	passwordGame,

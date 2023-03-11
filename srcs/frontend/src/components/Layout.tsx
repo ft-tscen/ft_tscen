@@ -14,6 +14,8 @@ type LayoutComponent = {
 	userData: UserData;
 	isChangedData: boolean;
 	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
+	isChangedGameData: boolean;
+	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function Layout({
@@ -21,6 +23,8 @@ function Layout({
 	userData,
 	isChangedData,
 	setChangedData,
+	isChangedGameData,
+	setChangedGameData,
 }: LayoutComponent) {
 	const [inform, setInform] = useState<UserData>();
 	const [enteredChannel, setEnteredChannel] = useState<boolean>(false);
@@ -46,11 +50,11 @@ function Layout({
 					setChangedData={setChangedData}
 				/>
 			);
-		else if (param === "soloGame") return <Game mod={gameMod.soloGame} />;
-		else if (param === "rankGame") return <Game mod={gameMod.rankGame} />;
-		else if (param === "friendlyGame") return <Game mod={gameMod.normalGame} />;
+		else if (param === "soloGame") return <Game mod={gameMod.soloGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} />;
+		else if (param === "rankGame") return <Game mod={gameMod.rankGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} />;
+		else if (param === "friendlyGame") return <Game mod={gameMod.normalGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} />;
 		else if (param === "privateGame")
-			return <Game mod={gameMod.passwordGame} />;
+			return <Game mod={gameMod.passwordGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} />;
 		else if (param === "creatGame") return <CreatRoom />;
 		else navigate("/");
 	};

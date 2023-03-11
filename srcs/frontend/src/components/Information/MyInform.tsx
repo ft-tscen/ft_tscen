@@ -163,10 +163,10 @@ function MyInform({ inform, setInform, myData }: InformComponent) {
 							</Form>
 						</Card.Body>
 					</Card>
-					<Form.Group className="mb-2" controlId="formName">
+					<Form.Group className="mb-2 mt-5" controlId="formName">
 						<Form.Label className="text-white">최근 전적(최대 30게임)</Form.Label>
 					</Form.Group>
-					<Container style={{ height: "10%", overflowY: "scroll" }}>
+					<Container style={{ height: "30vmin", overflowY: "scroll" }}>
 						<Card className="border-0">
 						<Card.Body className="p-0">
 						<ListGroup variant="flush">

@@ -11,9 +11,11 @@ import { BoolType, dataType, gameMod, playerType, SOCKET_GAME_EVENT } from '../.
 
 type gameComponent = {
 	mod: gameMod;
+	isChangedGameData: boolean;
+	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function Game({ mod }: gameComponent) {
+function Game({ mod, isChangedGameData, setChangedGameData, }: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	let CanvasWidth = 1200;
 	let CanvasHeight = 800;
@@ -60,12 +62,12 @@ function Game({ mod }: gameComponent) {
 					// myGameSocket.socket.emit('watching');
 					setIsWatch(true);
 				}
-				myGameSocket.socket.on(SOCKET_GAME_EVENT.START, (res: any)=> {
+				myGameSocket.socket.on('start-game', (res: any)=> {
 					setPlayer(res);
 					setStartGame(true);
 				})
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
-				myGameSocket.socket.on(SOCKET_GAME_EVENT.MATCH_SUCCESS, (data: any) => {
+				myGameSocket.socket.on('matching-success', (data: any) => {
 					const PlayerInfo : playerType = {
 						p1 : {
 							intra: data.p1.intra,
@@ -100,6 +102,7 @@ function Game({ mod }: gameComponent) {
 				ReadyPage(ctx, CanvasWidth, CanvasHeight);
 				document.addEventListener('keydown', (e) => {
 					if (e.code === 'KeyR') {
+						console.log('solo ready!');
 						myGameSocket.socket.emit(SOCKET_GAME_EVENT.SOLO_READY);
 						setStartGame(true);
 					}
@@ -110,13 +113,13 @@ function Game({ mod }: gameComponent) {
 				mod === gameMod.normalGame ||
 				mod === gameMod.passwordGame) {
 					WaitPage(ctx, CanvasWidth, CanvasHeight);
-					myGameSocket.socket.emit(SOCKET_GAME_EVENT.MATCH);
+					myGameSocket.socket.emit('matching');
 				}
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
 			// 프론트에서 보여줄 데이터 받기 위한 소켓
 			// 받을 때마다 USEEffect를 통해 render함수를 계속 실행
-			myGameSocket.socket.on(SOCKET_GAME_EVENT.UPDATE, (data: dataType) => {
+			myGameSocket.socket.on('update', (data: dataType) => {
 				setData({
 					leftPaddle : data.leftPaddle,
 					rightPaddle : data.rightPaddle,
@@ -126,7 +129,7 @@ function Game({ mod }: gameComponent) {
 					rightScore : data.rightScore,
 				})
 			})
-			myGameSocket.socket.on(SOCKET_GAME_EVENT.END, (p1win: boolean) => {
+			myGameSocket.socket.on('end-game', (p1win: boolean) => {
 				const ctx = canvas?.getContext("2d");
 				if (ctx) {
 					if (mod === gameMod.soloGame) {
@@ -143,10 +146,14 @@ function Game({ mod }: gameComponent) {
 					}
 					// 여기에 경기 결과 db에 업데이트 하는 코드 추가 (watch상태 아닐시에만)
 					if (mod === gameMod.rankGame) {
-						;
+						if (!isChangedGameData)
+							setChangedGameData(true);
+						// socket emit
 					}
 					if (mod === gameMod.normalGame || mod === gameMod.passwordGame) {
-						;
+						if (!isChangedGameData)
+							setChangedGameData(true);
+						// socket emit
 					}
 					killSockets(myGameSocket.socket);
 					mySocket.enteredGameRoom = false;
@@ -160,10 +167,10 @@ function Game({ mod }: gameComponent) {
 		}, [ctx])
 
 		function killSockets(socket : any) {
-			socket.off(SOCKET_GAME_EVENT.END);
-			socket.off(SOCKET_GAME_EVENT.UPDATE);
-			socket.off(SOCKET_GAME_EVENT.START);
-			socket.off(SOCKET_GAME_EVENT.MATCH_SUCCESS);
+			socket.off('end-game');
+			socket.off('update');
+			socket.off('start-game');
+			socket.off('matching-success');
 		}
 
 		//////////////////////////paddle 관련 이벤트////////////////////////////
@@ -310,7 +317,7 @@ const styles = `
 	justify-content:center;
 	vertical-align: center;
 	height: 100%;
-	margin-top: 95px
+	margin-top: 95px 
 }
 
 `;
