@@ -35,7 +35,7 @@ export class GameService {
 			const history: History = await this.histories.save(
 				this.histories.create({ winner, loser, type})
 			);
-			let h: History[];
+			let h: History[] = [];
 			h.push(history);
 			return { ok: true, history: h };
 		} catch (error) {

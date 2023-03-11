@@ -15,7 +15,12 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UserService } from 'src/user/user.service';
 import { GameDto, gameMod } from './dtos/game.dto';
 import { GameService } from './game.service';
-import * as bcrypt from 'bcrypt';
+
+
+export interface Room {
+	roomName: string,
+	password: boolean,
+}
 
 export interface WaitingPlayer {
 	waiting: boolean,
@@ -23,7 +28,8 @@ export interface WaitingPlayer {
 	nickname: string,
 }
 
-let createdRooms: string[] = [];
+let createdRooms: Room[] = [];
+const onlineList = new Map<string, boolean>();
 
 const GameDtoByRoomName = new Map<string, GameDto>();
 const RoomNameByNickname = new Map<string, string>();
@@ -59,13 +65,13 @@ export class GamesGateway
     this.nsp.adapter.on('delete-room', (roomName) => {
 		this.logger.log(`${roomName} deleted!!!`);
 		const deletedRoom = createdRooms.find(
-			(createdRoom) => createdRoom === roomName,
+			(createdRoom) => createdRoom.roomName === roomName,
 		);
 		if (!deletedRoom) return { success: false, payload: `${roomName} not found!` };
 
-		this.nsp.emit('delete-room', deletedRoom);
+		this.nsp.emit('delete-room', deletedRoom.roomName);
 		createdRooms = createdRooms.filter(
-			(createdRoom) => createdRoom !== deletedRoom,
+			(createdRoom) => createdRoom.roomName !== deletedRoom.roomName,
 		); // 유저가 생성한 room 목록 중에 삭제되는 room 있으면 제거
 		return { success: true, payload: `${roomName} deleted!` };
     });
@@ -75,6 +81,7 @@ export class GamesGateway
 
   handleConnection(@ConnectedSocket() socket: Socket) {
 	this.logger.log(`${socket.id} +=+=+=+=+=+= Socket Connected +=+=+=+=+=+=`);
+	//if (onlineList[socket.id])
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -99,12 +106,16 @@ export class GamesGateway
 	}
 	if (waitingPlayer.socket && socket.id == waitingPlayer.socket.id)
 		waitingPlayer.waiting = false;
+
+	onlineList[nickname] = false;
   }
 
   @SubscribeMessage('nickname')
   handleNickname(@ConnectedSocket() socket: Socket, @MessageBody() nickname: string) {
 	this.logger.log(`Nickname Registration ${nickname}`);
 	NicknameBySocketId[socket.id] = nickname;
+	// 닉네임 등록시 online 으로 등록
+	onlineList[nickname] = true;
 	return { success: true, payload: `${nickname} change success!` };
   }
 
@@ -190,7 +201,7 @@ export class GamesGateway
 		Game.p2.name = nickname;
 		GameDtoByRoomName[roomName] = Game;
 
-		createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
+		createdRooms.push({roomName: roomName, password: false}); // 유저가 생성한 room 목록에 추가
 
 		const nickname_w = NicknameBySocketId[waitingPlayer.socket.id];
 		RoomNameByNickname[nickname_w] = roomName;
@@ -265,7 +276,7 @@ export class GamesGateway
     );
     GameDtoByRoomName[Game.roomName] = Game;
     RoomNameByNickname[nickname] = Game.roomName;
-	createdRooms.push(Game.roomName); // 유저가 생성한 room 목록에 추가
+	createdRooms.push({ roomName: Game.roomName, password: false}); // 유저가 생성한 room 목록에 추가
 
     this.gameService.gameLoop(GameDtoByRoomName[Game.roomName]);
   }
@@ -285,13 +296,13 @@ export class GamesGateway
 	}
 	// createdRoom 배열 초기화
 	const deletedRoom = createdRooms.find(
-		(createdRoom) => createdRoom === roomName,
+		(createdRoom) => createdRoom.roomName === roomName,
 	);
 	if (!deletedRoom) return { success: false, payload: `${roomName} not found!` };
 
-	this.nsp.emit('delete-room', deletedRoom);
+	this.nsp.emit('delete-room', deletedRoom.roomName);
 	createdRooms = createdRooms.filter(
-		(createdRoom) => createdRoom !== deletedRoom,
+		(createdRoom) => createdRoom.roomName !== deletedRoom.roomName,
 	); // 유저가 생성한 room 목록 중에 삭제되는 room 있으면 제거
 	return { success: true, payload: `${roomName} deleted!` };
   }
@@ -306,7 +317,7 @@ export class GamesGateway
 
   @SubscribeMessage('room-list')
   handleRoomList() {
-    return createdRooms;
+	return createdRooms;
   }
 
   @SubscribeMessage('create-room')
@@ -315,7 +326,7 @@ export class GamesGateway
     @MessageBody() roomName: string,
     @MessageBody() password: string
   ) {
-    const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
+    const exists = createdRooms.find((createdRoom) => createdRoom.roomName === roomName);
     if (exists) {
       return { success: false, payload: `${roomName} room already existed!` };
     }
@@ -334,7 +345,10 @@ export class GamesGateway
 	GameDtoByRoomName[roomName] = Game;
 
     socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
-    createdRooms.push(roomName); // 유저가 생성한 room 목록에 추가
+	if (password)
+    	createdRooms.push({ roomName: roomName, password: true} ); // 유저가 생성한 room 목록에 추가
+	else
+    	createdRooms.push({ roomName: roomName, password: false} ); // 유저가 생성한 room 목록에 추가
 	RoomNameByNickname[Game.p1.name] = roomName;
 
     this.nsp.emit('create-room', roomName); // 대기실 방 생성
@@ -348,7 +362,7 @@ export class GamesGateway
 	  @ConnectedSocket() socket: Socket,
 	  @MessageBody() roomName: string,
   ) {
-	const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
+	const exists = createdRooms.find((createdRoom) => createdRoom.roomName === roomName);
     if (exists == undefined) {
       return { success: false, payload: `${roomName} not found!` };
     }
@@ -386,7 +400,7 @@ export class GamesGateway
     @MessageBody() roomName: string,
     @MessageBody() password: string,
   ) {
-	const exists = createdRooms.find((createdRoom) => createdRoom === roomName);
+	const exists = createdRooms.find((createdRoom) => createdRoom.roomName === roomName);
     if (exists == undefined) {
       return { success: false, payload: `${roomName} not found!` };
     }
@@ -415,5 +429,12 @@ export class GamesGateway
 	RoomNameByNickname[nickname] = undefined;
 
     return { success: true, payload: roomName};
+  }
+
+  @SubscribeMessage('playing-game')
+  handleOnline(
+    @ConnectedSocket() socket: Socket
+  ) {
+
   }
 }
