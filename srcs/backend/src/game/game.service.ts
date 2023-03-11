@@ -47,11 +47,11 @@ export class GameService {
 		try {
 			const winner = nickname;
 			const loser = nickname;
-			const history = await this.histories.find({
-				where: { winner, loser },
+			const history  = await this.histories.find({
+				where: [{ winner }, { loser }],
 			});
 			if (history)
-				return {ok: true, history: history};
+				return {ok: true, history: history };
 			return {ok: false, error: 'History not Found'};
 		} catch (error) {
 			return {ok: false, error: 'getWinHistory Error'};
