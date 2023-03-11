@@ -35,5 +35,5 @@ export type GameDto = {
 }
 
 export class HistoryOutput extends BaseOutput {
-	history?: History;
+	history?: History[];
 }
