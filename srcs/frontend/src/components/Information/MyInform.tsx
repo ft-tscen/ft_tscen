@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { Container, Col, Row, Image, Card, Stack, Form, Button, ListGroup, Offcanvas } from "react-bootstrap";
+import {
+	Container,
+	Col,
+	Row,
+	Image,
+	Card,
+	Stack,
+	Form,
+	Button,
+	Offcanvas,
+	ListGroup,
+} from "react-bootstrap";
 import { api } from "../../axios/api";
 import { mySocket } from "../../common/MySocket";
 import { UserData } from "../../common/types";
@@ -166,7 +177,7 @@ function MyInform({ inform, setInform, myData }: InformComponent) {
 					<Form.Group className="mb-2" controlId="formName">
 						<Form.Label className="text-white">최근 전적(최대 30게임)</Form.Label>
 					</Form.Group>
-					<Container style={{ height: "10%", overflowY: "scroll" }}>
+					<Container style={{ height: "30vmin", overflowY: "scroll" }}>
 						<Card className="border-0">
 						<Card.Body className="p-0">
 						<ListGroup variant="flush">
