@@ -740,7 +740,7 @@ export class ChatGateway
       const output = {
         author: input.author,
         target: input.target,
-        message: `you are invited from ${input.author}`,
+        message: `you are invited to ${input.author}`,
         user
       };
       socket.to(this.sockets.get(input.target)).emit('invite', output);

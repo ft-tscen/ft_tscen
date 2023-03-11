@@ -10,7 +10,7 @@ type GameRoomListType = [
     setGameRoomList: React.Dispatch<React.SetStateAction<GameRoomType[]>>
 ];
 
-export function GameRooms({enterGame} : { enterGame : (dto: SocketOutputDto) => void }) {
+export function GameRooms() {
     let [gameRoomList, setGameRoomList] : GameRoomListType = useState<GameRoomType[]>([]);
 
     useEffect(() => {
@@ -22,7 +22,7 @@ export function GameRooms({enterGame} : { enterGame : (dto: SocketOutputDto) => 
         {
             gameRoomList.map((obj :GameRoomType, idx :number) => {
                 return (
-                    <GameRoom key={idx} obj={obj} enterGame={enterGame}/>
+                    <GameRoom key={idx} obj={obj}/>
                 );
             })
         }

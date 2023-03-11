@@ -5,7 +5,7 @@ import EndPage from './PageEnd';
 import ReadyPage from './PageReady';
 import WaitPage from './PageWait';
 import Player from './PlayerBar';
-import { myGameSocket } from '../../common/MySocket';
+import { myGameSocket, mySocket } from '../../common/MySocket';
 import { BoolType, dataType, gameMod, playerType, SOCKET_GAME_EVENT, UserData } from '../../common/types';
 import { Row, Stack } from 'react-bootstrap';
 
@@ -85,6 +85,7 @@ function Game({ mod }: gameComponent) {
 							avatarId : data.p2.avatarId,
 						}
 					}
+					mySocket.enteredGameRoom = true;
 					setIsInfo(true);
 					setPlayerInfo(PlayerInfo);
 					setMatch(true);
@@ -147,6 +148,7 @@ function Game({ mod }: gameComponent) {
 
 					}
 					killSockets(myGameSocket.socket);
+					mySocket.enteredGameRoom = false;
 					myGameSocket.socket.emit('end-game');
 				}
 			})

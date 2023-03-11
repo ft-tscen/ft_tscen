@@ -14,14 +14,13 @@ import {
 
 type ArgsType = {
 	msg: SocketOutputDto;
-	enterGame: (dto: SocketOutputDto) => void;
 	setReceivedMsg: React.Dispatch<
 		React.SetStateAction<SocketOutputDto | undefined>
 	>;
 	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
 };
 
-export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
+export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 	let [isFriend, setIsFriend]: BoolType = useState<boolean>(false);
 	let [show, setShow]: BoolType = useState<boolean>(false);
 	let [active, setActive]: BoolType = useState<boolean>(true);
@@ -84,7 +83,11 @@ export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
 		};
 		const joinGame = () => {
 			console.log("초대한 게임에 참여함");
-			myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, )
+			myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, msg.author,
+				({success, payload}: {success :boolean, payload :string}) => {
+					setReceivedMsg({author:"server", message:payload})
+			})
+			mySocket.enteredGameRoom = true;
 			setActive(false);
 		};
 
@@ -178,7 +181,7 @@ export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
 						<Button
 							variant="outline-dark"
 							onClick={joinGame}
-							disabled={!active}
+							disabled={mySocket.enteredGameRoom}
 						>
 							참여하기
 						</Button>

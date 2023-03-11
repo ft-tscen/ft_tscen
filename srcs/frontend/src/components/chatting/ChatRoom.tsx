@@ -6,7 +6,6 @@ import "./Effect.css";
 
 type ArgsType = {
 	msgList: SocketOutputDto[];
-	enterGame: (dto: SocketOutputDto) => void;
 	setReceivedMsg: React.Dispatch<
 		React.SetStateAction<SocketOutputDto | undefined>
 	>;
@@ -15,7 +14,6 @@ type ArgsType = {
 
 export function ChatRoom({
 	msgList,
-	enterGame,
 	setReceivedMsg,
 	setInform,
 }: ArgsType) {
@@ -38,7 +36,6 @@ export function ChatRoom({
 					<Chat
 						key={idx}
 						msg={msg}
-						enterGame={enterGame}
 						setReceivedMsg={setReceivedMsg}
 						setInform={setInform}
 					/>

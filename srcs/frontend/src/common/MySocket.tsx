@@ -4,7 +4,7 @@ interface MySocket {
   socket: Socket;
   name: string;
   enteredChannelName: string;
-  enteredGameRoom: string;
+  enteredGameRoom?: boolean;
 }
 
 export let mySocket: MySocket;
@@ -21,7 +21,7 @@ export function SetSocket(newName: string) {
     }),
     name: newName,
     enteredChannelName: "",
-    enteredGameRoom: "",
+    enteredGameRoom: false,
   };
 }
 
@@ -38,6 +38,5 @@ export function setGameSocket(newName: string) {
 		),
 		name: newName,
 		enteredChannelName: "",
-		enteredGameRoom: "",
 	};
 }
