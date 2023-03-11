@@ -128,7 +128,7 @@ function App() {
 			setGameData(record);
 			myGameSocket === undefined && setGameSocket(data.nickname);
 			if (myGameSocket) {
-				myGameSocket.socket.emit("SOMETHING", data.nickname);
+				myGameSocket.socket.emit("nickname", data.nickname);
 			}
 			//////////////////////////////
 			if (data.nickname === null && data.phone === null) navigate("/profile");
