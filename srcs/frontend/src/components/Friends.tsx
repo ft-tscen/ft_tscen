@@ -23,10 +23,10 @@ function Friends({ show, handleClose, friends }: FriendsComponent) {
 						{friends.map(friend =>
 						<>
 						<ListGroup.Item className="d-flex justify-content-between">
-							{friend.nickname}
-							<Badge bg="primary" pill>
-								state
+							<Badge bg="primary" className="rounded-circle" style={{height: "1.5vmin", width: "1.5vmin"}}>
+								<p></p>
 							</Badge>
+							{friend.nickname}
 							{/* Status에 따른 색 추가 */}
 						</ListGroup.Item>
 						</>

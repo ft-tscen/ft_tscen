@@ -59,6 +59,7 @@ function App() {
 			setUserData(data);
 			mySocket === undefined && SetSocket(data.nickname);
 			myGameSocket === undefined && setGameSocket(data.nickname);
+			
 			if (data.nickname === null && data.phone === null) navigate("/profile");
 		} catch (e) {
 			setLoggedIn(false);

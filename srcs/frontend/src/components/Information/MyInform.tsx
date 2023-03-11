@@ -8,7 +8,6 @@ import {
 	Stack,
 	Form,
 	Button,
-	Offcanvas,
 	ListGroup,
 } from "react-bootstrap";
 import { api } from "../../axios/api";
