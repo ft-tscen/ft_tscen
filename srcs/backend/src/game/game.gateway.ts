@@ -85,16 +85,24 @@ export class GamesGateway
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-	if (NicknameBySocketId[socket.id]) {
+	if (NicknameBySocketId[socket.id])
 		this.logger.log(`${socket.id} (${NicknameBySocketId[socket.id]}) -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
-		NicknameBySocketId[socket.id] = undefined;
-	}
 	else
 		this.logger.log(`${socket.id} -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
 
 	const nickname = NicknameBySocketId[socket.id];
-	const roomName  = RoomNameByNickname[nickname];
-	const gameDto = GameDtoByRoomName[roomName];
+	NicknameBySocketId[socket.id] = undefined;
+
+	let roomName: string = undefined;
+	let gameDto: GameDto = undefined;
+	if (nickname) {
+		roomName = RoomNameByNickname[nickname];
+		RoomNameByNickname[nickname] = undefined;
+	}
+	if (roomName) {
+		gameDto = GameDtoByRoomName[roomName];
+		GameDtoByRoomName[roomName] = undefined;
+	}
 
 	if (roomName && gameDto) {
 		if (gameDto.p1.socket.id != socket.id) {
@@ -104,6 +112,7 @@ export class GamesGateway
 			this.gameService.finishGame(gameDto, false)
 		}
 	}
+
 	if (waitingPlayer.socket && socket.id == waitingPlayer.socket.id)
 		waitingPlayer.waiting = false;
 
@@ -112,8 +121,6 @@ export class GamesGateway
 
   @SubscribeMessage('nickname')
   handleNickname(@ConnectedSocket() socket: Socket, @MessageBody() nickname: string) {
-	if (NicknameBySocketId[socket.id])
-		return { success: false, payload: `${NicknameBySocketId[socket.id]} already set!` };
 	this.logger.log(`Nickname Registration ${nickname}`);
 	NicknameBySocketId[socket.id] = nickname;
 	// 닉네임 등록시 online 으로 등록
@@ -135,7 +142,7 @@ export class GamesGateway
 	if (!nickname)
 		return ;
 
-	if (waitingPlayer.waiting = true) {
+	if (waitingPlayer.waiting = true && socket.id == waitingPlayer.socket.id) {
 		waitingPlayer.nickname = undefined;
 	}
 
@@ -151,8 +158,6 @@ export class GamesGateway
 	GameDtoByRoomName[roomName] = undefined;
 
   }
-
-
 
 //  @SubscribeMessage('test')
 //  handleTest(@ConnectedSocket() socket: Socket) {
@@ -317,12 +322,11 @@ export class GamesGateway
 	const nickname_p1 = NicknameBySocketId[socket.id];
 	const roomName = RoomNameByNickname[nickname_p1];
 	const gameDto = GameDtoByRoomName[roomName];
-	const nickname_p2 = NicknameBySocketId[socket.id];
 	// RoomName, GameDto Map 초기화
 	if (roomName && gameDto) {
 		RoomNameByNickname[nickname_p1] = undefined;
 		if (gameDto.gameMod != gameMod.soloGame)
-			RoomNameByNickname[nickname_p2] = undefined;
+			RoomNameByNickname[NicknameBySocketId[gameDto.p2.socket.id]] = undefined;
 		GameDtoByRoomName[roomName] = undefined;
 	}
 	// createdRoom 배열 초기화
