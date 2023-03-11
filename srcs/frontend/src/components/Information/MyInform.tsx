@@ -143,28 +143,52 @@ function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 						</Card.Body>
 					</Card>
 					<Form.Group className="mb-2 mt-5" controlId="formName">
-						<Form.Label className="text-white">최근 전적(최대 30게임)</Form.Label>
+						<Form.Label className="text-white">게임 전적</Form.Label>
 					</Form.Group>
-					<Container style={{ height: "30vmin", overflowY: "scroll" }}>
-						<Card className="border-0">
-						<Card.Body className="p-0">
-						<ListGroup variant="flush">
-							{
-								gameData.length === 0 ? <ListGroup.Item className="py-2 d-flex justify-content-center" style={{backgroundColor: "black"}}>
-									<span className="fw-bold text-white">게임 전적이 없습니다!</span> </ListGroup.Item>: 
-								(gameData.map((res: GameData, index: any) => (
-									<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
-										<span className="fw-bold">{res.timestamp}</span>
-										<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>
-										<span className="ms-2 text-white fw-bold">{res.nickname.slice(0, 10)}</span>
-										<span className="text-white float-end">{res.isWin ? "🏆승리🏆" : "패배"}</span>
-									</ListGroup.Item>
-									)))
-							}
-						</ListGroup>
-						</Card.Body>
-					</Card>
-					</Container>
+									{
+										gameData.length === 0 ? (
+										<Container style={{ height: "30vmin" , overflowY: "scroll" }} className="d-flex justify-content-center align-items-center">
+												<span className="fw-bold text-white">게임 전적이 없습니다!</span>
+										</Container>
+										) : (
+												<Container style={{ height: "30vmin", overflowY: "scroll" }}>
+													<Card className="border-0">
+														<Card.Body className="p-0">
+															<ListGroup variant="flush">
+																{
+																	gameData.map((res: GameData, index: any) =>
+																			<>
+																				<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
+																				<span className="fw-bold">{res.timestamp}</span>
+																				<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>
+																				<span className="ms-2 text-white fw-bold">{res.nickname.slice(0, 10)}</span>
+																				<span className="text-white float-end">{res.isWin ? "🏆승리🏆" : "패배"}</span>
+																				</ListGroup.Item>
+																			</>
+																	)
+																}
+															</ListGroup> 
+														</Card.Body>
+													</Card>
+												</Container>
+											)
+									}
+							{/* <Card.Body className="p-0">
+								<ListGroup variant="flush">
+									{
+										gameData.length === 0 ? <ListGroup.Item className="py-2 d-flex justify-content-center" style={{backgroundColor: "black"}}>
+											<span className="fw-bold text-white">게임 전적이 없습니다!</span> </ListGroup.Item>: 
+										(gameData.map((res: GameData, index: any) => (
+											<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
+												<span className="fw-bold">{res.timestamp}</span>
+												<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>
+												<span className="ms-2 text-white fw-bold">{res.nickname.slice(0, 10)}</span>
+												<span className="text-white float-end">{res.isWin ? "🏆승리🏆" : "패배"}</span>
+											</ListGroup.Item>
+											)))
+									}
+								</ListGroup>
+							</Card.Body> */}
 				</Container>
 			</Stack>
 		</>

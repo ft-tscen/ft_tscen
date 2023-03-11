@@ -49,7 +49,6 @@ function App() {
 		try {
 			const res = await api.get(`/game/history?nickname=${userData.nickname}`);
 			let record: GameData[] = [];
-			console.log(res.data.history[0]);
 			for (let i = 0; i < res.data.history.length; i++) {
 				let WinCheck : boolean;
 				let RankCheck : boolean = true;
@@ -73,10 +72,10 @@ function App() {
 				}
 				record.push(rec);
 			}
-			// for (let i = 0; i < record.length; i++) {
-			// 	console.log("record[i]");
-			// 	console.log(record[i]);
-			// }
+			for (let i = 0; i < record.length; i++) {
+				console.log("record[i]");
+				console.log(record[i]);
+			}
 			setGameData(record);
 		} catch (e) {
 			console.error(e);
@@ -99,33 +98,7 @@ function App() {
 			setUserData(data);
 			mySocket === undefined && SetSocket(data.nickname);
 			/////////////////////////////
-			const res2 = await api.get(`/game/history?nickname=${userData.nickname}`);
-			let record: GameData[] = [];
-			console.log(res2.data.history[0]);
-			for (let i = 0; i < res2.data.history.length; i++) {
-				let WinCheck : boolean;
-				let RankCheck : boolean = true;
-				let opponent : string;
-				const dateObject = new Date(res2.data.history[i].createdAt);
-				if (res2.data.history[i].winner === userData.nickname) {
-					WinCheck = true;
-					opponent = res2.data.history[i].loser;
-				}
-				else {
-					WinCheck = false;
-					opponent = res2.data.history[i].winner;
-				}
-				if (res2.data.history[i].type !== 3)
-					RankCheck = false;
-				let rec : GameData = {
-					timestamp : dateObject.toLocaleTimeString(),
-					nickname: opponent,
-					isRank : RankCheck,
-					isWin : WinCheck,
-				}
-				record.push(rec);
-			}
-			setGameData(record);
+			getGameData();
 			myGameSocket === undefined && setGameSocket(data.nickname);
 			if (myGameSocket) {
 				myGameSocket.socket.emit("nickname", data.nickname);
@@ -147,12 +120,15 @@ function App() {
 
 	useEffect(() => {
 		intraLogin();
-		getGameData();
-	}, [loggedIn, isChangedGameData]);
+	}, [loggedIn]);
 
 	useEffect(() => {
 		getUserData();
 	}, [isChangedData]);
+
+	useEffect(() => {
+		getGameData();
+	}, [isChangedGameData]);
 
 
 	return (
