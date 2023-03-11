@@ -102,6 +102,9 @@ export class ChatGateway
   } // 채널에서 나갔다고 알려줘야 함.
 
   async hashPassword(password: string): Promise<string> {
+    if (!password) {
+      return ""
+    }
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -109,7 +112,10 @@ export class ChatGateway
   }
   
   async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+    if (!password && !hashedPassword)
+      return true;
     const isMatch = await bcrypt.compare(password, hashedPassword);
+    console.log(password, hashedPassword, isMatch)
     return isMatch;
   }
 

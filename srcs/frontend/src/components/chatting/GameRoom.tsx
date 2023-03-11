@@ -27,18 +27,6 @@ export function GameRoom({obj, enterGame} :ArgsType) {
         offVisible();
         pwInputRef.current!.value = "";
     }
-    const toJoinTheGame = () => {
-        let pw :string|undefined = pwInputRef.current!.value;
-        let dto :SocketInputDto = {
-            author :mySocket.name,
-            target :obj.name,
-            password :pw
-        }
-        
-        mySocket.socket.emit(SOCKET_EVENT.ENTER_GAME, dto, enterGame);
-        offVisible();
-        pwInputRef.current!.value = "";
-    }
 
     const onVisible = () => setVisible(true);
     const offVisible = () => setVisible(false);
@@ -66,18 +54,11 @@ export function GameRoom({obj, enterGame} :ArgsType) {
                                                         </InputGroup>
                                     }
                                     <Button
-                                        className="w-50"
+                                        className="w-100"
                                         variant="outline-light"
                                         size="lg"
                                         onClick={toWatchTheGame}
                                         >관전하기
-                                    </Button>
-                                    <Button
-                                        className="w-50"
-                                        variant="outline-light"
-                                        size="lg"
-                                        onClick={toJoinTheGame}
-                                        >참여하기
                                     </Button>
                                 </Card.Body>
                 }

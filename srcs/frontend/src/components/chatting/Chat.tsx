@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Card, Row, Image, OverlayTrigger, Popover } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import { api } from "../../axios/api";
-import { mySocket } from "../../common/MySocket";
+import { myGameSocket, mySocket } from "../../common/MySocket";
 import {
 	BoolType,
 	SocketInputDto,
 	SocketOutputDto,
 	SOCKET_EVENT,
+	SOCKET_GAME_EVENT,
 	UserData,
 } from "../../common/types";
 
@@ -83,11 +84,7 @@ export function Chat({ msg, enterGame, setReceivedMsg, setInform }: ArgsType) {
 		};
 		const joinGame = () => {
 			console.log("초대한 게임에 참여함");
-			let dto: SocketInputDto = {
-				author: mySocket.name,
-				target: msg.target,
-			};
-			mySocket.socket.emit(SOCKET_EVENT.ENTER_GAME, dto, enterGame);
+			myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, )
 			setActive(false);
 		};
 

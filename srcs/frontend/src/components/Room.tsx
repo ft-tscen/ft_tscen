@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Form, Button, Container, Card, CloseButton, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { myGameSocket } from "../common/MySocket";
+import { myGameSocket, mySocket } from "../common/MySocket";
 import { BoolType } from "../common/types";
 
 function CreatRoom() {
@@ -44,7 +44,7 @@ function CreatRoom() {
 				myGameSocket.socket.emit('create-room', roomName, password , (res: any)=> {
 					if (res.success) {
 						navigate("/privateGame");
-						// 채팅에 게임 룸 이름 작성
+						mySocket.enteredGameRoom = roomName
 						console.log('성공');
 					}
 				})
@@ -58,7 +58,7 @@ function CreatRoom() {
 				myGameSocket.socket.emit('create-room', roomName, (res: any) => {
 					if (res) {
 						navigate("/friendlyGame");
-						// 채팅에 게임 룸 이름 작성
+						mySocket.enteredGameRoom = roomName
 						console.log('성공');
 					}
 				})
