@@ -52,11 +52,6 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 		}
 		setReceivedMsg(dto);
 	};
-	const enterGame = (dto: SocketOutputDto) => {
-		mySocket.enteredGameRoom = dto.target === undefined ? "" : dto.target;
-		setReceivedMsg(dto);
-		// 게임 소켓 사용해서 게임 서버에 전달.(채팅 소켓에서 게임 룸 바뀌었을때 변수 값 할당.)
-	};
 	const exitChannel = () => {
 		mySocket.socket.emit(
 			SOCKET_EVENT.LEAVE,
@@ -123,14 +118,13 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 			/>
 			{flag === SHOW_OTHER ? (
 				enterChannelFlag === ENTER_CHANNEL ? (
-					<GameRooms enterGame={enterGame} />
+					<GameRooms />
 				) : (
 					<Channels enterChannel={enterChannel} />
 				)
 			) : (
 				<ChatRoom
 					msgList={msgList}
-					enterGame={enterGame}
 					setReceivedMsg={setReceivedMsg}
 					setInform={setInform}
 				/>

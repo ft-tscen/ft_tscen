@@ -1,15 +1,14 @@
 import { useRef, useState } from "react";
 import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
-import { BoolType, GameRoomType, SocketInputDto, SocketOutputDto, SOCKET_EVENT } from "../../common/types";
+import { BoolType, GameRoomType, SocketInputDto } from "../../common/types";
 import { mySocket } from "../../common/MySocket";
 import "./Effect.css"
 
 type ArgsType = {
     obj :GameRoomType,
-    enterGame : (dto: SocketOutputDto) => void
 }
 
-export function GameRoom({obj, enterGame} :ArgsType) {
+export function GameRoom({obj} :ArgsType) {
     let [visible, setVisible] :BoolType = useState<boolean>(false);
     
     let name :string = (obj.password ? `🔒 ${obj.name} 🔒` : obj.name);
@@ -23,7 +22,6 @@ export function GameRoom({obj, enterGame} :ArgsType) {
             password :pw
         }
         
-        mySocket.socket.emit(SOCKET_EVENT.WATCH_GAME, dto, enterGame);
         offVisible();
         pwInputRef.current!.value = "";
     }

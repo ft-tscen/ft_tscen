@@ -82,10 +82,18 @@ export function InputMsg({
 							message: `${text} :${WRONGINPUT}`,
 						});
 						break;
-					} else {
+					}
+					else if (mySocket.enteredGameRoom) {
+						setReceivedMsg({
+							author: "server",
+							message: `${text} : Be out of the room`,
+						});
+						break;
+					}
+					else {
 						enteredMSG.target = words[1];
 					}
-					// MySocket.instance.emit(SOCKET_EVENT.INVITE, enteredMSG);
+					mySocket.socket.emit(SOCKET_EVENT.INVITE, enteredMSG, setReceivedMsg);
 					break;
 				case "/PROFILE":
 					if (words.length !== 2) {

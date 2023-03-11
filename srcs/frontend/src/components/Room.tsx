@@ -44,7 +44,7 @@ function CreatRoom() {
 				myGameSocket.socket.emit('create-room', roomName, password , (res: any)=> {
 					if (res.success) {
 						navigate("/privateGame");
-						mySocket.enteredGameRoom = roomName
+						mySocket.enteredGameRoom = true
 						console.log('성공');
 					}
 				})
@@ -58,7 +58,7 @@ function CreatRoom() {
 				myGameSocket.socket.emit('create-room', roomName, (res: any) => {
 					if (res) {
 						navigate("/friendlyGame");
-						mySocket.enteredGameRoom = roomName
+						mySocket.enteredGameRoom = true
 						console.log('성공');
 					}
 				})
