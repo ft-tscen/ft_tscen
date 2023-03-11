@@ -311,7 +311,7 @@ export class GamesGateway
   handleFindRoom(@MessageBody() nickname: string) {
 	const roomName = RoomNameByNickname[nickname];
 	if (!roomName)
-		return { success: false, payload: `${nickname} Jimmy doesn't have a room`};
+		return { success: false, payload: `${nickname} doesn't have a room`};
 	return {success: true, payload: roomName};
   }
 
@@ -330,6 +330,9 @@ export class GamesGateway
     if (exists) {
       return { success: false, payload: `${roomName} room already existed!` };
     }
+
+	this.logger.log('++=+=++ created Room +=++=+=');
+	this.logger.log(`++=+=+${NicknameBySocketId[socket.id]}+=+++=`);
 
 	const Game: GameDto = this.gameService.init_game(
 		socket,  // p1
@@ -389,7 +392,7 @@ export class GamesGateway
 		p2: p2.user,
 	};
 
-	this.nsp.emit('matching-success', playerInfo);
+	this.nsp.in(roomName).emit('matching-success', playerInfo);
 
 	return { success: true, payload: roomName };
   }

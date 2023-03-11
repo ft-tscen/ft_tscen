@@ -82,23 +82,20 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 			setShow(false);
 		};
 		const joinGame = () => {
-			let roomName :string|undefined;
 			myGameSocket.socket.emit(SOCKET_GAME_EVENT.GET_ROOM_NAME, msg.author,
 				({success, payload}: {success: boolean, payload: string}) => {
-					if (success)
-						roomName = payload;
+					if (success) {
+						myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, payload,
+							({success, payload}: {success :boolean, payload :string}) => {
+								setReceivedMsg({author:"server", message:payload})
+						})
+						mySocket.enteredGameRoom = true;
+						setActive(false);
+					}
 					else {
 						setReceivedMsg({author:'server', message:payload})
 					}
-				})
-			if (roomName) {
-				myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, roomName,
-					({success, payload}: {success :boolean, payload :string}) => {
-						setReceivedMsg({author:"server", message:payload})
-				})
-				mySocket.enteredGameRoom = true;
-				setActive(false);
-			}
+				});
 		};
 
 		const weAreFriend = async () => {
