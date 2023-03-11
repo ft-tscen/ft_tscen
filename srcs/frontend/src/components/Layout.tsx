@@ -8,6 +8,7 @@ import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
 import { gameMod, UserData } from "../common/types";
 import { useState } from "react";
+import { myGameSocket } from "../common/MySocket";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -33,14 +34,17 @@ function Layout({
 	const navigate = useNavigate();
 
 	const getComponent = () => {
-		if (param === "")
+		if (param === "") {
+			if (myGameSocket)
+				myGameSocket.socket.emit('clear');
 			return (
 				<Home
-					isLoggedIn={isLoggedIn}
-					userData={userData}
-					enteredChannel={enteredChannel}
+				isLoggedIn={isLoggedIn}
+				userData={userData}
+				enteredChannel={enteredChannel}
 				/>
 			);
+		}
 		else if (param === "profile")
 			return (
 				<Profile

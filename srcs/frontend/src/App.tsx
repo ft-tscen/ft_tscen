@@ -49,21 +49,20 @@ function App() {
 		try {
 			const res = await api.get(`/game/history?nickname=${userData.nickname}`);
 			let record: GameData[] = [];
-			console.log(res.data.history[0]);
-			for (let i = 0; i < res.data.history.length; i++) {
+			for (let i = 0; i < res.data?.history?.length; i++) {
 				let WinCheck : boolean;
 				let RankCheck : boolean = true;
 				let opponent : string;
-				const dateObject = new Date(res.data.history[i].createdAt);
-				if (res.data.history[i].winner === userData.nickname) {
+				const dateObject = new Date(res.data?.history[i].createdAt);
+				if (res.data?.history[i].winner === userData.nickname) {
 					WinCheck = true;
-					opponent = res.data.history[i].loser;
+					opponent = res.data?.history[i].loser;
 				}
 				else {
 					WinCheck = false;
-					opponent = res.data.history[i].winner;
+					opponent = res.data?.history[i].winner;
 				}
-				if (res.data.history[i].type !== 3)
+				if (res.data?.history[i].type !== 3)
 					RankCheck = false;
 				let rec : GameData = {
 					timestamp : dateObject.toLocaleTimeString(),
@@ -101,7 +100,6 @@ function App() {
 			/////////////////////////////
 			const res2 = await api.get(`/game/history?nickname=${userData.nickname}`);
 			let record: GameData[] = [];
-			console.log(res2.data.history[0]);
 			for (let i = 0; i < res2.data.history.length; i++) {
 				let WinCheck : boolean;
 				let RankCheck : boolean = true;

@@ -27,13 +27,11 @@ export class GameService {
 	async createHistory(winner: string, loser: string, type: gameMod)
 	: Promise<HistoryOutput> {
 		try {
-			const existed = await this.histories.findOne({
-				where: {winner, loser, type},
-			});
-			if (existed)
-				return {ok: false, error: 'There is a History already'};
+			const { user: user1 } = await this.userService.getUserByNickName(winner);
+			const { user: user2 } = await this.userService.getUserByNickName(loser);
+
 			const history: History = await this.histories.save(
-				this.histories.create({ winner, loser, type})
+				this.histories.create({ winner: user1.id, loser: user2.id, type})
 			);
 			let h: History[] = [];
 			h.push(history);
@@ -45,11 +43,21 @@ export class GameService {
 
 	async getHistory(nickname: string): Promise<HistoryOutput> {
 		try {
-			const winner = nickname;
-			const loser = nickname;
+			const { user } = await this.userService.getUserByNickName(nickname);
+			const winner = user.id;
+			const loser = user.id;
 			const history  = await this.histories.find({
 				where: [{ winner }, { loser }],
 			});
+			history.map((item)=>
+				(async () => {
+					const { winner, loser } = item;
+					const {user: {nickname: winnerNickname}} = await this.userService.getUserById(winner);
+					const {user: {nickname: loserNickname}} = await this.userService.getUserById(loser);
+					return {...item, winner: winnerNickname, loser: loserNickname}
+				})()
+			)
+
 			if (history)
 				return {ok: true, history: history };
 			return {ok: false, error: 'History not Found'};
@@ -58,31 +66,31 @@ export class GameService {
 		}
 	}
 
-	async getWinHistory(winner: string): Promise<HistoryOutput> {
-		try {
-			const win_history = await this.histories.find({
-				where: { winner },
-			});
-			if (win_history)
-				return {ok: true, history: win_history};
-			return {ok: false, error: 'History not Found'};
-		} catch (error) {
-			return {ok: false, error: 'getWinHistory Error'};
-		}
-	}
+	//async getWinHistory(winner: string): Promise<HistoryOutput> {
+	//	try {
+	//		const win_history = await this.histories.find({
+	//			where: { winner },
+	//		});
+	//		if (win_history)
+	//			return {ok: true, history: win_history};
+	//		return {ok: false, error: 'History not Found'};
+	//	} catch (error) {
+	//		return {ok: false, error: 'getWinHistory Error'};
+	//	}
+	//}
 
-	async getLoseHistory(loser: string): Promise<HistoryOutput> {
-		try {
-			const lose_history = await this.histories.find({
-				where: { loser },
-			});
-			if (lose_history)
-				return {ok: true, history: lose_history};
-			return {ok: false, error: 'History not Found'};
-		} catch (error) {
-			return {ok: false, error: 'getloseHistory Error'};
-		}
-	}
+	//async getLoseHistory(loser: string): Promise<HistoryOutput> {
+	//	try {
+	//		const lose_history = await this.histories.find({
+	//			where: { loser },
+	//		});
+	//		if (lose_history)
+	//			return {ok: true, history: lose_history};
+	//		return {ok: false, error: 'History not Found'};
+	//	} catch (error) {
+	//		return {ok: false, error: 'getloseHistory Error'};
+	//	}
+	//}
 
 	async deleteHistory(id: number) {
 		await this.histories.delete(id);

@@ -112,6 +112,8 @@ export class GamesGateway
 
   @SubscribeMessage('nickname')
   handleNickname(@ConnectedSocket() socket: Socket, @MessageBody() nickname: string) {
+	if (NicknameBySocketId[socket.id])
+		return { success: false, payload: `${NicknameBySocketId[socket.id]} already set!` };
 	this.logger.log(`Nickname Registration ${nickname}`);
 	NicknameBySocketId[socket.id] = nickname;
 	// 닉네임 등록시 online 으로 등록
@@ -119,10 +121,38 @@ export class GamesGateway
 	return { success: true, payload: `${nickname} change success!` };
   }
 
-  @SubscribeMessage('check-playing')
-  handleCheckPlaying(@ConnectedSocket() socket: Socket, @MessageBody() nickname: string) {
+//  let createdRooms: Room[] = [];
+//const onlineList = new Map<string, boolean>();
+
+//const GameDtoByRoomName = new Map<string, GameDto>();
+//const RoomNameByNickname = new Map<string, string>();
+//const NicknameBySocketId = new Map<string, string>();
+
+  @SubscribeMessage('clear')
+  handleClear(@ConnectedSocket() socket: Socket) {
+	this.logger.log(`+=+=+=+=+=+= ${NicknameBySocketId[socket.id]} clear +=+=+=+=+=+=`);
+	const nickname = NicknameBySocketId[socket.id];
+	if (!nickname)
+		return ;
+
+	if (waitingPlayer.waiting = true) {
+		waitingPlayer.nickname = undefined;
+	}
+
+	const roomName = RoomNameByNickname[nickname];
+	if (!roomName)
+		return ;
+	RoomNameByNickname[nickname] = undefined;
+	socket.leave(roomName);
+
+	const gameDto = GameDtoByRoomName[roomName];
+	if (!gameDto)
+		return ;
+	GameDtoByRoomName[roomName] = undefined;
 
   }
+
+
 
 //  @SubscribeMessage('test')
 //  handleTest(@ConnectedSocket() socket: Socket) {
@@ -183,6 +213,7 @@ export class GamesGateway
 
   @SubscribeMessage('matching')
   async handleMatching(@ConnectedSocket() socket: Socket) {
+	this.logger.log('call matching...');
 	const nickname = NicknameBySocketId[socket.id];
 
 	if (waitingPlayer.waiting) {
@@ -222,7 +253,7 @@ export class GamesGateway
 			p2: p2.user,
 		};
 
-		this.nsp.emit('matching-success', playerInfo); // 대기실 방 생성을 연결된 클라들에게 알림
+		this.nsp.in(roomName).emit('matching-success', playerInfo); // 대기실 방 생성을 연결된 클라들에게 알림
 		this.logger.log('matching success!!!');
 
 		waitingPlayer.waiting = false;
@@ -375,6 +406,8 @@ export class GamesGateway
 	if (Game.p2.name)
 		return { success: false, payload: `${NicknameBySocketId[socket.id]} is not player!` };
 
+	this.logger.log('+=+=+=+=+=+= join Room +=+=+=+=+=+=');
+
 	socket.join(roomName); // join room
 	Game.p2.socket = socket;
 	Game.p2.name = NicknameBySocketId[socket.id];
@@ -392,7 +425,9 @@ export class GamesGateway
 		p2: p2.user,
 	};
 
-	this.nsp.in(roomName).emit('matching-success', playerInfo);
+	this.logger.log(`p1: ${Game.p1.name}, p2: ${Game.p2.name}`);
+	Game.p1.socket.emit('matching-success', playerInfo);
+	socket.emit('matching-success', playerInfo);
 
 	return { success: true, payload: roomName };
   }

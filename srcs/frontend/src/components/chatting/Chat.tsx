@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, Row, Image, OverlayTrigger, Popover } from "react-bootstrap";
 import { Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { api } from "../../axios/api";
 import { myGameSocket, mySocket } from "../../common/MySocket";
 import {
@@ -25,6 +26,7 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 	let [show, setShow]: BoolType = useState<boolean>(false);
 	let [active, setActive]: BoolType = useState<boolean>(true);
 	const [imageDataUrl, setImageDataUrl] = useState<string>();
+	const navigate = useNavigate();
 
 	const getUserData = async () => {
 		if (msg.user?.avatarId) {
@@ -82,9 +84,11 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 			setShow(false);
 		};
 		const joinGame = () => {
+			navigate('/friendlyGame');
 			myGameSocket.socket.emit(SOCKET_GAME_EVENT.GET_ROOM_NAME, msg.author,
 				({success, payload}: {success: boolean, payload: string}) => {
 					if (success) {
+						console.log(myGameSocket.socket.listeners('matching-success'));
 						myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, payload,
 							({success, payload}: {success :boolean, payload :string}) => {
 								setReceivedMsg({author:"server", message:payload})

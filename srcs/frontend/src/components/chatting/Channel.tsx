@@ -16,8 +16,8 @@ export function Channel({obj, enterChannel} :ArgsType) {
 
     const toJoinTheGame = () => {
         let pw :string;
-        if (pwInputRef.current && pwInputRef.current.value !== null)
-            pw = pwInputRef.current.value;
+        if (pwInputRef && pwInputRef.current && pwInputRef.current.value)
+            pw = pwInputRef.current!.value;
         else
             pw = "";
         const dto :SocketInputDto = {
@@ -28,7 +28,8 @@ export function Channel({obj, enterChannel} :ArgsType) {
 
         mySocket.socket.emit(SOCKET_EVENT.JOIN, dto, enterChannel);
         offVisible();
-        pwInputRef.current!.value = "";
+		if (pwInputRef && pwInputRef.current)
+        	pwInputRef!.current!.value = "";
     }
 
     const onVisible = () => setVisible(true);

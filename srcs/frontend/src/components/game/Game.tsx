@@ -68,6 +68,7 @@ function Game({ mod, isChangedGameData, setChangedGameData, }: gameComponent) {
 				})
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
 				myGameSocket.socket.on('matching-success', (data: any) => {
+					console.log('매칭 성공~');
 					const PlayerInfo : playerType = {
 						p1 : {
 							intra: data.p1.intra,
@@ -113,7 +114,8 @@ function Game({ mod, isChangedGameData, setChangedGameData, }: gameComponent) {
 				mod === gameMod.normalGame ||
 				mod === gameMod.passwordGame) {
 					WaitPage(ctx, CanvasWidth, CanvasHeight);
-					myGameSocket.socket.emit('matching');
+					if (mod === gameMod.rankGame)
+						myGameSocket.socket.emit('matching');
 				}
 				// 매칭 성공 이벤트 받으면 레디 입력 받고 ready-rank 이벤트 보내야함
 			}
@@ -317,7 +319,7 @@ const styles = `
 	justify-content:center;
 	vertical-align: center;
 	height: 100%;
-	margin-top: 95px 
+	margin-top: 95px
 }
 
 `;
