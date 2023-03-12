@@ -59,7 +59,7 @@ export const SOCKET_EVENT = {
     UNMUTE: "channel-unmute",
     BLOCK: "direct-mute",
     UNBLOCK: "direct-unmute",
-    INVITE: "invite-game",
+    INVITE: "invite",
     BEFRIEND: "be-friend",
     RESFRIEND: "res-friend",
     NOTICE: "notice",
@@ -128,6 +128,13 @@ export const STARTMSG : SocketOutputDto = {
 }
 
 //////////////////////////// GAME TYPE ////////////////////////////////////
+
+export interface GameData {
+	timestamp: string;
+	nickname: string;
+	isRank: boolean;
+	isWin: boolean;
+}
 
 export enum gameMod{
 	normalGame,

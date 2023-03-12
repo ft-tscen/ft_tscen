@@ -83,7 +83,7 @@ export function InputMsg({
 						});
 						break;
 					}
-					else if (mySocket.enteredGameRoom) {
+					else if (!mySocket.enteredGameRoom) {
 						setReceivedMsg({
 							author: "server",
 							message: `${text} : Be out of the room`,

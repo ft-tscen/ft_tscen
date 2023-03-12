@@ -7,12 +7,12 @@ import { gameMod } from 'src/game/dtos/game.dto';
 
 @Entity('histories')
 export class History extends BaseEntity {
-  @Column({ unique: true })
-  winner: string;
+  @Column()
+  winner: number;
 
-  @Column({ unique: true })
-  loser: string;
+  @Column()
+  loser: number;
 
-  @Column({ unique: true })
+  @Column()
   type: gameMod;
 }
