@@ -379,8 +379,14 @@ export class GameService {
 	if (p1_win) {
 		if (Game.gameMod != gameMod.soloGame) {
 			let res = await this.createHistory(Game.p1.name, Game.p2.name, Game.gameMod);
+			if (!res.ok)
+				console.log('[gameservice] create History error');
 			res = await this.userService.winGame(Game.p1.name, Game.gameMod);
+			if (!res.ok)
+				console.log('[gameservice] winGame error');
 			res = await this.userService.loseGame(Game.p2.name, Game.gameMod);
+			if (!res.ok)
+				console.log('[gameservice] loseGame error');
 			Game.nsp.in(Game.roomName).emit('end-game', true);
 		}
 		else {

@@ -35,7 +35,7 @@ const GameDtoByRoomName = new Map<string, GameDto>();
 const RoomNameByNickname = new Map<string, string>();
 const NicknameBySocketId = new Map<string, string>();
 
-let onClickSolo = false;
+let onClickSoloByNickname = new Map<string, boolean>();
 
 const waitingPlayer: WaitingPlayer = {
 	waiting: false,
@@ -139,26 +139,33 @@ export class GamesGateway
 
   @SubscribeMessage('clear')
   handleClear(@ConnectedSocket() socket: Socket) {
-	this.logger.log(`+=+=+=+=+=+= ${NicknameBySocketId[socket.id]} clear +=+=+=+=+=+=`);
-
-	onClickSolo = false;
+	this.logger.log(`+=+=+=+=+=+=+=+=+= ${NicknameBySocketId[socket.id]} clear +=+=+=+=+=+=+=+=+=`);
 
 	const nickname = NicknameBySocketId[socket.id];
 	if (!nickname)
 		return ;
+	onClickSoloByNickname[nickname] = false;
 
-	if (waitingPlayer.waiting = true && nickname == waitingPlayer.nickname)
+	this.logger.log(waitingPlayer.waiting);
+	if (waitingPlayer.waiting = true && nickname == waitingPlayer.nickname) {
+		this.logger.log(`${waitingPlayer.nickname} is clear ~~`);
+		waitingPlayer.waiting = false;
 		waitingPlayer.nickname = undefined;
+	}
 
 	const roomName = RoomNameByNickname[nickname];
-	if (!roomName)
+	this.logger.log(`again ${waitingPlayer.waiting}`);
+	if (!roomName) {
+		this.logger.log('clear: no roomName');
 		return ;
+	}
 	RoomNameByNickname[nickname] = undefined;
 	socket.leave(roomName);
-
 	const gameDto = GameDtoByRoomName[roomName];
-	if (!gameDto)
+	if (!gameDto) {
+		this.logger.log('clear: no gameDto');
 		return ;
+	}
 	GameDtoByRoomName[roomName] = undefined;
 
 	clearInterval(gameDto.interval);
@@ -229,8 +236,10 @@ export class GamesGateway
 
   @SubscribeMessage('matching')
   async handleMatching(@ConnectedSocket() socket: Socket) {
-	this.logger.log('call matching...');
 	const nickname = NicknameBySocketId[socket.id];
+	this.logger.log(`${nickname} call matching...`);
+
+	this.logger.log(`${waitingPlayer.waiting}`);
 
 	if (waitingPlayer.waiting) {
 		if (nickname == waitingPlayer.nickname)
@@ -278,7 +287,7 @@ export class GamesGateway
 		waitingPlayer.nickname = nickname;
 		waitingPlayer.socket = socket;
 		waitingPlayer.waiting = true;
-		this.logger.log(`${socket.id} matching waiting...`);
+		this.logger.log(`${nickname} matching waiting...`);
 	}
   }
 
@@ -286,16 +295,20 @@ export class GamesGateway
   handleReadyRank(@ConnectedSocket() socket: Socket) {
 	const nickname = NicknameBySocketId[socket.id];
 	const roomName = RoomNameByNickname[nickname];
+	if (!roomName)
+		return { success: false, payload: `room not existed!` };
 	const game: GameDto = GameDtoByRoomName[roomName];
+	if (!game)
+		return { success: false, payload: `game not existed!` };
 
 	if (game.p1Ready === true && game.p2Ready == true)
 		return { success: false, payload: `already started!` };
 
-	if (socket.id === game.p1.socket.id) {
+	if (game.p1.socket && socket.id === game.p1.socket.id) {
 		game.p1Ready = true;
 		this.logger.log(`Ready p1!!!`);
 	}
-	else if (socket.id === game.p2.socket.id ){
+	else if (game.p2.socket && socket.id === game.p2.socket.id ){
 		game.p2Ready = true;
 		this.logger.log(`Ready p2!!!`);
 	}
@@ -310,21 +323,26 @@ export class GamesGateway
 
   @SubscribeMessage('click-solo')
   handleClickSolo(@ConnectedSocket() socket: Socket) {
-	onClickSolo = true;
+	const nickname = NicknameBySocketId[socket.id];
+	if (!nickname)
+		return { success: false, payload: 'click-solo error'};
+	onClickSoloByNickname[nickname] = true;
+	return { success: true, payload: 'click-solo'};
   }
 
   @SubscribeMessage('ready-solo')
   handleReadySolo(@ConnectedSocket() socket: Socket) {
-	if (!onClickSolo)
-		return ;
-	onClickSolo = false;
-
 	const nickname = NicknameBySocketId[socket.id];
-    if (RoomNameByNickname[nickname]) {
+	if (!nickname)
+		return { success: false, payload: 'nickname error'};
+	if (RoomNameByNickname[nickname]) {
 		this.logger.log('already solo mod playing');
-		return;
+		return { success: false, payload: 'already solo mod playing'};
 	}  // 여기 조건문 달아서 중복 호출 막음
-    this.logger.log(`Ready !!!`);
+	if (!onClickSoloByNickname[nickname])
+		return { success: false, payload: 'not solo page'};
+
+    this.logger.log(`Solo Ready !!!`);
     const Game: GameDto = this.gameService.init_test(
       socket,
       socket.id,
@@ -426,7 +444,8 @@ export class GamesGateway
     }
 
 	const Game: GameDto =  GameDtoByRoomName[roomName];
-
+	if (!Game)
+		return { success: false, payload: `game not existed!` };
 	if (Game.p2.name)
 		return { success: false, payload: `${NicknameBySocketId[socket.id]} is not player!` };
 
@@ -499,13 +518,13 @@ export class GamesGateway
   ) {
 	const nickname = NicknameBySocketId[socket.id];
 	if (!nickname)
-		return { success:false, payload: false };
+		return { success: false, payload: false };
 	const roomName = RoomNameByNickname[nickname];
 	if (!roomName)
-		return { success:true, payload: false };
+		return { success: true, payload: false };
 	const gameDto = GameDtoByRoomName[roomName];
 	if (!gameDto)
-		return { success:true, payload: false };
+		return { success: true, payload: false };
 	return {success: true, payload: true};
   }
 }

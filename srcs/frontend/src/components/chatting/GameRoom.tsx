@@ -13,13 +13,13 @@ type ArgsType = {
 
 export function GameRoom({obj, setReceivedMsg} :ArgsType) {
     let [visible, setVisible] :BoolType = useState<boolean>(false);
-    
-    let name :string = (obj.password ? `🔒 ${obj.name} 🔒` : obj.name);
+
+    let name :string = (obj.password ? `🔒 ${obj.roomName} 🔒` : obj.roomName);
     const pwInputRef = useRef<HTMLInputElement>(null);
 
     const toWatchTheGame = () => {
         let pw :string|undefined = pwInputRef.current!.value;
-        myGameSocket.socket.emit(SOCKET_GAME_EVENT.WATCH, obj.name, pw,
+        myGameSocket.socket.emit(SOCKET_GAME_EVENT.WATCH, obj.roomName, pw,
             ({success, payload} :{success :boolean, payload :string}) => {
                 setReceivedMsg({author:'server', message:payload})
             });
