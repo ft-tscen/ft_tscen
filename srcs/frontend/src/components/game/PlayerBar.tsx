@@ -19,10 +19,17 @@ function Player({ mod, playerInfo }: gameComponent) {
 	const [leftUrl, setLeftUrl] = useState<string>();
 	const [rightUrl, setRightUrl] = useState<string>();
 
+	// "f_win": 0,
+    // "f_lose": 0,
+    // "r_win": 0,
+    // "r_lose": 0
+
 	useEffect(() => {
 	if (mod !== gameMod.soloGame) {
 		const getLPlayer = async () => {
 			let name;
+			let wins: number = 0;
+			let losses: number = 0;
 			if (playerInfo?.p1.nickname)
 				name = playerInfo?.p1.nickname;
 			else
@@ -41,13 +48,26 @@ function Player({ mod, playerInfo }: gameComponent) {
 			}
 			else
 				setLeftUrl("https://www.w3schools.com/howto/img_avatar.png");
-			const wins = 5;
-			const losses = 2;
+			try {
+				const res = await api.get(`/user/score?nickname=${playerInfo?.p1.nickname}`);
+				if (mod === gameMod.rankGame) {
+					wins = res.data?.score.r_win;
+					losses = res.data?.score.r_lose;
+				}
+				else {
+					wins = res.data?.score.f_win;
+					losses = res.data?.score.f_lose;
+				}
+			} catch (e) {
+				console.error(e);
+			}
 			setLPlayer({ name, wins, losses });
 		};
 
 		const getRPlayer = async () => {
 			let name;
+			let wins: number = 0;
+			let losses: number = 0;
 			if (playerInfo?.p2.nickname)
 				name = playerInfo?.p2.nickname;
 			else
@@ -66,11 +86,21 @@ function Player({ mod, playerInfo }: gameComponent) {
 			}
 			else
 				setRightUrl("https://www.w3schools.com/howto/img_avatar.png");
-			const wins = 5;
-			const losses = 2;
+				try {
+					const res = await api.get(`/user/score?nickname=${playerInfo?.p2.nickname}`);
+					if (mod === gameMod.rankGame) {
+						wins = res.data?.score.r_win;
+						losses = res.data?.score.r_lose;
+					}
+					else {
+						wins = res.data?.score.f_win;
+						losses = res.data?.score.f_lose;
+					}
+				} catch (e) {
+					console.error(e);
+				}
 			setRPlayer({ name, wins, losses });
 		};
-
 		getLPlayer();
 		getRPlayer();
 	}
