@@ -59,7 +59,7 @@ export class UserService {
     }
   }
 
-  async getUserByNickName(nickname: string): Promise<any> {
+  async getUserByNickName(nickname: string): Promise<getUserByNickNameOutput> {
     try {
 		console.log(nickname);
       const user = await this.users.findOne({

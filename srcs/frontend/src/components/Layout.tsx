@@ -6,37 +6,51 @@ import Game from "./game/Game";
 import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
-import { gameMod, UserData } from "../common/types";
-import { useState } from "react";
+import { GameData, gameMod, UserData } from "../common/types";
+import { useEffect, useState } from "react";
+import { myGameSocket } from "../common/MySocket";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
 	userData: UserData;
+	gameData: GameData[] | undefined;
 	isChangedData: boolean;
 	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
+	isChangedGameData: boolean;
+	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function Layout({
 	isLoggedIn,
 	userData,
+	gameData,
 	isChangedData,
 	setChangedData,
+	isChangedGameData,
+	setChangedGameData,
 }: LayoutComponent) {
 	const [inform, setInform] = useState<UserData>();
 	const [enteredChannel, setEnteredChannel] = useState<boolean>(false);
 	const url = useParams();
 	const param = url["*"];
 	const navigate = useNavigate();
+	const [needClear, SetNeedclear] = useState<boolean>(true);
+
 
 	const getComponent = () => {
-		if (param === "")
+		if (param === "") {
+			if (myGameSocket && needClear) {
+				myGameSocket.socket.emit('clear');
+				SetNeedclear(false);
+			}
 			return (
 				<Home
-					isLoggedIn={isLoggedIn}
-					userData={userData}
-					enteredChannel={enteredChannel}
+				isLoggedIn={isLoggedIn}
+				userData={userData}
+				enteredChannel={enteredChannel}
 				/>
 			);
+		}
 		else if (param === "profile")
 			return (
 				<Profile
@@ -46,12 +60,12 @@ function Layout({
 					setChangedData={setChangedData}
 				/>
 			);
-		else if (param === "soloGame") return <Game mod={gameMod.soloGame} />;
-		else if (param === "rankGame") return <Game mod={gameMod.rankGame} />;
-		else if (param === "friendlyGame") return <Game mod={gameMod.normalGame} />;
+		else if (param === "soloGame") return <Game mod={gameMod.soloGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear}/>;
+		else if (param === "rankGame") return <Game mod={gameMod.rankGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
+		else if (param === "friendlyGame") return <Game mod={gameMod.normalGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
 		else if (param === "privateGame")
-			return <Game mod={gameMod.passwordGame} />;
-		else if (param === "creatGame") return <CreatRoom />;
+			return <Game mod={gameMod.passwordGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
+		else if (param === "creatGame") return <CreatRoom  SetNeedclear={SetNeedclear}/>;
 		else navigate("/");
 	};
 
@@ -70,6 +84,7 @@ function Layout({
 								inform={inform ?? userData}
 								setInform={setInform}
 								myData={userData}
+								gameData={gameData}
 							/>
 						)}
 					</Col>

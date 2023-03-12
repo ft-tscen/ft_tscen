@@ -12,7 +12,7 @@ import {
 } from "react-bootstrap";
 import { api } from "../../axios/api";
 import { mySocket } from "../../common/MySocket";
-import { UserData } from "../../common/types";
+import { GameData, UserData } from "../../common/types";
 import Friends from "../Friends";
 
 type Record = {
@@ -41,9 +41,10 @@ type InformComponent = {
 	inform: UserData;
 	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
 	myData: UserData;
+	gameData: GameData[] | undefined;
 };
 
-function MyInform({ inform, setInform, myData }: InformComponent) {
+function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 	const [imageURL, setImageURL] = useState("");
 	const [show, setShow] = useState(false);
 	const [myFriends, setMyFriends] = useState([]);
@@ -173,14 +174,14 @@ function MyInform({ inform, setInform, myData }: InformComponent) {
 							</Form>
 						</Card.Body>
 					</Card>
-					<Form.Group className="mb-2" controlId="formName">
+					<Form.Group className="mb-2 mt-5" controlId="formName">
 						<Form.Label className="text-white">최근 전적(최대 30게임)</Form.Label>
 					</Form.Group>
 					<Container style={{ height: "30vmin", overflowY: "scroll" }}>
 						<Card className="border-0">
 						<Card.Body className="p-0">
 						<ListGroup variant="flush">
-							{createDummyData().slice(0, 30).map((res, index) => (
+							{gameData && gameData.map((res, index) => (
 							<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
 								<span className="fw-bold">{res.timestamp}</span>
 								<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>
