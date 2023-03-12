@@ -82,13 +82,23 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 			setShow(false);
 		};
 		const joinGame = () => {
-			console.log("초대한 게임에 참여함");
-			myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, msg.author,
-				({success, payload}: {success :boolean, payload :string}) => {
-					setReceivedMsg({author:"server", message:payload})
-			})
-			mySocket.enteredGameRoom = true;
-			setActive(false);
+			let roomName :string|undefined;
+			myGameSocket.socket.emit(SOCKET_GAME_EVENT.GET_ROOM_NAME, msg.author,
+				({success, payload}: {success: boolean, payload: string}) => {
+					if (success)
+						roomName = payload;
+					else {
+						setReceivedMsg({author:'server', message:payload})
+					}
+				})
+			if (roomName) {
+				myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, roomName,
+					({success, payload}: {success :boolean, payload :string}) => {
+						setReceivedMsg({author:"server", message:payload})
+				})
+				mySocket.enteredGameRoom = true;
+				setActive(false);
+			}
 		};
 
 		const weAreFriend = async () => {

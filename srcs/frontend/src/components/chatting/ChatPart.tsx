@@ -13,7 +13,7 @@ import {
 } from "../../common/types";
 import { useEffect, useState } from "react";
 import { ChatRoom } from "./ChatRoom";
-import { myGameSocket, mySocket } from "../../common/MySocket";
+import { mySocket } from "../../common/MySocket";
 import { InputMsg } from "./InputMsg";
 import { Channels } from "./Channels";
 
@@ -118,7 +118,7 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 			/>
 			{flag === SHOW_OTHER ? (
 				enterChannelFlag === ENTER_CHANNEL ? (
-					<GameRooms />
+					<GameRooms setReceivedMsg={setReceivedMsg}/>
 				) : (
 					<Channels enterChannel={enterChannel} />
 				)
