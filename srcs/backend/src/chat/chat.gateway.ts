@@ -110,7 +110,7 @@ export class ChatGateway
     const hashedPassword = await bcrypt.hash(password, salt);
     return hashedPassword;
   }
-  
+
   async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
     if (!password && !hashedPassword)
       return true;
@@ -152,7 +152,7 @@ export class ChatGateway
           if (member !== socket.id) {
             const now = new Date().getTime();
             const authorID :string = this.sockets.get(author); // author -> this->sockets.get(author)
-            
+
             if (channelMute.has(authorID) && now < channelMute.get(authorID)) {
               return;
             }
