@@ -32,7 +32,7 @@ export interface ChannelType {
 }
 
 export interface GameRoomType {
-    name: string;
+    roomName: string;
     password: boolean;
 }
 
