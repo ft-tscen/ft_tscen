@@ -1,6 +1,7 @@
 import { Col, Row, Button } from "react-bootstrap";
 import { Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { myGameSocket } from "../common/MySocket";
 import { UserData } from "../common/types";
 
 enum gameMod {
@@ -79,7 +80,10 @@ function Home({ isLoggedIn, userData, enteredChannel }: HomeComponent) {
 							variant="outline-light"
 							disabled={!isLoggedIn}
 							style={{ width: "100px", height: "50px" }}
-							onClick={() => gameModHandle(gameMod.soloGame)}
+							onClick={() =>{
+								myGameSocket.socket.emit("click-solo");
+								gameModHandle(gameMod.soloGame)
+							}}
 						>
 							혼자하기
 						</Button>

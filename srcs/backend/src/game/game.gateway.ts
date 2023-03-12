@@ -35,6 +35,8 @@ const GameDtoByRoomName = new Map<string, GameDto>();
 const RoomNameByNickname = new Map<string, string>();
 const NicknameBySocketId = new Map<string, string>();
 
+let onClickSolo = false;
+
 const waitingPlayer: WaitingPlayer = {
 	waiting: false,
 	socket: undefined,
@@ -138,13 +140,15 @@ export class GamesGateway
   @SubscribeMessage('clear')
   handleClear(@ConnectedSocket() socket: Socket) {
 	this.logger.log(`+=+=+=+=+=+= ${NicknameBySocketId[socket.id]} clear +=+=+=+=+=+=`);
+
+	onClickSolo = false;
+
 	const nickname = NicknameBySocketId[socket.id];
 	if (!nickname)
 		return ;
 
-	if (waitingPlayer.waiting = true && socket.id == waitingPlayer?.socket?.id) {
+	if (waitingPlayer.waiting = true && nickname == waitingPlayer.nickname)
 		waitingPlayer.nickname = undefined;
-	}
 
 	const roomName = RoomNameByNickname[nickname];
 	if (!roomName)
@@ -157,6 +161,7 @@ export class GamesGateway
 		return ;
 	GameDtoByRoomName[roomName] = undefined;
 
+	clearInterval(gameDto.interval);
   }
 
 //  @SubscribeMessage('test')
@@ -179,6 +184,8 @@ export class GamesGateway
 	const nickname = NicknameBySocketId[socket.id]
     const roomName = RoomNameByNickname[nickname];
     const dto: GameDto = GameDtoByRoomName[roomName];
+	if (!dto)
+		return {success: false, payload: 'none game'};
     if (is_p1)
 		dto.p1.padleUp = true;
 	else
@@ -191,6 +198,8 @@ export class GamesGateway
 	const nickname = NicknameBySocketId[socket.id];
     const roomName = RoomNameByNickname[nickname];
     const dto: GameDto = GameDtoByRoomName[roomName];
+	if (!dto)
+		return {success: false, payload: 'none game'};
 	if (is_p1)
     	dto.p1.padleDown = true;
 	else
@@ -203,6 +212,8 @@ export class GamesGateway
 	const nickname = NicknameBySocketId[socket.id];
     const roomName = RoomNameByNickname[nickname];
     const dto: GameDto = GameDtoByRoomName[roomName];
+	if (!dto)
+		return {success: false, payload: 'none game'};
 	if (!dto)
 		return;
 	if (is_p1) {
@@ -297,11 +308,20 @@ export class GamesGateway
     }
   }
 
+  @SubscribeMessage('click-solo')
+  handleClickSolo(@ConnectedSocket() socket: Socket) {
+	onClickSolo = true;
+  }
+
   @SubscribeMessage('ready-solo')
   handleReadySolo(@ConnectedSocket() socket: Socket) {
+	if (!onClickSolo)
+		return ;
+	onClickSolo = false;
+
 	const nickname = NicknameBySocketId[socket.id];
     if (RoomNameByNickname[nickname]) {
-		this.logger.log('alreay solo mod playing');
+		this.logger.log('already solo mod playing');
 		return;
 	}  // 여기 조건문 달아서 중복 호출 막음
     this.logger.log(`Ready !!!`);
@@ -477,6 +497,15 @@ export class GamesGateway
   handleOnline(
     @ConnectedSocket() socket: Socket
   ) {
-
+	const nickname = NicknameBySocketId[socket.id];
+	if (!nickname)
+		return { success:false, payload: false };
+	const roomName = RoomNameByNickname[nickname];
+	if (!roomName)
+		return { success:true, payload: false };
+	const gameDto = GameDtoByRoomName[roomName];
+	if (!gameDto)
+		return { success:true, payload: false };
+	return {success: true, payload: true};
   }
 }
