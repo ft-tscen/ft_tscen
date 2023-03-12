@@ -154,14 +154,18 @@ export class GamesGateway
 	}
 
 	const roomName = RoomNameByNickname[nickname];
-	if (!roomName)
+	this.logger.log(`again ${waitingPlayer.waiting}`);
+	if (!roomName) {
+		this.logger.log('clear: no roomName');
 		return ;
+	}
 	RoomNameByNickname[nickname] = undefined;
 	socket.leave(roomName);
-
 	const gameDto = GameDtoByRoomName[roomName];
-	if (!gameDto)
+	if (!gameDto) {
+		this.logger.log('clear: no gameDto');
 		return ;
+	}
 	GameDtoByRoomName[roomName] = undefined;
 
 	clearInterval(gameDto.interval);
