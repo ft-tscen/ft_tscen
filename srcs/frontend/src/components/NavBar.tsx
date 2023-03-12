@@ -14,6 +14,7 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 		await api.get("/logout");
 		setLoggedIn(false);
 		navigate("/");
+		navigate(0);
 	};
 
 	return (

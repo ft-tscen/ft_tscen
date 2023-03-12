@@ -1,11 +1,20 @@
+import { useEffect, useState } from "react";
 import { Badge, ListGroup, Offcanvas } from "react-bootstrap";
+import { myGameSocket, mySocket } from "../common/MySocket";
 import { UserData } from "../common/types";
+import Status from "./Status";
 
 type FriendsComponent = {
 	show: boolean;
 	handleClose: () => void;
 	friends: UserData[];
 };
+
+enum STATUS{
+	GAMING = "success",
+	ONLINE = "primary",
+	OFFLINE = "secondary",
+}
 
 function Friends({ show, handleClose, friends }: FriendsComponent) {
 	return (
@@ -23,9 +32,7 @@ function Friends({ show, handleClose, friends }: FriendsComponent) {
 						{friends.map(friend =>
 						<>
 						<ListGroup.Item className="d-flex justify-content-between">
-							<Badge bg="primary" className="rounded-circle" style={{height: "1.5vmin", width: "1.5vmin"}}>
-								<p></p>
-							</Badge>
+							<Status friend={friend.nickname}></Status>
 							{friend.nickname}
 							{/* Status에 따른 색 추가 */}
 						</ListGroup.Item>

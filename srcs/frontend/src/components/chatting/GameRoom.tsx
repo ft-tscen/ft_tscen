@@ -13,7 +13,6 @@ type ArgsType = {
 
 export function GameRoom({obj, setReceivedMsg} :ArgsType) {
     let [visible, setVisible] :BoolType = useState<boolean>(false);
-
     let name :string = (obj.password ? `🔒 ${obj.roomName} 🔒` : obj.roomName);
     const pwInputRef = useRef<HTMLInputElement>(null);
 

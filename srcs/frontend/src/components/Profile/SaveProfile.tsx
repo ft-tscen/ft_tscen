@@ -115,6 +115,7 @@ function SaveProfile({
 				}
 				setChangedData(!isChangedData);
 				navigate("/");
+				navigate(0);
 			} catch (e) {
 				console.error(e);
 			}

@@ -32,8 +32,8 @@ export interface ChannelType {
 }
 
 export interface GameRoomType {
-    roomName: string;
-    password: boolean;
+    roomName: string,
+	password: boolean,
 }
 
 export type BoolType = [

@@ -82,6 +82,7 @@ export class ChatGateway
       });
       this.sockets.set(nickname, socket.id);
       console.log(`${socket.id}(${nickname}) 소켓 연결`);
+	  socket.broadcast.emit('refresh-status');
     } else {
       socket.disconnect();
     }
@@ -99,6 +100,7 @@ export class ChatGateway
       });
     }
     console.log(`${socket.id} 소켓 연결 해제 ❌`);
+	socket.broadcast.emit('refresh-status');
   } // 채널에서 나갔다고 알려줘야 함.
 
   async hashPassword(password: string): Promise<string> {
@@ -727,6 +729,17 @@ export class ChatGateway
       message: `get ${input.target}'s profile`,
       user
     };
+  }
+
+  @SubscribeMessage('check-status')
+  checkStatus(
+    @ConnectedSocket() socket: Socket,
+	@MessageBody() nickname: string,
+  ): boolean {
+	console.log(this.users.has(this.sockets.get(nickname)));
+    if (this.users.has(this.sockets.get(nickname)))
+      return true;
+    return false;
   }
 
   @SubscribeMessage('invite')
