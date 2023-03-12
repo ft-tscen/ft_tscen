@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Socket, Namespace } from 'socket.io';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
-import type { GameDto, HistoryOutput } from './dtos/game.dto';
+import type { GameDto, History2, HistoryOutput } from './dtos/game.dto';
 import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
 import { History } from './entities/history.entity';
@@ -24,6 +24,21 @@ export class GameService {
 		private readonly userService: UserService
 		) {}
 
+
+    async createDummyHistory(winner: string, type: gameMod) {
+        try {
+        const { user: user1 } = await this.userService.getUserByNickName(winner);
+        const history: History = await this.histories.save(
+          this.histories.create({ winner: user1.id, loser: user1.id, type})
+        );
+        let h: History[] = [];
+        h.push(history);
+        return { ok: true, history: h };
+      } catch (error) {
+        return {ok: false, error: 'createHistory Error'};
+      }
+    }
+
 	async createHistory(winner: string, loser: string, type: gameMod)
 	: Promise<HistoryOutput> {
 		try {
@@ -35,7 +50,7 @@ export class GameService {
 			);
 			let h: History[] = [];
 			h.push(history);
-			return { ok: true, history: h };
+			return { ok: true };
 		} catch (error) {
 			return {ok: false, error: 'createHistory Error'};
 		}
@@ -49,17 +64,15 @@ export class GameService {
 			const history  = await this.histories.find({
 				where: [{ winner }, { loser }],
 			});
-			history.map((item)=>
-				(async () => {
-					const { winner, loser } = item;
-					const {user: {nickname: winnerNickname}} = await this.userService.getUserById(winner);
-					const {user: {nickname: loserNickname}} = await this.userService.getUserById(loser);
-					return {...item, winner: winnerNickname, loser: loserNickname}
-				})()
-			)
-
+      const promises = history.map(async (item) => {
+        const { winner, loser } = item;
+        const { user: { nickname: winnerNickname } } = await this.userService.getUserById(winner);
+        const { user: { nickname: loserNickname } } = await this.userService.getUserById(loser);
+        return { ...item, winner: winnerNickname, loser: loserNickname };
+      });
+      const results:History2[] = await Promise.all(promises);
 			if (history)
-				return {ok: true, history: history };
+				return {ok: true, history: results };
 			return {ok: false, error: 'History not Found'};
 		} catch (error) {
 			return {ok: false, error: 'getWinHistory Error'};

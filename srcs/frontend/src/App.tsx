@@ -22,7 +22,7 @@ function App() {
 		verified: false,
 		avatarId: 0,
 	});
-	let [gameData, setGameData] = useState<any[]>();
+	let [gameData, setGameData] = useState<GameData[]>();
 	const [isChangedData, setChangedData]: BoolType = useState<boolean>(false);
 	const [isChangedGameData, setChangedGameData]: BoolType = useState<boolean>(false);
 
@@ -39,7 +39,8 @@ function App() {
 				avatarId: user.avatarId,
 			};
 			setUserData(data);
-			mySocket.name = user.nickname;
+			if (mySocket)
+				mySocket.name = user?.nickname;
 		} catch (e) {
 			console.error(e);
 		}
@@ -49,33 +50,33 @@ function App() {
 		try {
 			const res = await api.get(`/game/history?nickname=${userData.nickname}`);
 			let record: GameData[] = [];
-			//for (let i = 0; i < res.data?.history?.length; i++) {
-			//	let WinCheck : boolean;
-			//	let RankCheck : boolean = true;
-			//	let opponent : string;
-			//	const dateObject = new Date(res.data?.history[i].createdAt);
-			//	if (res.data?.history[i].winner === userData.nickname) {
-			//		WinCheck = true;
-			//		opponent = res.data?.history[i].loser;
-			//	}
-			//	else {
-			//		WinCheck = false;
-			//		opponent = res.data?.history[i].winner;
-			//	}
-			//	if (res.data?.history[i].type !== 3)
-			//		RankCheck = false;
-			//	let rec : GameData = {
-			//		timestamp : dateObject.toLocaleTimeString(),
-			//		nickname: opponent,
-			//		isRank : RankCheck,
-			//		isWin : WinCheck,
-			//	}
-			//	record.push(rec);
-			//}
-			//for (let i = 0; i < record.length; i++) {
-			//	console.log("record[i]");
-			//	console.log(record[i]);
-			//}
+			for (let i = 0; i < res.data?.history?.length; i++) {
+				let WinCheck : boolean;
+				let RankCheck : boolean = true;
+				let opponent : string;
+				const dateObject = new Date(res.data?.history[i].createdAt);
+				if (res.data?.history[i].winner === userData.nickname) {
+					WinCheck = true;
+					opponent = res.data?.history[i].loser;
+				}
+				else {
+					WinCheck = false;
+					opponent = res.data?.history[i].winner;
+				}
+				if (res.data?.history[i].type !== 3)
+					RankCheck = false;
+				let rec : GameData = {
+					timestamp : dateObject.toLocaleTimeString(),
+					nickname: opponent,
+					isRank : RankCheck,
+					isWin : WinCheck,
+				}
+				record.push(rec);
+			}
+			for (let i = 0; i < record.length; i++) {
+				console.log("record[i]");
+				console.log(record[i]);
+			}
 			setGameData(record);
 		} catch (e) {
 			console.error(e);
@@ -138,6 +139,7 @@ function App() {
 						<Layout
 							isLoggedIn={loggedIn}
 							userData={userData}
+							gameData={gameData}
 							isChangedData={isChangedData}
 							setChangedData={setChangedData}
 							isChangedGameData={isChangedGameData}

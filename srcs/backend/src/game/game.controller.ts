@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { AuthUser } from 'src/auth/authUser.decorator';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
@@ -29,10 +29,10 @@ export class GameController {
     description: 'make win history by nickname',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @Get('/make_history')
-  async makeHistory(
+  @Post('/history')
+  async createDummyHistory(
     @Query('nickname') nickname: string,
   ) {
-	  return await this.gameService.createHistory(nickname, 'test', gameMod.rankGame);
+	  return await this.gameService.createDummyHistory(nickname, gameMod.rankGame);
   }
 }

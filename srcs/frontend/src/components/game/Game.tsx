@@ -13,9 +13,10 @@ type gameComponent = {
 	mod: gameMod;
 	isChangedGameData: boolean;
 	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
+	SetNeedclear: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function Game({ mod, isChangedGameData, setChangedGameData, }: gameComponent) {
+function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameComponent) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	let CanvasWidth = 1200;
 	let CanvasHeight = 800;
@@ -37,6 +38,7 @@ function Game({ mod, isChangedGameData, setChangedGameData, }: gameComponent) {
 
 	useEffect(()=> {
 		try {
+			SetNeedclear(true);
 			const canvas = canvasRef.current;
 			if (canvas) {
 				myGameSocket.socket.emit(SOCKET_GAME_EVENT.NICK, myGameSocket.name);
