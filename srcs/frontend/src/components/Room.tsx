@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Form, Button, Container, Card, CloseButton, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { myGameSocket, mySocket } from "../common/MySocket";
 import { BoolType } from "../common/types";
 
-function CreatRoom() {
+type CreatRoomType = {
+	SetNeedclear: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+function CreatRoom({SetNeedclear}: CreatRoomType) {
 	const navigate = useNavigate();
 	const [roomName, setRoomName] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
@@ -73,6 +77,10 @@ function CreatRoom() {
 	const handleClickClose = () => {
 		navigate("/");
 	};
+
+	useEffect(()=> {
+		SetNeedclear(true);
+	}, []);
 
 	return (
 		<Container className="pt-5 mt-5">

@@ -142,7 +142,7 @@ export class GamesGateway
 	if (!nickname)
 		return ;
 
-	if (waitingPlayer.waiting = true && socket.id == waitingPlayer.socket.id) {
+	if (waitingPlayer.waiting = true && socket.id == waitingPlayer?.socket?.id) {
 		waitingPlayer.nickname = undefined;
 	}
 

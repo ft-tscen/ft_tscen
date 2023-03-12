@@ -2,7 +2,6 @@ import { BallDto } from './ball.dto';
 import { PlayerDto } from './player.dto';
 import { Namespace } from 'socket.io';
 import { BaseOutput } from 'src/common/dtos/base.dto';
-import { History } from '../entities/history.entity';
 
 export enum gameMod{
   normalGame,
@@ -34,6 +33,15 @@ export type GameDto = {
   interval: NodeJS.Timer,
 }
 
+export class History2 {
+  id: number;
+  createdAt: Date;
+  updatedAt:Date;
+  winner: string;
+  loser: string;
+  type: gameMod;
+}
+
 export class HistoryOutput extends BaseOutput {
-	history?: History[];
+	history?: History2[];
 }
