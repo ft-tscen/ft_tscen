@@ -318,6 +318,7 @@ export class GamesGateway
 		game.p2.socket.emit('start-game', false);
 		this.gameService.gameLoop(game);
 		this.logger.log(`Game Start!!!`);
+		socket.broadcast.emit('refresh-status');
     }
   }
 
@@ -377,6 +378,8 @@ export class GamesGateway
 	createdRooms = createdRooms.filter(
 		(createdRoom) => createdRoom.roomName !== deletedRoom.roomName,
 	); // 유저가 생성한 room 목록 중에 삭제되는 room 있으면 제거
+	
+	socket.broadcast.emit('refresh-status');
 	return { success: true, payload: `${roomName} deleted!` };
   }
 
@@ -429,6 +432,7 @@ export class GamesGateway
 
     this.nsp.emit('create-room', roomName); // 대기실 방 생성
 
+	socket.broadcast.emit('refresh-status');
     return { success: true, payload: roomName };
   }
 
@@ -472,6 +476,7 @@ export class GamesGateway
 	Game.p1.socket.emit('matching-success', playerInfo);
 	socket.emit('matching-success', playerInfo);
 
+	socket.broadcast.emit('refresh-status');
 	return { success: true, payload: roomName };
   }
 
@@ -512,19 +517,17 @@ export class GamesGateway
     return { success: true, payload: roomName};
   }
 
-  @SubscribeMessage('playing-game')
+  @SubscribeMessage('check-status')
   handleOnline(
-    @ConnectedSocket() socket: Socket
+    @ConnectedSocket() socket: Socket,
+	@MessageBody() nickname: string
   ) {
-	const nickname = NicknameBySocketId[socket.id];
-	if (!nickname)
-		return { success: false, payload: false };
 	const roomName = RoomNameByNickname[nickname];
 	if (!roomName)
-		return { success: true, payload: false };
+		return false;
 	const gameDto = GameDtoByRoomName[roomName];
 	if (!gameDto)
-		return { success: true, payload: false };
-	return {success: true, payload: true};
+		return false;
+	return true;
   }
 }

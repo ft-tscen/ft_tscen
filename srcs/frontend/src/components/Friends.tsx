@@ -1,14 +1,24 @@
-import { Offcanvas } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Badge, ListGroup, Offcanvas } from "react-bootstrap";
+import { myGameSocket, mySocket } from "../common/MySocket";
+import { UserData } from "../common/types";
+import Status from "./Status";
 
 type FriendsComponent = {
 	show: boolean;
 	handleClose: () => void;
-	friends: string[];
+	friends: UserData[];
 };
+
+enum STATUS{
+	GAMING = "success",
+	ONLINE = "primary",
+	OFFLINE = "secondary",
+}
 
 function Friends({ show, handleClose, friends }: FriendsComponent) {
 	return (
-		<Offcanvas show={show} onHide={handleClose}>
+		<Offcanvas show={show} onHide={handleClose} style={{ overflowY: "scroll" }}>
 			<Offcanvas.Header closeButton>
 				<Offcanvas.Title>친구 목록</Offcanvas.Title>
 			</Offcanvas.Header>
@@ -17,7 +27,19 @@ function Friends({ show, handleClose, friends }: FriendsComponent) {
 					친구가 없습니다. 친구를 추가해보세요!
 				</Offcanvas.Body>
 			) : (
-				<Offcanvas.Body>sdf</Offcanvas.Body>
+				<Offcanvas.Body>
+					<ListGroup variant="flush">
+						{friends.map(friend =>
+						<>
+						<ListGroup.Item className="d-flex justify-content-between">
+							<Status friend={friend.nickname}></Status>
+							{friend.nickname}
+							{/* Status에 따른 색 추가 */}
+						</ListGroup.Item>
+						</>
+					)}
+					</ListGroup>
+				</Offcanvas.Body>
 			)}
 		</Offcanvas>
 	);
