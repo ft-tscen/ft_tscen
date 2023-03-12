@@ -3,6 +3,7 @@ import { Button, Card, Form, InputGroup, Row } from "react-bootstrap";
 import { BoolType, GameRoomType, SocketOutputDto, SOCKET_GAME_EVENT } from "../../common/types";
 import { myGameSocket, mySocket } from "../../common/MySocket";
 import "./Effect.css"
+import { useNavigate } from "react-router-dom";
 
 type ArgsType = {
     obj :GameRoomType,
@@ -15,15 +16,22 @@ export function GameRoom({obj, setReceivedMsg} :ArgsType) {
     let [visible, setVisible] :BoolType = useState<boolean>(false);
     let name :string = (obj.password ? `🔒 ${obj.roomName} 🔒` : obj.roomName);
     const pwInputRef = useRef<HTMLInputElement>(null);
-
+	let navigate = useNavigate();
     const toWatchTheGame = () => {
-        let pw :string|undefined = pwInputRef.current!.value;
-        myGameSocket.socket.emit(SOCKET_GAME_EVENT.WATCH, obj.roomName, pw,
+		let room :{roomName: string, password: string} = {
+			roomName : obj.roomName,
+			password : '',
+		}
+		if (pwInputRef.current) {
+			room.password = pwInputRef.current.value;
+			pwInputRef.current.value = "";
+		}
+        myGameSocket.socket.emit(SOCKET_GAME_EVENT.WATCH, room,
             ({success, payload} :{success :boolean, payload :string}) => {
                 setReceivedMsg({author:'server', message:payload})
+				navigate('/watchGame')
             });
         offVisible();
-        pwInputRef.current!.value = "";
     }
 
     const onVisible = () => setVisible(true);

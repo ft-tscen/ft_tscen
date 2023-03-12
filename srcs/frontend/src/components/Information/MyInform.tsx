@@ -31,6 +31,7 @@ type InformComponent = {
 
 function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 	const [imageURL, setImageURL] = useState("");
+	//const [refresh, setRefresh] = useState(false);
 	const [show, setShow] = useState(false);
 	const [myFriends, setMyFriends] = useState([]);
 	const handleClose = () => setShow(false);
@@ -159,8 +160,9 @@ function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 							</Form>
 						</Card.Body>
 					</Card>
-					<Form.Group className="mb-2 mt-5" controlId="formName">
+					<Form.Group className="mb-2 mt-5 d-flex justify-content-between" controlId="formName">
 						<Form.Label className="text-white">최근 전적(최대 30게임)</Form.Label>
+						<Button variant="outline-light" onClick={() => getMyFriends()}>♻</Button>
 					</Form.Group>
 					{
 						gameData && gameData.length === 0 ? (

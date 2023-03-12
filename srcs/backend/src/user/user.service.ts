@@ -197,10 +197,11 @@ export class UserService {
     }
   }
 
-  async winGame(intra: string, mod: gameMod) {
+  async winGame(nickname: string, mod: gameMod) {
     try {
+	  console.log(`nickname: ${nickname}`);
       const user = await this.users.findOne({
-        where: { intra }
+        where: { nickname }
       });
       if (!user)
         return {ok: false, error: 'User Not Found'};
@@ -208,7 +209,7 @@ export class UserService {
         user.r_win += 1;
       else
         user.f_win += 1;
-      await this.users.update(intra, user);
+      await this.users.update(user.id, { f_win: user.f_win, r_win: user.r_win});
       return {ok: true, error: 'Success'};
     } catch (error) {
       return {ok: false, error};
@@ -226,7 +227,7 @@ export class UserService {
         user.r_lose += 1;
       else
         user.f_lose += 1;
-      await this.users.update(nickname, user);
+      await this.users.update(user.id, { f_lose: user.f_lose, r_lose: user.r_lose});
       return {ok: true, error: 'Success'};
     } catch (error) {
       return {ok: false, error};

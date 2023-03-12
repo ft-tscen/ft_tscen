@@ -31,6 +31,8 @@ export type GameDto = {
   p2Ready: boolean,
   nsp: Namespace,
   interval: NodeJS.Timer,
+  start: boolean,
+  end: boolean,
 }
 
 export class History2 {

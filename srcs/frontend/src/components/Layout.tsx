@@ -63,6 +63,7 @@ function Layout({
 		else if (param === "soloGame") return <Game mod={gameMod.soloGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear}/>;
 		else if (param === "rankGame") return <Game mod={gameMod.rankGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
 		else if (param === "friendlyGame") return <Game mod={gameMod.normalGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
+		else if (param === "watchGame") return <Game mod={gameMod.watchGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
 		else if (param === "privateGame")
 			return <Game mod={gameMod.passwordGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
 		else if (param === "creatGame") return <CreatRoom  SetNeedclear={SetNeedclear}/>;

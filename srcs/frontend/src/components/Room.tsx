@@ -43,9 +43,10 @@ function CreatRoom({SetNeedclear}: CreatRoomType) {
 	}
 
 	const handleSubmit = () => {
+		let room : {roomName : string, password : string} = {roomName, password};
 		if (usePassword) {
 			if (roomName.length >= 4 && password.length >= 4) {
-				myGameSocket.socket.emit('create-room', roomName, password , (res: any)=> {
+				myGameSocket.socket.emit('create-room', room, (res: any)=> {
 					if (res.success) {
 						navigate("/privateGame");
 						mySocket.enteredGameRoom = true
@@ -59,7 +60,7 @@ function CreatRoom({SetNeedclear}: CreatRoomType) {
 		}
 		else {
 			if (roomName.length >= 4) {
-				myGameSocket.socket.emit('create-room', roomName, (res: any) => {
+				myGameSocket.socket.emit('create-room', room, (res: any) => {
 					if (res) {
 						navigate("/friendlyGame");
 						mySocket.enteredGameRoom = true

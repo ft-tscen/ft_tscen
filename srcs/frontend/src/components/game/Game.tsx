@@ -61,8 +61,30 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 			if (canvas && ctx) {
 				// watch모드 대비 추가 iswatch일시 paddle 작동 막아둠
 				if (mod === gameMod.watchGame) {
-					// myGameSocket.socket.emit('watching');
-					setIsWatch(true);
+					myGameSocket.socket.emit('watching', (data: any) => {
+						console.log(data);
+						const PlayerInfo : playerType = {
+							p1 : {
+								intra: data.p1.intra,
+								usual_full_name : data.p1.usual_full_name,
+								nickname : data.p1.nickname,
+								phone : data.p1.phone,
+								verified : data.p1.verified,
+								avatarId : data.p1.avatarId,
+							},
+							p2 : {
+								intra: data.p2.intra,
+								usual_full_name : data.p2.usual_full_name,
+								nickname : data.p2.nickname,
+								phone : data.p2.phone,
+								verified : data.p2.verified,
+								avatarId : data.p2.avatarId,
+							}
+						}
+						setIsInfo(true);
+						setPlayerInfo(PlayerInfo);
+						setIsWatch(true);
+					});
 				}
 				myGameSocket.socket.on('start-game', (res: any)=> {
 					setPlayer(res);
