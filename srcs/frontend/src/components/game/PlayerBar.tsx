@@ -19,11 +19,6 @@ function Player({ mod, playerInfo }: gameComponent) {
 	const [leftUrl, setLeftUrl] = useState<string>();
 	const [rightUrl, setRightUrl] = useState<string>();
 
-	// "f_win": 0,
-    // "f_lose": 0,
-    // "r_win": 0,
-    // "r_lose": 0
-
 	useEffect(() => {
 	if (mod !== gameMod.soloGame) {
 		const getLPlayer = async () => {
@@ -47,7 +42,7 @@ function Player({ mod, playerInfo }: gameComponent) {
 				.catch((error) => console.error(error));
 			}
 			else
-				setLeftUrl("https://www.w3schools.com/howto/img_avatar.png");
+				setLeftUrl("./Anonymous.jpeg");
 			try {
 				const res = await api.get(`/user/score?nickname=${playerInfo?.p1.nickname}`);
 				if (mod === gameMod.rankGame) {
@@ -85,7 +80,7 @@ function Player({ mod, playerInfo }: gameComponent) {
 				.catch((error) => console.error(error));
 			}
 			else
-				setRightUrl("https://www.w3schools.com/howto/img_avatar.png");
+				setRightUrl("./Anonymous.jpeg");
 				try {
 					const res = await api.get(`/user/score?nickname=${playerInfo?.p2.nickname}`);
 					if (mod === gameMod.rankGame) {
