@@ -42,7 +42,7 @@ export class User extends BaseEntity {
   r_lose: number;
 
   @JoinColumn({ name: 'avatarId' })
-  @OneToOne(() => Avatar, { nullable: true, onDelete: 'SET NULL', })
+  @OneToOne(() => Avatar, { nullable: true, onDelete: 'SET NULL' })
   public avatar?: Avatar;
 
   @Column({ nullable: true })

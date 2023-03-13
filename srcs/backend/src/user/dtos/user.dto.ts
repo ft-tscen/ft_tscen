@@ -1,5 +1,5 @@
 import { User } from 'src/user/entities/user.entity';
-import Avatar  from 'src/user/entities/avatar.entity';
+import Avatar from 'src/user/entities/avatar.entity';
 import { BaseOutput } from 'src/common/dtos/base.dto';
 
 export class getMeOutput extends BaseOutput {
@@ -32,5 +32,5 @@ export class UpdateUserDto {
 }
 
 export class getScoreByNickNameOutput extends BaseOutput {
-	score?: any;
+  score?: any;
 }

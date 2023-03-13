@@ -24,7 +24,8 @@ function App() {
 	});
 	let [gameData, setGameData] = useState<GameData[]>();
 	const [isChangedData, setChangedData]: BoolType = useState<boolean>(false);
-	const [isChangedGameData, setChangedGameData]: BoolType = useState<boolean>(false);
+	const [isChangedGameData, setChangedGameData]: BoolType =
+		useState<boolean>(false);
 
 	const getUserData = async () => {
 		try {
@@ -39,8 +40,7 @@ function App() {
 				avatarId: user.avatarId,
 			};
 			setUserData(data);
-			if (mySocket)
-				mySocket.name = user?.nickname;
+			if (mySocket) mySocket.name = user?.nickname;
 		} catch (e) {
 			console.error(e);
 		}
@@ -51,26 +51,24 @@ function App() {
 			const res = await api.get(`/game/history?nickname=${userData.nickname}`);
 			let record: GameData[] = [];
 			for (let i = 0; i < res.data?.history?.length; i++) {
-				let WinCheck : boolean;
-				let RankCheck : boolean = true;
-				let opponent : string;
+				let WinCheck: boolean;
+				let RankCheck: boolean = true;
+				let opponent: string;
 				const dateObject = new Date(res.data?.history[i].createdAt);
 				if (res.data?.history[i].winner === userData.nickname) {
 					WinCheck = true;
 					opponent = res.data?.history[i].loser;
-				}
-				else {
+				} else {
 					WinCheck = false;
 					opponent = res.data?.history[i].winner;
 				}
-				if (res.data?.history[i].type !== 3)
-					RankCheck = false;
-				let rec : GameData = {
-					timestamp : dateObject.toLocaleTimeString(),
+				if (res.data?.history[i].type !== 3) RankCheck = false;
+				let rec: GameData = {
+					timestamp: dateObject.toLocaleTimeString(),
 					nickname: opponent,
-					isRank : RankCheck,
-					isWin : WinCheck,
-				}
+					isRank: RankCheck,
+					isWin: WinCheck,
+				};
 				record.push(rec);
 			}
 			for (let i = 0; i < record.length; i++) {
@@ -127,7 +125,6 @@ function App() {
 	useEffect(() => {
 		getUserData();
 	}, [isChangedData]);
-
 
 	return (
 		<>

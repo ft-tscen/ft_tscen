@@ -12,8 +12,7 @@ export class TfaModule {
   static forRoot(options: tfaModuleOptions): DynamicModule {
     return {
       module: TfaModule,
-      imports: [
-        TypeOrmModule.forFeature([User, Avatar]),],
+      imports: [TypeOrmModule.forFeature([User, Avatar])],
       controllers: [TfaController],
       providers: [
         { provide: 'tfa_options', useValue: options },

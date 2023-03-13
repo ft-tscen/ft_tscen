@@ -26,7 +26,6 @@ import {
   Delete,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { User } from './entities/user.entity';
 import { AuthUser } from 'src/auth/authUser.decorator';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -90,7 +89,8 @@ export class UserController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Patch('/update')
-  async updateUser(@AuthUser() user: userSession,
+  async updateUser(
+    @AuthUser() user: userSession,
     @Body() updateData: UpdateUserDto,
   ): Promise<UpdateUserOutput> {
     return await this.userService.updateUser(user.id, updateData);
@@ -108,7 +108,11 @@ export class UserController {
     @AuthUser() user: userSession,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<changeAvatarOutput> {
-    return this.userService.changeAvatar(user.id, file.buffer, file.originalname);
+    return this.userService.changeAvatar(
+      user.id,
+      file.buffer,
+      file.originalname,
+    );
   }
 
   @UseGuards(AuthGuard)
@@ -139,9 +143,7 @@ export class UserController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Get('/friends')
-  async getFriends(
-    @AuthUser() user: userSession
-  ) {
+  async getFriends(@AuthUser() user: userSession) {
     return await this.userService.getFriends(user.id);
   }
 
@@ -175,15 +177,15 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @ApiResponse({
-	status: 200,
-	description: 'get score by nickname',
+    status: 200,
+    description: 'get score by nickname',
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Get('/score')
   async getScoreByNickName(
-	@Query('nickname') nickname: string,
+    @Query('nickname') nickname: string,
   ): Promise<getScoreByNickNameOutput> {
-	return await this.userService.getScoreByNickName(nickname);
+    return await this.userService.getScoreByNickName(nickname);
   }
 
   @UseGuards(AuthGuard)
@@ -198,5 +200,4 @@ export class UserController {
   ): Promise<getUserByIdOutput> {
     return await this.userService.getUserById(id);
   }
-
 }

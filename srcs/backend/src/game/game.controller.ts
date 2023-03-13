@@ -17,10 +17,8 @@ export class GameController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Get('/history')
-  async getHistory(
-    @Query('nickname') nickname: string,
-  ) {
-	  return await this.gameService.getHistory(nickname);
+  async getHistory(@Query('nickname') nickname: string) {
+    return await this.gameService.getHistory(nickname);
   }
 
   @UseGuards(AuthGuard)
@@ -30,9 +28,10 @@ export class GameController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @Post('/history')
-  async createDummyHistory(
-    @Query('nickname') nickname: string,
-  ) {
-	  return await this.gameService.createDummyHistory(nickname, gameMod.rankGame);
+  async createDummyHistory(@Query('nickname') nickname: string) {
+    return await this.gameService.createDummyHistory(
+      nickname,
+      gameMod.rankGame,
+    );
   }
 }

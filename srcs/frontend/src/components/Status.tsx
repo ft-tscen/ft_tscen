@@ -7,7 +7,7 @@ type StatusComponent = {
 	friend: string;
 };
 
-enum STATUS{
+enum STATUS {
 	GAMING = "success",
 	ONLINE = "primary",
 	OFFLINE = "secondary",
@@ -17,38 +17,38 @@ function Status({ friend }: StatusComponent) {
 	const [status, setStatus] = useState<STATUS>(STATUS.OFFLINE);
 	const [refresh, setRefresh] = useState<boolean>(true);
 
-	useEffect(()=>{
-		mySocket.socket.on('refresh-status', (userSocket)=>{
-			setRefresh(prev=>!prev);
-		})
+	useEffect(() => {
+		mySocket.socket.on("refresh-status", (userSocket) => {
+			setRefresh((prev) => !prev);
+		});
 
 		return () => {
-			mySocket.socket.off('refresh-status');
-		}
-	}, [])
+			mySocket.socket.off("refresh-status");
+		};
+	}, []);
 
-	useEffect(()=>{
+	useEffect(() => {
 		checkStatus(friend);
-	}, [refresh])
+	}, [refresh]);
 
-	const checkStatus = (friend : string) => {
-		myGameSocket.socket.emit('check-status', friend, (s :boolean) => {
-			if (s)
-				setStatus(STATUS.GAMING);
+	const checkStatus = (friend: string) => {
+		myGameSocket.socket.emit("check-status", friend, (s: boolean) => {
+			if (s) setStatus(STATUS.GAMING);
 			else {
-				mySocket.socket.emit('check-status', friend, (s :boolean) => {
-					if(s)
-						setStatus(STATUS.ONLINE);
-					else
-						setStatus(STATUS.OFFLINE);
+				mySocket.socket.emit("check-status", friend, (s: boolean) => {
+					if (s) setStatus(STATUS.ONLINE);
+					else setStatus(STATUS.OFFLINE);
 				});
 			}
 		});
-	}
+	};
 
 	return (
-		<Badge bg={status}
-			className="rounded-circle" style={{height: "1.5vmin", width: "1.5vmin"}}>
+		<Badge
+			bg={status}
+			className="rounded-circle"
+			style={{ height: "1.5vmin", width: "1.5vmin" }}
+		>
 			<p></p>
 		</Badge>
 	);

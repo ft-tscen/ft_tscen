@@ -17,7 +17,7 @@ function Profile({
 	isChangedData,
 	setChangedData,
 }: ProfileComponent) {
-	const [edit, setEdit] :BoolType = useState<boolean>(false);
+	const [edit, setEdit]: BoolType = useState<boolean>(false);
 	const navigate = useNavigate();
 	useEffect(() => {}, [edit]);
 

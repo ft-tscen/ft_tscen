@@ -7,7 +7,7 @@ import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
 import { GameData, gameMod, UserData } from "../common/types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { myGameSocket } from "../common/MySocket";
 
 type LayoutComponent = {
@@ -36,22 +36,20 @@ function Layout({
 	const navigate = useNavigate();
 	const [needClear, SetNeedclear] = useState<boolean>(true);
 
-
 	const getComponent = () => {
 		if (param === "") {
 			if (myGameSocket && needClear) {
-				myGameSocket.socket.emit('clear');
+				myGameSocket.socket.emit("clear");
 				SetNeedclear(false);
 			}
 			return (
 				<Home
-				isLoggedIn={isLoggedIn}
-				userData={userData}
-				enteredChannel={enteredChannel}
+					isLoggedIn={isLoggedIn}
+					userData={userData}
+					enteredChannel={enteredChannel}
 				/>
 			);
-		}
-		else if (param === "profile")
+		} else if (param === "profile")
 			return (
 				<Profile
 					isLoggedIn={isLoggedIn}
@@ -60,13 +58,53 @@ function Layout({
 					setChangedData={setChangedData}
 				/>
 			);
-		else if (param === "soloGame") return <Game mod={gameMod.soloGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear}/>;
-		else if (param === "rankGame") return <Game mod={gameMod.rankGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
-		else if (param === "friendlyGame") return <Game mod={gameMod.normalGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
-		else if (param === "watchGame") return <Game mod={gameMod.watchGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
+		else if (param === "soloGame")
+			return (
+				<Game
+					mod={gameMod.soloGame}
+					isChangedGameData={isChangedData}
+					setChangedGameData={setChangedData}
+					SetNeedclear={SetNeedclear}
+				/>
+			);
+		else if (param === "rankGame")
+			return (
+				<Game
+					mod={gameMod.rankGame}
+					isChangedGameData={isChangedData}
+					setChangedGameData={setChangedData}
+					SetNeedclear={SetNeedclear}
+				/>
+			);
+		else if (param === "friendlyGame")
+			return (
+				<Game
+					mod={gameMod.normalGame}
+					isChangedGameData={isChangedData}
+					setChangedGameData={setChangedData}
+					SetNeedclear={SetNeedclear}
+				/>
+			);
+		else if (param === "watchGame")
+			return (
+				<Game
+					mod={gameMod.watchGame}
+					isChangedGameData={isChangedData}
+					setChangedGameData={setChangedData}
+					SetNeedclear={SetNeedclear}
+				/>
+			);
 		else if (param === "privateGame")
-			return <Game mod={gameMod.passwordGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
-		else if (param === "creatGame") return <CreatRoom  SetNeedclear={SetNeedclear}/>;
+			return (
+				<Game
+					mod={gameMod.passwordGame}
+					isChangedGameData={isChangedData}
+					setChangedGameData={setChangedData}
+					SetNeedclear={SetNeedclear}
+				/>
+			);
+		else if (param === "creatGame")
+			return <CreatRoom SetNeedclear={SetNeedclear} />;
 		else navigate("/");
 	};
 

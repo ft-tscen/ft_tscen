@@ -16,7 +16,7 @@ type ArgsType = {
 	enterChannel: (dto: SocketOutputDto) => void;
 	setDMMsg: (dto: SocketOutputDto) => void;
 	setInviteMsg: (dto: SocketOutputDto) => void;
-    getOtherProfile: (dto: SocketOutputDto) => void;
+	getOtherProfile: (dto: SocketOutputDto) => void;
 };
 
 export function InputMsg({
@@ -82,15 +82,13 @@ export function InputMsg({
 							message: `${text} :${WRONGINPUT}`,
 						});
 						break;
-					}
-					else if (!mySocket.enteredGameRoom) {
+					} else if (!mySocket.enteredGameRoom) {
 						setReceivedMsg({
 							author: "server",
 							message: `${text} : Be out of the room`,
 						});
 						break;
-					}
-					else {
+					} else {
 						enteredMSG.target = words[1];
 					}
 					mySocket.socket.emit(SOCKET_EVENT.INVITE, enteredMSG, setReceivedMsg);
@@ -105,7 +103,11 @@ export function InputMsg({
 					} else {
 						enteredMSG.target = words[1];
 					}
-					mySocket.socket.emit(SOCKET_EVENT.PROFILE, enteredMSG, getOtherProfile);
+					mySocket.socket.emit(
+						SOCKET_EVENT.PROFILE,
+						enteredMSG,
+						getOtherProfile
+					);
 					break;
 				case "/BLOCK":
 					if (words.length !== 2) {

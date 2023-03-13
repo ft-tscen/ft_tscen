@@ -44,8 +44,7 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 		if (dto.target === undefined) {
 			mySocket.enteredChannelName = "";
 			setEnteredChannel(false);
-		}
-		else {
+		} else {
 			mySocket.enteredChannelName = dto.target;
 			setEnteredChannel(true);
 			setEnterChannelFlag(ENTER_CHANNEL);
@@ -118,7 +117,7 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 			/>
 			{flag === SHOW_OTHER ? (
 				enterChannelFlag === ENTER_CHANNEL ? (
-					<GameRooms setReceivedMsg={setReceivedMsg}/>
+					<GameRooms setReceivedMsg={setReceivedMsg} />
 				) : (
 					<Channels enterChannel={enterChannel} />
 				)

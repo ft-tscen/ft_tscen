@@ -6,26 +6,31 @@ import { mySocket } from "../../common/MySocket";
 import "./Effect.css";
 
 type channelListType = [
-    channelList: ChannelType[],
-    setChannelList: React.Dispatch<React.SetStateAction<ChannelType[]>>
+	channelList: ChannelType[],
+	setChannelList: React.Dispatch<React.SetStateAction<ChannelType[]>>
 ];
 
-export function Channels({enterChannel} : { enterChannel : (dto: SocketOutputDto) => void }) {
-    let [channelList, setChannelList] : channelListType = useState<ChannelType[]>([]);
+export function Channels({
+	enterChannel,
+}: {
+	enterChannel: (dto: SocketOutputDto) => void;
+}) {
+	let [channelList, setChannelList]: channelListType = useState<ChannelType[]>(
+		[]
+	);
 
-    useEffect(() => {
-        mySocket.socket.emit(SOCKET_EVENT.GET_CHANNEL, setChannelList);
-    }, []);
+	useEffect(() => {
+		mySocket.socket.emit(SOCKET_EVENT.GET_CHANNEL, setChannelList);
+	}, []);
 
 	return (
-		<Container className="m-0 p-0 mb-auto Scrollable" style={{ height:"81vmin" }}>
-        {
-            channelList.map((obj :ChannelType, idx :number) => {
-                return (
-                    <Channel key={idx} obj={obj} enterChannel={enterChannel}/>
-                );
-            })
-        }
-        </Container>
+		<Container
+			className="m-0 p-0 mb-auto Scrollable"
+			style={{ height: "81vmin" }}
+		>
+			{channelList.map((obj: ChannelType, idx: number) => {
+				return <Channel key={idx} obj={obj} enterChannel={enterChannel} />;
+			})}
+		</Container>
 	);
 }

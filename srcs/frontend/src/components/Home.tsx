@@ -33,10 +33,8 @@ function Home({ isLoggedIn, userData, enteredChannel }: HomeComponent) {
 	const isDisable = () => {
 		// 커밋전에 수정
 		//if (isLoggedIn && enteredChannel && userData.verified)
-		if (isLoggedIn && enteredChannel)
-			return false;
-		else
-			return true;
+		if (isLoggedIn && enteredChannel) return false;
+		else return true;
 	};
 	return (
 		<>
@@ -80,9 +78,9 @@ function Home({ isLoggedIn, userData, enteredChannel }: HomeComponent) {
 							variant="outline-light"
 							disabled={!isLoggedIn}
 							style={{ width: "100px", height: "50px" }}
-							onClick={() =>{
+							onClick={() => {
 								myGameSocket.socket.emit("click-solo");
-								gameModHandle(gameMod.soloGame)
+								gameModHandle(gameMod.soloGame);
 							}}
 						>
 							혼자하기

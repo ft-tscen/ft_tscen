@@ -31,7 +31,9 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 	const getUserData = async () => {
 		if (msg.user?.avatarId) {
 			await api
-				.get(`/user/avatar/${msg.user?.avatarId}`, { responseType: "arraybuffer" })
+				.get(`/user/avatar/${msg.user?.avatarId}`, {
+					responseType: "arraybuffer",
+				})
 				.then((response) => {
 					const arrayBufferView = new Uint8Array(response.data);
 					const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
@@ -40,14 +42,12 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 					setImageDataUrl(imageUrl);
 				})
 				.catch((error) => console.error(error));
-		}
-		else {
+		} else {
 			setImageDataUrl("./Anonymous.jpeg");
 		}
 	};
 	useEffect(() => {
-		if (msg.author !== 'server' && msg.author !== mySocket.name)
-			getUserData();
+		if (msg.author !== "server" && msg.author !== mySocket.name) getUserData();
 	}, []);
 
 	if (msg.author === "server") {
@@ -84,22 +84,27 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 			setShow(false);
 		};
 		const joinGame = () => {
-			navigate('/friendlyGame');
-			myGameSocket.socket.emit(SOCKET_GAME_EVENT.GET_ROOM_NAME, msg.author,
-				({success, payload}: {success: boolean, payload: string}) => {
+			navigate("/friendlyGame");
+			myGameSocket.socket.emit(
+				SOCKET_GAME_EVENT.GET_ROOM_NAME,
+				msg.author,
+				({ success, payload }: { success: boolean; payload: string }) => {
 					if (success) {
-						console.log(myGameSocket.socket.listeners('matching-success'));
-						myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, payload,
-							({success, payload}: {success :boolean, payload :string}) => {
-								setReceivedMsg({author:"server", message:payload})
-						})
+						console.log(myGameSocket.socket.listeners("matching-success"));
+						myGameSocket.socket.emit(
+							SOCKET_GAME_EVENT.JOIN,
+							payload,
+							({ success, payload }: { success: boolean; payload: string }) => {
+								setReceivedMsg({ author: "server", message: payload });
+							}
+						);
 						mySocket.enteredGameRoom = true;
 						setActive(false);
+					} else {
+						setReceivedMsg({ author: "server", message: payload });
 					}
-					else {
-						setReceivedMsg({author:'server', message:payload})
-					}
-				});
+				}
+			);
 		};
 
 		const weAreFriend = async () => {

@@ -8,7 +8,10 @@ import {
 } from "react";
 import { io } from "socket.io-client";
 
-const socket = io(`http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/chat`, { withCredentials: true });
+const socket = io(
+	`http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/chat`,
+	{ withCredentials: true }
+);
 
 console.log("");
 interface IChat {

@@ -10,7 +10,7 @@ type FriendsComponent = {
 	friends: UserData[];
 };
 
-enum STATUS{
+enum STATUS {
 	GAMING = "success",
 	ONLINE = "primary",
 	OFFLINE = "secondary",
@@ -29,15 +29,15 @@ function Friends({ show, handleClose, friends }: FriendsComponent) {
 			) : (
 				<Offcanvas.Body>
 					<ListGroup variant="flush">
-						{friends.map(friend =>
-						<>
-						<ListGroup.Item className="d-flex justify-content-between">
-							<Status friend={friend.nickname}></Status>
-							{friend.nickname}
-							{/* Status에 따른 색 추가 */}
-						</ListGroup.Item>
-						</>
-					)}
+						{friends.map((friend) => (
+							<>
+								<ListGroup.Item className="d-flex justify-content-between">
+									<Status friend={friend.nickname}></Status>
+									{friend.nickname}
+									{/* Status에 따른 색 추가 */}
+								</ListGroup.Item>
+							</>
+						))}
 					</ListGroup>
 				</Offcanvas.Body>
 			)}

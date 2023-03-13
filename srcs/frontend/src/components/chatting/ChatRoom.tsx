@@ -12,11 +12,7 @@ type ArgsType = {
 	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
 };
 
-export function ChatRoom({
-	msgList,
-	setReceivedMsg,
-	setInform,
-}: ArgsType) {
+export function ChatRoom({ msgList, setReceivedMsg, setInform }: ArgsType) {
 	const chatWindow = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
