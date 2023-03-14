@@ -333,9 +333,11 @@ function Game({
 	document.head.appendChild(styleEl);
 
 	return (
-		<>
-			{isInfo && <Player mod={mod} playerInfo={playerInfo}></Player>}
-			<div className={isInfo ? "canv2" : "canv"}>
+		<div className='Game'>
+			{isInfo && (
+			<Player mod={mod} playerInfo={playerInfo} ></Player>
+			)}
+			<div className={isInfo ? 'canv2' : 'canv'}>
 				<canvas
 					className="border"
 					ref={canvasRef}
@@ -343,31 +345,34 @@ function Game({
 					height={CanvasHeight}
 				/>
 			</div>
-		</>
+		</div>
 	);
 }
 
 export default Game;
 
 const styles = `
+.Game {
+	min-height: 100%;
+}
+
 .canv {
-    display: flex;
-    width: 100%;
-    margin: 0 auto;
+	display: flex;
+	width: 100%;
+	margin: 0 auto;
+	padding-top: 220px;
 	align-items: center;
 	justify-content:center;
 	vertical-align: center;
-	height: 100%;
 }
 
 .canv2 {
-    display: flex;
-    width: 100%;
-    margin: 0 auto;
+	display: flex;
+	width: 100%;
+	margin: 0 auto;
+	padding-top: 100px;
 	align-items: flex-start;
 	justify-content:center;
-	vertical-align: center;
-	height: 100%;
 	margin-top: 95px
 }
 
