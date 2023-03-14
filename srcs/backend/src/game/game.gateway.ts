@@ -15,6 +15,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UserService } from 'src/user/user.service';
 import { GameDto, gameMod } from './dtos/game.dto';
 import { GameService } from './game.service';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface Room {
   roomName: string;
@@ -128,9 +129,9 @@ export class GamesGateway
 
     onlineList[nickname] = false;
 
-    NicknameBySocketId.delete(socket.id);
-    RoomNameByNickname.delete(nickname);
-    GameDtoByRoomName.delete(roomName);
+    NicknameBySocketId[socket.id] = undefined;
+    RoomNameByNickname[nickname] = undefined;
+    GameDtoByRoomName[roomName] = undefined;
   }
 
   @SubscribeMessage('nickname')
@@ -170,7 +171,7 @@ export class GamesGateway
     }
     const roomName = RoomNameByNickname[nickname];
     if (!roomName) return;
-    RoomNameByNickname.delete(nickname);
+    RoomNameByNickname[nickname] = undefined;
 
     socket.leave(roomName);
 
@@ -186,7 +187,7 @@ export class GamesGateway
       this.logger.log('clear: no gameDto');
       return;
     }
-    GameDtoByRoomName.delete(roomName);
+    GameDtoByRoomName[roomName] = undefined;
 
     clearInterval(gameDto.interval);
   }
@@ -263,7 +264,7 @@ export class GamesGateway
     if (waitingPlayer.waiting) {
       if (nickname == waitingPlayer.nickname) return;
 
-      const roomName = waitingPlayer.nickname + nickname;
+      const roomName = uuidv4();
       const Game: GameDto = this.gameService.init_game(
         waitingPlayer.socket, // p1
         waitingPlayer.nickname,
@@ -355,7 +356,7 @@ export class GamesGateway
     this.logger.log(`Solo Ready !!!`);
     const Game: GameDto = this.gameService.init_test(
       socket,
-      socket.id,
+      uuidv4(),
       gameMod.soloGame,
     );
     Game.start = true;
@@ -562,7 +563,7 @@ export class GamesGateway
   ) {
     socket.leave(roomName); // leave room
     const nickname = NicknameBySocketId[socket.id];
-    RoomNameByNickname.delete(nickname);
+    RoomNameByNickname[nickname] = undefined;
 
     return { success: true, payload: roomName };
   }

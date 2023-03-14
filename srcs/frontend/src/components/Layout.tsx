@@ -7,7 +7,7 @@ import CreatRoom from "./Room";
 import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
 import { GameData, gameMod, UserData } from "../common/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { myGameSocket } from "../common/MySocket";
 
 type LayoutComponent = {
@@ -19,6 +19,8 @@ type LayoutComponent = {
 	isChangedGameData: boolean;
 	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
+
+const min_width = 2000;
 
 function Layout({
 	isLoggedIn,
@@ -35,6 +37,17 @@ function Layout({
 	const param = url["*"];
 	const navigate = useNavigate();
 	const [needClear, SetNeedclear] = useState<boolean>(true);
+	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+	useEffect(() => {
+		function handleResize() {
+			setWindowWidth(window.innerWidth);
+		}
+		window.addEventListener("resize", handleResize);
+		return () => {
+			window.removeEventListener("resize", handleResize);
+		};
+	}, []);
 
 	const getComponent = () => {
 		if (param === "") {
@@ -116,26 +129,36 @@ function Layout({
 	return (
 		<>
 			<Container fluid style={{ height: "90vmin" }}>
-				<Row style={{ height: "90vmin" }}>
-					<Col xs={3} className={getBorder()}>
-						{userData.nickname === null || !isLoggedIn ? null : (
-							<MyInform
-								inform={inform ?? userData}
-								setInform={setInform}
-								myData={userData}
-								gameData={gameData}
-							/>
-						)}
-					</Col>
+				<Row
+					style={{
+						height: "90vmin",
+						display: "flex",
+						justifyContent: "center",
+					}}
+				>
+					{windowWidth > min_width && (
+						<Col xs={3} className={getBorder()}>
+							{userData.nickname === null || !isLoggedIn ? null : (
+								<MyInform
+									inform={inform ?? userData}
+									setInform={setInform}
+									myData={userData}
+									gameData={gameData}
+								/>
+							)}
+						</Col>
+					)}
 					<Col xs={6}>{getComponent()}</Col>
-					<Col xs={3} className={getBorder()}>
-						{isLoggedIn && (
-							<ChatPart
-								setInform={setInform}
-								setEnteredChannel={setEnteredChannel}
-							/>
-						)}
-					</Col>
+					{windowWidth > min_width && (
+						<Col xs={3} className={getBorder()}>
+							{isLoggedIn && (
+								<ChatPart
+									setInform={setInform}
+									setEnteredChannel={setEnteredChannel}
+								/>
+							)}
+						</Col>
+					)}
 				</Row>
 			</Container>
 		</>
