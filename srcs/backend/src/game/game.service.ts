@@ -52,7 +52,7 @@ export class GameService {
         const { user: u2 } = await this.userService.getUserByNickName(loser);
 
         await this.histories.save(
-          this.histories.create({ winner: u1.id, loser: u2.id, type }),
+          this.histories.create({ gameId, winner: u1.id, loser: u2.id, type }),
         );
         await this.userService.winGame(winner, type);
         await this.userService.loseGame(loser, type);
