@@ -8,7 +8,7 @@ import Profile from "./Profile/Profile";
 import MyInform from "./Information/MyInform";
 import { GameData, gameMod, UserData } from "../common/types";
 import { useEffect, useState } from "react";
-import { myGameSocket } from "../common/MySocket";
+import { myGameSocket, mySocket } from "../common/MySocket";
 
 type LayoutComponent = {
 	isLoggedIn: boolean;
@@ -53,6 +53,7 @@ function Layout({
 		if (param === "") {
 			if (myGameSocket && needClear) {
 				myGameSocket.socket.emit('clear');
+				mySocket.enteredGameRoom = false;
 				SetNeedclear(false);
 			}
 			return (

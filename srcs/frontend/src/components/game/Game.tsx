@@ -327,6 +327,7 @@ export default Game;
 const styles = `
 .Game {
 	min-height: 100%;
+	margin-top: 30px;
 }
 
 .canv {
@@ -346,7 +347,6 @@ const styles = `
 	padding-top: 100px;
 	align-items: flex-start;
 	justify-content:center;
-	margin-top: 95px
 }
 
 `;

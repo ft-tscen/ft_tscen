@@ -1,4 +1,4 @@
-import { Logger, Query, UseGuards } from '@nestjs/common';
+import { Logger} from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 import {
   ConnectedSocket,
@@ -11,7 +11,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
-import { AuthGuard } from 'src/auth/auth.guard';
 import { UserService } from 'src/user/user.service';
 import { GameDto, gameMod } from './dtos/game.dto';
 import { GameService } from './game.service';
@@ -146,16 +145,12 @@ export class GamesGateway
 		return ;
 	onClickSoloByNickname[nickname] = false;
 
-	this.logger.log(waitingPlayer.waiting);
-	this.logger.log(`again ${waitingPlayer.waiting}`);
 	if (waitingPlayer.waiting == true && nickname == waitingPlayer.nickname) {
 		this.logger.log(`${waitingPlayer.nickname} is clear ~~`);
 		waitingPlayer.waiting = false;
 		waitingPlayer.nickname = undefined;
 	}
-	this.logger.log(`again ${waitingPlayer.waiting}`);
 	const roomName = RoomNameByNickname[nickname];
-	this.logger.log(`again ${waitingPlayer.waiting}`);
 	if (!roomName) {
 		this.logger.log('clear: no roomName');
 		return ;
@@ -176,28 +171,13 @@ export class GamesGateway
 		}
 	}
 	if (!gameDto) {
-		this.logger.log('clear: no gameDto');
+		this.logger.log('[clear] no gameDto');
 		return ;
 	}
 	GameDtoByRoomName[roomName] = undefined;
 
 	clearInterval(gameDto.interval);
   }
-
-//  @SubscribeMessage('test')
-//  handleTest(@ConnectedSocket() socket: Socket) {
-//    this.logger.log(`${socket.id}: test success!`);
-//    const Game: GameDto = this.gameService.init_test(
-//      socket,
-//      'test',
-//      gameMod.soloGame,
-//    );
-//    GameDtoByRoomName[Game.roomName] = Game;
-//    RoomNameBySocketId[socket.id] = Game.roomName;
-//    this.gameService.gameLoop(GameDtoByRoomName[Game.roomName]);
-
-//    socket.emit('test', `${socket.id}: test success!`);
-//  }
 
   @SubscribeMessage('PaddleUp')
   handlePaddleUp(@ConnectedSocket() socket: Socket, @MessageBody() is_p1: boolean) {
@@ -412,9 +392,9 @@ export class GamesGateway
   @SubscribeMessage('room-list')
   handleRoomList() {
 	const activeRooms: Room[] = [];
-	createdRooms.forEach((room) => {
+	createdRooms?.forEach((room) => {
 		const game = GameDtoByRoomName[room.roomName];
-		if (game.p2.name) {
+		if (game?.p2?.name) {
 			activeRooms.push(room);
 		}
 	})

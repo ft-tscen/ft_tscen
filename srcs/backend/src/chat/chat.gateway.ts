@@ -505,7 +505,7 @@ export class ChatGateway
     };
   }
 
-  @SubscribeMessage('kick')
+  @SubscribeMessage('channel-ban')
   kickUser(
     @ConnectedSocket() socket: Socket,
     @MessageBody() input: SocketInputDto,
