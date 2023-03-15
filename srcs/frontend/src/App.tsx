@@ -11,6 +11,8 @@ import {
 	setGameSocket,
 } from "./common/MySocket";
 
+const min_height = 500;
+
 function App() {
 	const navigate = useNavigate();
 	const [loggedIn, setLoggedIn]: BoolType = useState<boolean>(false);
@@ -25,6 +27,17 @@ function App() {
 	let [gameData, setGameData] = useState<GameData[]>();
 	const [isChangedData, setChangedData]: BoolType = useState<boolean>(false);
 	const [isChangedGameData, setChangedGameData]: BoolType = useState<boolean>(false);
+	const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+
+ 	useEffect(() => {
+ 		function handleResize() {
+ 			setWindowHeight(window.innerHeight);
+ 		}
+ 		window.addEventListener("resize", handleResize);
+ 		return () => {
+ 			window.removeEventListener("resize", handleResize);
+ 		};
+ 	}, []);
 
 	const getUserData = async () => {
 		try {
@@ -50,6 +63,7 @@ function App() {
 		try {
 			const res = await api.get(`/game/history?nickname=${userData.nickname}`);
 			let record: GameData[] = [];
+			res.data?.history?.sort((h:any) => -new Date(h.createdAt).valueOf());
 			for (let i = 0; i < res.data?.history?.length; i++) {
 				let WinCheck : boolean;
 				let RankCheck : boolean = true;
@@ -131,7 +145,7 @@ function App() {
 
 	return (
 		<>
-			<NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+			{windowHeight > min_height && <NavBar isLoggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
 			<Routes>
 				<Route
 					path="/*"

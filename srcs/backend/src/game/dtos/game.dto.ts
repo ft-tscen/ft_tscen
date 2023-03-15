@@ -20,6 +20,7 @@ export type FrontData = {
 }
 
 export type GameDto = {
+  gameId: string,
   roomName: string,
   password: string,
   ball: BallDto,

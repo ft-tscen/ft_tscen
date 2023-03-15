@@ -7,6 +7,9 @@ import { gameMod } from 'src/game/dtos/game.dto';
 
 @Entity('histories')
 export class History extends BaseEntity {
+  @Column({unique: true})
+  gameId: string;
+
   @Column()
   winner: number;
 

@@ -8,6 +8,7 @@ import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
 import { History } from './entities/history.entity';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 // Cluster
 const CanvasWidth = 1200;
@@ -39,17 +40,15 @@ export class GameService {
       }
     }
 
-	async createHistory(winner: string, loser: string, type: gameMod)
+	async createHistory(gameId:string, winner: string, loser: string, type: gameMod)
 	: Promise<HistoryOutput> {
 		try {
 			const { user: user1 } = await this.userService.getUserByNickName(winner);
 			const { user: user2 } = await this.userService.getUserByNickName(loser);
 
 			const history: History = await this.histories.save(
-				this.histories.create({ winner: user1.id, loser: user2.id, type})
+				this.histories.create({ gameId, winner: user1.id, loser: user2.id, type})
 			);
-			let h: History[] = [];
-			h.push(history);
 			return { ok: true };
 		} catch (error) {
 			return {ok: false, error: 'createHistory Error'};
@@ -165,7 +164,8 @@ export class GameService {
   ): GameDto {
     const params: GameDto = <GameDto>{
       roomName: roomName,
-	  password: undefined,
+      gameId: uuidv4(),
+	    password: undefined,
       ball: {
         x: CanvasWidth / 2,
         y: CanvasHeight / 2,
@@ -385,20 +385,10 @@ export class GameService {
 	console.log(`[gameservice] p1_win: ${p1_win}`);
 	if (p1_win) {
 		if (Game.gameMod != gameMod.soloGame) {
-			let res = await this.createHistory(Game.p1.name, Game.p2.name, Game.gameMod);
-			if (!res.ok) {
-				console.log('[gameservice] create History error');
-				console.log(`[gameservice] ${res.error}`);
-			}
-			res = await this.userService.winGame(Game.p1.name, Game.gameMod);
-			if (!res.ok) {
-				console.log('[gameservice] winGame error');
-				console.log(`[gameservice] ${res.error}`);
-			}
-			res = await this.userService.loseGame(Game.p2.name, Game.gameMod);
-			if (!res.ok) {
-				console.log('[gameservice] loseGame error');
-				console.log(`[gameservice] ${res.error}`);
+			let res = await this.createHistory(Game.gameId, Game.p1.name, Game.p2.name, Game.gameMod);
+			if (res.ok) {
+        await this.userService.winGame(Game.p1.name, Game.gameMod);
+        await this.userService.loseGame(Game.p2.name, Game.gameMod);
 			}
 			Game.nsp.in(Game.roomName).emit('end-game', true);
 		}
@@ -408,20 +398,10 @@ export class GameService {
 	}
 	else {
 		if (Game.gameMod != gameMod.soloGame) {
-			let res = await this.createHistory(Game.p2.name, Game.p1.name, Game.gameMod);
-			if (!res.ok) {
-				console.log('[gameservice] create History error');
-				console.log(`[gameservice] ${res.error}`);
-			}
-			res = await this.userService.winGame(Game.p2.name, Game.gameMod);
-			if (!res.ok) {
-				console.log('[gameservice] winGame error');
-				console.log(`[gameservice] ${res.error}`);
-			}
-			res = await this.userService.loseGame(Game.p1.name, Game.gameMod);
-			if (!res.ok) {
-				console.log('[gameservice] loseGame error');
-				console.log(`[gameservice] ${res.error}`);
+			let res = await this.createHistory(Game.gameId, Game.p2.name, Game.p1.name, Game.gameMod);
+			if (res.ok) {
+        await this.userService.winGame(Game.p2.name, Game.gameMod);
+        await this.userService.loseGame(Game.p1.name, Game.gameMod);
 			}
 			Game.nsp.in(Game.roomName).emit('end-game', false);
 		}
