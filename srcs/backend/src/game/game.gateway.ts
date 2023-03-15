@@ -163,6 +163,8 @@ export class GamesGateway
 	RoomNameByNickname[nickname] = undefined;
 	socket.leave(roomName);
 	const gameDto = GameDtoByRoomName[roomName];
+	if (!gameDto)
+		return ;
 	this.logger.log('a');
 	if (gameDto.start && !gameDto.end) {
 		this.logger.log('b');
@@ -300,6 +302,7 @@ export class GamesGateway
 		waitingPlayer.waiting = true;
 		this.logger.log(`${nickname} matching waiting...`);
 	}
+	socket.broadcast.emit('refresh-status');
   }
 
   @SubscribeMessage('ready-rank')
@@ -366,6 +369,8 @@ export class GamesGateway
     RoomNameByNickname[nickname] = Game.roomName;
 	createdRooms.push({ roomName: Game.roomName, password: false}); // 유저가 생성한 room 목록에 추가
 
+	socket.broadcast.emit('refresh-status');
+
     this.gameService.gameLoop(GameDtoByRoomName[Game.roomName]);
   }
 
@@ -406,7 +411,14 @@ export class GamesGateway
 
   @SubscribeMessage('room-list')
   handleRoomList() {
-	return createdRooms;
+	const activeRooms: Room[] = [];
+	createdRooms.forEach((room) => {
+		const game = GameDtoByRoomName[room.roomName];
+		if (game.p2.name) {
+			activeRooms.push(room);
+		}
+	})
+	return activeRooms;
   }
 
   @SubscribeMessage('create-room')
@@ -542,6 +554,7 @@ export class GamesGateway
     socket.join(room.roomName); // join room
 	const nickname = NicknameBySocketId[socket.id];
 	RoomNameByNickname[nickname] = room.roomName;
+	socket.broadcast.emit('refresh-status');
 
     return { success: true, payload: room.roomName };
   }
@@ -560,7 +573,6 @@ export class GamesGateway
 
   @SubscribeMessage('check-status')
   handleOnline(
-    @ConnectedSocket() socket: Socket,
 	@MessageBody() nickname: string
   ) {
 	const roomName = RoomNameByNickname[nickname];
