@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Badge, ListGroup, Offcanvas } from "react-bootstrap";
 import { myGameSocket, mySocket } from "../common/MySocket";
-import { UserData } from "../common/types";
 
 type StatusComponent = {
 	friend: string;
@@ -18,12 +17,16 @@ function Status({ friend }: StatusComponent) {
 	const [refresh, setRefresh] = useState<boolean>(true);
 
 	useEffect(()=>{
-		mySocket.socket.on('refresh-status', (userSocket)=>{
+		mySocket.socket.on('refresh-status', ()=>{
+			setRefresh(prev=>!prev);
+		})
+		myGameSocket.socket.on('refresh-status', ()=>{
 			setRefresh(prev=>!prev);
 		})
 
 		return () => {
 			mySocket.socket.off('refresh-status');
+			myGameSocket.socket.off('refresh-status');
 		}
 	}, [])
 

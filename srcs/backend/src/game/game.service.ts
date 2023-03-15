@@ -8,6 +8,7 @@ import { gameMod } from './dtos/game.dto';
 import { PlayerDto } from './dtos/player.dto';
 import { History } from './entities/history.entity';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 // Cluster
 const CanvasWidth = 1200;
@@ -15,7 +16,7 @@ const CanvasHeight = 800;
 // // Laptop
 // const CanvasWidth = 600;
 // const CanvasHeight = 400;
-const VictoryScore = 2;
+const VictoryScore = 3;
 
 @Injectable()
 export class GameService {
@@ -39,17 +40,15 @@ export class GameService {
       }
     }
 
-	async createHistory(winner: string, loser: string, type: gameMod)
+	async createHistory(gameId:string, winner: string, loser: string, type: gameMod)
 	: Promise<HistoryOutput> {
 		try {
 			const { user: user1 } = await this.userService.getUserByNickName(winner);
 			const { user: user2 } = await this.userService.getUserByNickName(loser);
 
 			const history: History = await this.histories.save(
-				this.histories.create({ winner: user1.id, loser: user2.id, type})
+				this.histories.create({ gameId, winner: user1.id, loser: user2.id, type})
 			);
-			let h: History[] = [];
-			h.push(history);
 			return { ok: true };
 		} catch (error) {
 			return {ok: false, error: 'createHistory Error'};
@@ -150,6 +149,8 @@ export class GameService {
         ballX: CanvasWidth / 2,
         ballY: CanvasHeight / 2,
       },
+	  start: false,
+	  end: false,
     };
     return params;
   }
@@ -163,7 +164,8 @@ export class GameService {
   ): GameDto {
     const params: GameDto = <GameDto>{
       roomName: roomName,
-	  password: undefined,
+      gameId: uuidv4(),
+	    password: undefined,
       ball: {
         x: CanvasWidth / 2,
         y: CanvasHeight / 2,
@@ -207,6 +209,8 @@ export class GameService {
 	  p2Ready: false,
 	  nsp: nsp,
 	  interval: undefined,
+	  start: false,
+	  end: false,
     };
     return params;
   }
@@ -240,7 +244,7 @@ export class GameService {
     );
   }
 
-  private update_v2(Game: GameDto) {
+  private async update_v2(Game: GameDto) {
     // 공이 양쪽 벽에 닿아서 점수 발생했는지 체크
 	if (Game.ball.x + Game.ball.radius < 0) {
 		Game.p2.score++;
@@ -251,11 +255,11 @@ export class GameService {
 	}
 	// 게임이 끝났는지 체크
 	if (Game.p1.score >= VictoryScore) {
-		this.finishGame(Game, true);
+		await this.finishGame(Game, true);
 		return ;
 	}
 	else if (Game.p2.score >= VictoryScore) {
-		this.finishGame(Game, false);
+		await this.finishGame(Game, false);
 		return ;
 	}
     // 패들 움직임 계산
@@ -376,17 +380,16 @@ export class GameService {
   }
 
   async finishGame(Game: GameDto, p1_win: boolean) {
+	if (Game.end)
+		return ;
+	console.log(`[gameservice] p1_win: ${p1_win}`);
 	if (p1_win) {
 		if (Game.gameMod != gameMod.soloGame) {
-			let res = await this.createHistory(Game.p1.name, Game.p2.name, Game.gameMod);
-			if (!res.ok)
-				console.log('[gameservice] create History error');
-			res = await this.userService.winGame(Game.p1.name, Game.gameMod);
-			if (!res.ok)
-				console.log('[gameservice] winGame error');
-			res = await this.userService.loseGame(Game.p2.name, Game.gameMod);
-			if (!res.ok)
-				console.log('[gameservice] loseGame error');
+			let res = await this.createHistory(Game.gameId, Game.p1.name, Game.p2.name, Game.gameMod);
+			if (res.ok) {
+        await this.userService.winGame(Game.p1.name, Game.gameMod);
+        await this.userService.loseGame(Game.p2.name, Game.gameMod);
+			}
 			Game.nsp.in(Game.roomName).emit('end-game', true);
 		}
 		else {
@@ -395,15 +398,18 @@ export class GameService {
 	}
 	else {
 		if (Game.gameMod != gameMod.soloGame) {
-			let res = await this.createHistory(Game.p2.name, Game.p1.name, Game.gameMod);
-			res = await this.userService.winGame(Game.p2.name, Game.gameMod);
-			res = await this.userService.loseGame(Game.p1.name, Game.gameMod);
+			let res = await this.createHistory(Game.gameId, Game.p2.name, Game.p1.name, Game.gameMod);
+			if (res.ok) {
+        await this.userService.winGame(Game.p2.name, Game.gameMod);
+        await this.userService.loseGame(Game.p1.name, Game.gameMod);
+			}
 			Game.nsp.in(Game.roomName).emit('end-game', false);
 		}
 		else
 			Game.p1.socket.emit('end-game', false);
 	}
 	clearInterval(Game.interval);
+	Game.end = true;
   }
 }
 

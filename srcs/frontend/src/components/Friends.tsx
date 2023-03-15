@@ -29,14 +29,12 @@ function Friends({ show, handleClose, friends }: FriendsComponent) {
 			) : (
 				<Offcanvas.Body>
 					<ListGroup variant="flush">
-						{friends.map(friend =>
-						<>
-						<ListGroup.Item className="d-flex justify-content-between">
+						{friends.map((friend, index) =>
+						<ListGroup.Item className="d-flex justify-content-between" key={index}>
 							<Status friend={friend.nickname}></Status>
 							{friend.nickname}
 							{/* Status에 따른 색 추가 */}
 						</ListGroup.Item>
-						</>
 					)}
 					</ListGroup>
 				</Offcanvas.Body>

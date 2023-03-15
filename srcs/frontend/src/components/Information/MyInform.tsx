@@ -14,6 +14,8 @@ import { api } from "../../axios/api";
 import { mySocket } from "../../common/MySocket";
 import { GameData, UserData } from "../../common/types";
 import Friends from "../Friends";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 
 type Record = {
 	timestamp: string;
@@ -27,10 +29,12 @@ type InformComponent = {
 	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
 	myData: UserData;
 	gameData: GameData[] | undefined;
+	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
+function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: InformComponent) {
 	const [imageURL, setImageURL] = useState("");
+	//const [refresh, setRefresh] = useState(false);
 	const [show, setShow] = useState(false);
 	const [myFriends, setMyFriends] = useState([]);
 	const handleClose = () => setShow(false);
@@ -38,6 +42,11 @@ function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 		setShow(true);
 		getMyFriends();
 	};
+
+	const refresh = () => {
+		getMyFriends();
+		setChangedGameData((prev) => !prev);
+	}
 
 	const getAvatar = async () => {
 		if (inform.avatarId) {
@@ -159,8 +168,11 @@ function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 							</Form>
 						</Card.Body>
 					</Card>
-					<Form.Group className="mb-2 mt-5" controlId="formName">
+					<Form.Group className="mb-2 mt-5 d-flex justify-content-between" controlId="formName">
 						<Form.Label className="text-white">최근 전적(최대 30게임)</Form.Label>
+						<Button variant="outline-light" onClick={refresh}>
+							<FontAwesomeIcon icon={faArrowsRotate} />
+						</Button>
 					</Form.Group>
 					{
 						gameData && gameData.length === 0 ? (
@@ -174,14 +186,12 @@ function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 											<ListGroup variant="flush">
 												{
 													gameData && gameData.map((res: GameData, index: any) =>
-															<>
-																<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
+															<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
 																<span className="fw-bold">{res.timestamp}</span>
 																<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>
 																<span className="ms-2 text-white fw-bold">{res.nickname.slice(0, 10)}</span>
 																<span className="text-white float-end">{res.isWin ? "🏆승리🏆" : "패배"}</span>
-																</ListGroup.Item>
-															</>
+															</ListGroup.Item>
 													)
 												}
 											</ListGroup>

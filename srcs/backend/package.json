@@ -35,7 +35,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "solapi": "^5.2.3",
-    "typeorm": "^0.3.11"
+    "typeorm": "^0.3.11",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.2.0",

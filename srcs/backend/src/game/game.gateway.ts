@@ -86,7 +86,7 @@ export class GamesGateway
 	//if (onlineList[socket.id])
   }
 
-  handleDisconnect(@ConnectedSocket() socket: Socket) {
+  async handleDisconnect(@ConnectedSocket() socket: Socket) {
 	if (NicknameBySocketId[socket.id])
 		this.logger.log(`${socket.id} (${NicknameBySocketId[socket.id]}) -=-=-=-=-=-= Socket Disconnected -=-=-=-=-=-=`,);
 	else
@@ -108,10 +108,10 @@ export class GamesGateway
 
 	if (roomName && gameDto) {
 		if (gameDto.p1.socket.id != socket.id) {
-			this.gameService.finishGame(gameDto, true)
+			await this.gameService.finishGame(gameDto, true)
 		}
 		else {
-			this.gameService.finishGame(gameDto, false)
+			await this.gameService.finishGame(gameDto, false)
 		}
 	}
 
@@ -138,7 +138,7 @@ export class GamesGateway
 //const NicknameBySocketId = new Map<string, string>();
 
   @SubscribeMessage('clear')
-  handleClear(@ConnectedSocket() socket: Socket) {
+  async handleClear(@ConnectedSocket() socket: Socket) {
 	this.logger.log(`+=+=+=+=+=+=+=+=+= ${NicknameBySocketId[socket.id]} clear +=+=+=+=+=+=+=+=+=`);
 
 	const nickname = NicknameBySocketId[socket.id];
@@ -147,12 +147,13 @@ export class GamesGateway
 	onClickSoloByNickname[nickname] = false;
 
 	this.logger.log(waitingPlayer.waiting);
-	if (waitingPlayer.waiting = true && nickname == waitingPlayer.nickname) {
+	this.logger.log(`again ${waitingPlayer.waiting}`);
+	if (waitingPlayer.waiting == true && nickname == waitingPlayer.nickname) {
 		this.logger.log(`${waitingPlayer.nickname} is clear ~~`);
 		waitingPlayer.waiting = false;
 		waitingPlayer.nickname = undefined;
 	}
-
+	this.logger.log(`again ${waitingPlayer.waiting}`);
 	const roomName = RoomNameByNickname[nickname];
 	this.logger.log(`again ${waitingPlayer.waiting}`);
 	if (!roomName) {
@@ -162,6 +163,18 @@ export class GamesGateway
 	RoomNameByNickname[nickname] = undefined;
 	socket.leave(roomName);
 	const gameDto = GameDtoByRoomName[roomName];
+	if (!gameDto)
+		return ;
+	this.logger.log('a');
+	if (gameDto.start && !gameDto.end) {
+		this.logger.log('b');
+		if (gameDto.p1.socket.id != socket.id) {
+			await this.gameService.finishGame(gameDto, true)
+		}
+		else {
+			await this.gameService.finishGame(gameDto, false)
+		}
+	}
 	if (!gameDto) {
 		this.logger.log('clear: no gameDto');
 		return ;
@@ -277,7 +290,7 @@ export class GamesGateway
 			p1: p1.user,
 			p2: p2.user,
 		};
-
+		Game.start = true;
 		this.nsp.in(roomName).emit('matching-success', playerInfo); // 대기실 방 생성을 연결된 클라들에게 알림
 		this.logger.log('matching success!!!');
 
@@ -289,6 +302,7 @@ export class GamesGateway
 		waitingPlayer.waiting = true;
 		this.logger.log(`${nickname} matching waiting...`);
 	}
+	socket.broadcast.emit('refresh-status');
   }
 
   @SubscribeMessage('ready-rank')
@@ -314,6 +328,7 @@ export class GamesGateway
 	}
 
     if (game.p1Ready === true && game.p2Ready == true) {
+		game.start = true;
 		game.p1.socket.emit('start-game', true);
 		game.p2.socket.emit('start-game', false);
 		this.gameService.gameLoop(game);
@@ -349,9 +364,12 @@ export class GamesGateway
       socket.id,
       gameMod.soloGame,
     );
+	Game.start = true;
     GameDtoByRoomName[Game.roomName] = Game;
     RoomNameByNickname[nickname] = Game.roomName;
 	createdRooms.push({ roomName: Game.roomName, password: false}); // 유저가 생성한 room 목록에 추가
+
+	socket.broadcast.emit('refresh-status');
 
     this.gameService.gameLoop(GameDtoByRoomName[Game.roomName]);
   }
@@ -378,7 +396,7 @@ export class GamesGateway
 	createdRooms = createdRooms.filter(
 		(createdRoom) => createdRoom.roomName !== deletedRoom.roomName,
 	); // 유저가 생성한 room 목록 중에 삭제되는 room 있으면 제거
-	
+
 	socket.broadcast.emit('refresh-status');
 	return { success: true, payload: `${roomName} deleted!` };
   }
@@ -393,18 +411,27 @@ export class GamesGateway
 
   @SubscribeMessage('room-list')
   handleRoomList() {
-	return createdRooms;
+	const activeRooms: Room[] = [];
+	createdRooms.forEach((room) => {
+		const game = GameDtoByRoomName[room.roomName];
+		if (game.p2.name) {
+			activeRooms.push(room);
+		}
+	})
+	return activeRooms;
   }
 
   @SubscribeMessage('create-room')
   async handleCreateRoom(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() roomName: string,
-    @MessageBody() password: string
+    @MessageBody() room: {
+		roomName :string,
+		password :string,
+	}
   ) {
-    const exists = createdRooms.find((createdRoom) => createdRoom.roomName === roomName);
+    const exists = createdRooms.find((createdRoom) => createdRoom.roomName === room.roomName);
     if (exists) {
-      return { success: false, payload: `${roomName} room already existed!` };
+      return { success: false, payload: `${room.roomName} room already existed!` };
     }
 
 	this.logger.log('++=+=++ created Room +=++=+=');
@@ -413,27 +440,28 @@ export class GamesGateway
 	const Game: GameDto = this.gameService.init_game(
 		socket,  // p1
 		NicknameBySocketId[socket.id],
-		roomName, // roomName
-		gameMod.soloGame, // game mod
+		room.roomName, // roomName
+		gameMod.normalGame, // game mod
 		this.nsp,
 	);
-	if (password) {
+	if (room.password) {
+		this.logger.log(room.password);
 		Game.gameMod = gameMod.passwordGame;
-		Game.password = await this.gameService.hashPassword(password);
+		Game.password = await this.gameService.hashPassword(room.password);
 	}
-	GameDtoByRoomName[roomName] = Game;
+	GameDtoByRoomName[room.roomName] = Game;
 
-    socket.join(roomName); // 기존에 없던 room으로 join하면 room이 생성됨
-	if (password)
-    	createdRooms.push({ roomName: roomName, password: true} ); // 유저가 생성한 room 목록에 추가
+    socket.join(room.roomName); // 기존에 없던 room으로 join하면 room이 생성됨
+	if (room.password)
+    	createdRooms.push({ roomName: room.roomName, password: true} ); // 유저가 생성한 room 목록에 추가
 	else
-    	createdRooms.push({ roomName: roomName, password: false} ); // 유저가 생성한 room 목록에 추가
-	RoomNameByNickname[Game.p1.name] = roomName;
+    	createdRooms.push({ roomName: room.roomName, password: false} ); // 유저가 생성한 room 목록에 추가
+	RoomNameByNickname[Game.p1.name] = room.roomName;
 
-    this.nsp.emit('create-room', roomName); // 대기실 방 생성
+    this.nsp.emit('create-room', room.roomName); // 대기실 방 생성
 
 	socket.broadcast.emit('refresh-status');
-    return { success: true, payload: roomName };
+    return { success: true, payload: room.roomName };
   }
 
 
@@ -476,33 +504,59 @@ export class GamesGateway
 	Game.p1.socket.emit('matching-success', playerInfo);
 	socket.emit('matching-success', playerInfo);
 
+	Game.start = true;
+
 	socket.broadcast.emit('refresh-status');
 	return { success: true, payload: roomName };
+  }
+
+  @SubscribeMessage('watching')
+  async handleWatching(@ConnectedSocket() socket: Socket) {
+	const nickname = NicknameBySocketId[socket.id];
+	const roomName = RoomNameByNickname[nickname];
+	const Game = GameDtoByRoomName[roomName];
+
+	const p1 = await this.userService.getUserByNickName(
+		Game.p1.name
+	);
+	const p2 = await this.userService.getUserByNickName(
+		Game.p2.name
+	);
+
+	const playerInfo = {
+		p1: p1.user,
+		p2: p2.user,
+	};
+
+	return playerInfo;
   }
 
   @SubscribeMessage('watch-room')
   async handleJoinRoom(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() roomName: string,
-    @MessageBody() password: string,
+    @MessageBody() room: {
+		roomName :string,
+		password :string,
+	}
   ) {
-	const exists = createdRooms.find((createdRoom) => createdRoom.roomName === roomName);
+	this.logger.log(`watch-room ${NicknameBySocketId[socket.id]}`);
+	const exists = createdRooms.find((createdRoom) => createdRoom.roomName === room.roomName);
     if (exists == undefined) {
-      return { success: false, payload: `${roomName} not found!` };
+      return { success: false, payload: `${room.roomName} not found!` };
     }
 
-	const Game: GameDto =  GameDtoByRoomName[roomName];
-    const isMatch = await this.gameService.verifyPassword(password, Game.password);
+	const Game: GameDto =  GameDtoByRoomName[room.roomName];
+    const isMatch = await this.gameService.verifyPassword(room.password, Game.password);
 	if (Game.gameMod === gameMod.passwordGame && !isMatch) {
-		return { success: false, payload: `${roomName} password wrong!` };
+		return { success: false, payload: `${room.roomName} password wrong!` };
 	}
 
-    socket.join(roomName); // join room
+    socket.join(room.roomName); // join room
 	const nickname = NicknameBySocketId[socket.id];
-	RoomNameByNickname[nickname] = roomName;
-    socket.broadcast.to(roomName).emit('message', { message: `${socket.id} join room!` });
+	RoomNameByNickname[nickname] = room.roomName;
+	socket.broadcast.emit('refresh-status');
 
-    return { success: true, payload: roomName };
+    return { success: true, payload: room.roomName };
   }
 
   @SubscribeMessage('leave-room')
@@ -519,7 +573,6 @@ export class GamesGateway
 
   @SubscribeMessage('check-status')
   handleOnline(
-    @ConnectedSocket() socket: Socket,
 	@MessageBody() nickname: string
   ) {
 	const roomName = RoomNameByNickname[nickname];

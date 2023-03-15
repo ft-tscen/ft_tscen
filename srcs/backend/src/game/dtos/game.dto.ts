@@ -20,6 +20,7 @@ export type FrontData = {
 }
 
 export type GameDto = {
+  gameId: string,
   roomName: string,
   password: string,
   ball: BallDto,
@@ -31,6 +32,8 @@ export type GameDto = {
   p2Ready: boolean,
   nsp: Namespace,
   interval: NodeJS.Timer,
+  start: boolean,
+  end: boolean,
 }
 
 export class History2 {

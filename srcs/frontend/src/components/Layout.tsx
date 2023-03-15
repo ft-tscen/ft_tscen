@@ -20,6 +20,8 @@ type LayoutComponent = {
 	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+const min_width = 2400;
+
 function Layout({
 	isLoggedIn,
 	userData,
@@ -35,6 +37,16 @@ function Layout({
 	const param = url["*"];
 	const navigate = useNavigate();
 	const [needClear, SetNeedclear] = useState<boolean>(true);
+	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+	useEffect(() => {
+		function handleResize() {
+			setWindowWidth(window.innerWidth);
+		}
+		window.addEventListener("resize", handleResize);
+		return () => {
+			window.removeEventListener("resize", handleResize);
+		};
+	}, []);
 
 
 	const getComponent = () => {
@@ -63,6 +75,7 @@ function Layout({
 		else if (param === "soloGame") return <Game mod={gameMod.soloGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear}/>;
 		else if (param === "rankGame") return <Game mod={gameMod.rankGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
 		else if (param === "friendlyGame") return <Game mod={gameMod.normalGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
+		else if (param === "watchGame") return <Game mod={gameMod.watchGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
 		else if (param === "privateGame")
 			return <Game mod={gameMod.passwordGame} isChangedGameData={isChangedData} setChangedGameData={setChangedData} SetNeedclear={SetNeedclear} />;
 		else if (param === "creatGame") return <CreatRoom  SetNeedclear={SetNeedclear}/>;
@@ -77,26 +90,37 @@ function Layout({
 	return (
 		<>
 			<Container fluid style={{ height: "90vmin" }}>
-				<Row style={{ height: "90vmin" }}>
-					<Col xs={3} className={getBorder()}>
-						{userData.nickname === null || !isLoggedIn ? null : (
-							<MyInform
-								inform={inform ?? userData}
-								setInform={setInform}
-								myData={userData}
-								gameData={gameData}
-							/>
-						)}
-					</Col>
+				<Row
+					style={{
+						height: "90vmin",
+						display: "flex",
+						justifyContent: "center",
+					}}
+				>
+					{windowWidth > min_width && (
+						<Col xs={3} className={getBorder()}>
+							{userData.nickname === null || !isLoggedIn ? null : (
+								<MyInform
+									inform={inform ?? userData}
+ 									setInform={setInform}
+ 									myData={userData}
+ 									gameData={gameData}
+ 									setChangedGameData={setChangedGameData}
+ 								/>
+ 							)}
+ 						</Col>
+					)}
 					<Col xs={6}>{getComponent()}</Col>
-					<Col xs={3} className={getBorder()}>
-						{isLoggedIn && (
-							<ChatPart
-								setInform={setInform}
-								setEnteredChannel={setEnteredChannel}
-							/>
-						)}
-					</Col>
+					{windowWidth > min_width && (
+						<Col xs={3} className={getBorder()}>
+							{isLoggedIn && (
+								<ChatPart
+									setInform={setInform}
+									setEnteredChannel={setEnteredChannel}
+								/>
+							)}
+						</Col>
+					)}
 				</Row>
 			</Container>
 		</>
