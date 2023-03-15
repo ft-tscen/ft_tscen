@@ -193,7 +193,6 @@ function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: I
 									<ListGroup variant="flush">
 										{gameData &&
 											gameData.map((res: GameData, index: any) => (
-												<>
 													<ListGroup.Item
 														key={index}
 														className="py-2"
@@ -210,7 +209,6 @@ function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: I
 															{res.isWin ? "🏆승리🏆" : "패배"}
 														</span>
 													</ListGroup.Item>
-												</>
 											))}
 									</ListGroup>
 								</Card.Body>

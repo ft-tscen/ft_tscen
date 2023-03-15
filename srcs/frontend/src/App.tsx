@@ -63,6 +63,7 @@ function App() {
 		try {
 			const res = await api.get(`/game/history?nickname=${userData.nickname}`);
 			let record: GameData[] = [];
+			res.data?.history?.sort((h:any) => -new Date(h.createdAt).valueOf());
 			for (let i = 0; i < res.data?.history?.length; i++) {
 				let WinCheck: boolean;
 				let RankCheck: boolean = true;
@@ -82,11 +83,8 @@ function App() {
 					isRank: RankCheck,
 					isWin: WinCheck,
 				};
+				
 				record.push(rec);
-			}
-			for (let i = 0; i < record.length; i++) {
-				console.log("record[i]");
-				console.log(record[i]);
 			}
 			setGameData(record);
 		} catch (e) {
