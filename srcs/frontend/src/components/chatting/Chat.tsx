@@ -88,7 +88,6 @@ export function Chat({ msg, setReceivedMsg, setInform }: ArgsType) {
 			myGameSocket.socket.emit(SOCKET_GAME_EVENT.GET_ROOM_NAME, msg.author,
 				({success, payload}: {success: boolean, payload: string}) => {
 					if (success) {
-						console.log(myGameSocket.socket.listeners('matching-success'));
 						myGameSocket.socket.emit(SOCKET_GAME_EVENT.JOIN, payload,
 							({success, payload}: {success :boolean, payload :string}) => {
 								setReceivedMsg({author:"server", message:payload})

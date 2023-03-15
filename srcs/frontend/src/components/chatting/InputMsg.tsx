@@ -139,7 +139,6 @@ export function InputMsg({
 
 					for (; idx < words.length; ++idx) {
 						if (words[idx][0] === "-" && words[idx].length === 2) {
-							console.log(words[idx]);
 							if (
 								words[idx][1] === "p" &&
 								enteredMSG.password === "" &&

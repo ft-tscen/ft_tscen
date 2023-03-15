@@ -61,7 +61,6 @@ export class UserService {
 
   async getUserByNickName(nickname: string): Promise<getUserByNickNameOutput> {
     try {
-		console.log(nickname);
       const user = await this.users.findOne({
         where: { nickname },
       });
@@ -199,7 +198,6 @@ export class UserService {
 
   async winGame(nickname: string, mod: gameMod) {
     try {
-	  console.log(`nickname: ${nickname}`);
       const user = await this.users.findOne({
         where: { nickname }
       });

@@ -146,7 +146,6 @@ export class ChatGateway
     const { author, target } = input;
     const { user } = this.users.get(this.sockets.get(author));
 
-    console.log("asdf");
     if (author !== target) {
       if (this.channels.has(target)) {
         const { members, channelMute } = this.channels.get(target);

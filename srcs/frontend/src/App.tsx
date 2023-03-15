@@ -87,10 +87,6 @@ function App() {
 				}
 				record.push(rec);
 			}
-			for (let i = 0; i < record.length; i++) {
-				console.log("record[i]");
-				console.log(record[i]);
-			}
 			setGameData(record);
 		} catch (e) {
 			console.error(e);

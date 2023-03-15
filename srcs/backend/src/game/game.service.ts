@@ -355,7 +355,6 @@ export class GameService {
   async finishGame(Game: GameDto, p1_win: boolean) {
 	if (Game.end)
 		return ;
-	console.log(`[gameservice] p1_win: ${p1_win}`);
 	if (p1_win) {
 		if (Game.gameMod != gameMod.soloGame) {
 			let res = await this.createHistory(Game.gameId, Game.p1.name, Game.p2.name, Game.gameMod);

@@ -62,7 +62,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 				// watch모드 대비 추가 iswatch일시 paddle 작동 막아둠
 				if (mod === gameMod.watchGame) {
 					myGameSocket.socket.emit('watching', (data: any) => {
-						console.log(data);
 						const PlayerInfo : playerType = {
 							p1 : {
 								intra: data.p1.intra,
@@ -92,7 +91,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 				})
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
 				myGameSocket.socket.on('matching-success', (data: any) => {
-					console.log('매칭 성공~');
 					const PlayerInfo : playerType = {
 						p1 : {
 							intra: data.p1.intra,
@@ -127,7 +125,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 				ReadyPage(ctx, CanvasWidth, CanvasHeight);
 				document.addEventListener('keydown', (e) => {
 					if (e.code === 'KeyR') {
-						console.log('solo ready!');
 						myGameSocket.socket.emit(SOCKET_GAME_EVENT.SOLO_READY);
 						setStartGame(true);
 					}
@@ -233,7 +230,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 	useEffect(() => {
 		// game시작 했을 때만 적용되게
 		if (startGame && !isWatch) {
-			console.log(player);
 			if (paddleUp === true) {
 				myGameSocket.socket.emit('PaddleUp', player);
 			}
