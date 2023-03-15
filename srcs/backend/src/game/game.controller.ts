@@ -22,17 +22,4 @@ export class GameController {
   ) {
 	  return await this.gameService.getHistory(nickname);
   }
-
-  @UseGuards(AuthGuard)
-  @ApiResponse({
-    status: 200,
-    description: 'make win history by nickname',
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @Post('/history')
-  async createDummyHistory(
-    @Query('nickname') nickname: string,
-  ) {
-	  return await this.gameService.createDummyHistory(nickname, gameMod.rankGame);
-  }
 }
