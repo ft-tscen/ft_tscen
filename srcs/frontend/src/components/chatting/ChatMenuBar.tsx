@@ -20,7 +20,7 @@ export function ChatMenuBar({
 }: Flags) {
 	return (
 		<Container className="pt-3 px-0" style={{ height: "8vmin" }}>
-			<Row className="px-3 text-center align-items-center">
+			<Row className="px-3 text-center align-items-center" style={{ backgroundColor: 'black' }}>
 				<Col className="text-center align-items-center">
 					<h4 style={{ color: "white", padding: "0", margin: "0" }}>
 						{flag === SHOW_CHATROOM
@@ -53,7 +53,7 @@ export function ChatMenuBar({
 					</Button>
 				</Col>
 			</Row>
-			<Row className="pt-3">
+			<Row className="pt-3" style={{ backgroundColor: 'black' }}>
 				<hr style={{ color: "white" }} />
 			</Row>
 		</Container>

@@ -29,9 +29,10 @@ type InformComponent = {
 	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
 	myData: UserData;
 	gameData: GameData[] | undefined;
+	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
+function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: InformComponent) {
 	const [imageURL, setImageURL] = useState("");
 	//const [refresh, setRefresh] = useState(false);
 	const [show, setShow] = useState(false);
@@ -84,6 +85,11 @@ function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 			console.error(e);
 		}
 	};
+
+	const refresh = () => {
+		getMyFriends();
+		setChangedGameData((prev) => !prev);
+	}
 
 	useEffect(() => {
 		getAvatar();
@@ -169,7 +175,7 @@ function MyInform({ inform, setInform, myData, gameData }: InformComponent) {
 						<Form.Label className="text-white">
 							최근 전적(최대 30게임)
 						</Form.Label>
-						<Button variant="outline-light" onClick={() => getMyFriends()}>
+						<Button variant="outline-light" onClick={refresh}>
 							<FontAwesomeIcon icon={faArrowsRotate} />
 						</Button>
 					</Form.Group>

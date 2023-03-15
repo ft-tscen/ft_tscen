@@ -16,11 +16,10 @@ type LayoutComponent = {
 	gameData: GameData[] | undefined;
 	isChangedData: boolean;
 	setChangedData: React.Dispatch<React.SetStateAction<boolean>>;
-	isChangedGameData: boolean;
 	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const min_width = 2000;
+const min_width = 2400;
 
 function Layout({
 	isLoggedIn,
@@ -28,7 +27,6 @@ function Layout({
 	gameData,
 	isChangedData,
 	setChangedData,
-	isChangedGameData,
 	setChangedGameData,
 }: LayoutComponent) {
 	const [inform, setInform] = useState<UserData>();
@@ -144,6 +142,7 @@ function Layout({
 									setInform={setInform}
 									myData={userData}
 									gameData={gameData}
+									setChangedGameData={setChangedGameData}
 								/>
 							)}
 						</Col>
