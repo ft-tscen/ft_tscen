@@ -3,9 +3,17 @@ import { PlayerDto } from './player.dto';
 import { Namespace } from 'socket.io';
 import { BaseOutput } from 'src/common/dtos/base.dto';
 
-import { IsBoolean, IsDate, IsEnum, IsNumber, IsNumberString, IsObject, IsString } from "class-validator";
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
-export enum gameMod{
+export enum gameMod {
   normalGame,
   passwordGame,
   soloGame,
@@ -14,13 +22,13 @@ export enum gameMod{
 
 export class FrontData {
   @IsNumber()
-  leftPaddle : number;
+  leftPaddle: number;
   @IsNumber()
-  rightPaddle : number;
+  rightPaddle: number;
   @IsNumber()
-  ballX : number;
+  ballX: number;
   @IsNumber()
-  ballY : number;
+  ballY: number;
   @IsNumber()
   leftScore: number;
   @IsNumber()
@@ -62,7 +70,7 @@ export class History2 {
   @IsDate()
   createdAt: Date;
   @IsDate()
-  updatedAt:Date;
+  updatedAt: Date;
   @IsString()
   winner: string;
   @IsString()
@@ -72,5 +80,6 @@ export class History2 {
 }
 
 export class HistoryOutput extends BaseOutput {
-	history?: History2[];
+  @IsOptional()
+  history?: History2[];
 }

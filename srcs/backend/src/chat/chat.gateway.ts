@@ -47,7 +47,9 @@ export interface SocketOutputDto {
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: [`http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}`],
+    origin: [
+      `http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}`,
+    ],
     credentials: true,
   },
 })
@@ -82,7 +84,7 @@ export class ChatGateway
       });
       this.sockets.set(nickname, socket.id);
       console.log(`${socket.id}(${nickname}) 소켓 연결`);
-	  socket.broadcast.emit('refresh-status');
+      socket.broadcast.emit('refresh-status');
     } else {
       socket.disconnect();
     }
@@ -100,12 +102,12 @@ export class ChatGateway
       });
     }
     console.log(`${socket.id} 소켓 연결 해제 ❌`);
-	socket.broadcast.emit('refresh-status');
+    socket.broadcast.emit('refresh-status');
   } // 채널에서 나갔다고 알려줘야 함.
 
   async hashPassword(password: string): Promise<string> {
     if (!password) {
-      return ""
+      return '';
     }
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
@@ -113,11 +115,12 @@ export class ChatGateway
     return hashedPassword;
   }
 
-  async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-    if (!password && !hashedPassword)
-      return true;
+  async verifyPassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    if (!password && !hashedPassword) return true;
     const isMatch = await bcrypt.compare(password, hashedPassword);
-    console.log(password, hashedPassword, isMatch)
     return isMatch;
   }
 
@@ -126,7 +129,8 @@ export class ChatGateway
     const channelList = [];
 
     this.channels.forEach((channel) => {
-      if (!channel.private) { // private일때 안보냄
+      if (!channel.private) {
+        // private일때 안보냄
         const channelObj = {
           name: channel.name,
           // hidden: channel.private,
@@ -146,14 +150,13 @@ export class ChatGateway
     const { author, target } = input;
     const { user } = this.users.get(this.sockets.get(author));
 
-    console.log("asdf");
     if (author !== target) {
       if (this.channels.has(target)) {
         const { members, channelMute } = this.channels.get(target);
         members.forEach((member) => {
           if (member !== socket.id) {
             const now = new Date().getTime();
-            const authorID :string = this.sockets.get(author); // author -> this->sockets.get(author)
+            const authorID: string = this.sockets.get(author); // author -> this->sockets.get(author)
 
             if (channelMute.has(authorID) && now < channelMute.get(authorID)) {
               return;
@@ -256,7 +259,7 @@ export class ChatGateway
         const targetSocket = this.sockets.get(target);
         const { userMute } = this.users.get(targetSocket);
         const now = new Date().getTime();
-        const authorID :string = this.sockets.get(author); // author -> this->sockets.get(author)
+        const authorID: string = this.sockets.get(author); // author -> this->sockets.get(author)
         if (!(userMute.has(authorID) && now < userMute.get(authorID))) {
           socket.to(targetSocket).emit('direct-msg', { ...chat, user });
         }
@@ -342,12 +345,16 @@ export class ChatGateway
     if (this.channels.has(input.target)) {
       const channel = this.channels.get(input.target);
       const now = new Date().getTime();
-      const isMatch = await this.verifyPassword(input.password, channel.password);
+      const isMatch = await this.verifyPassword(
+        input.password,
+        channel.password,
+      );
 
       if (
         !(
           channel.banList.has(socket.id) && now < channel.banList.get(socket.id)
-        ) && isMatch
+        ) &&
+        isMatch
       ) {
         channel.members.add(socket.id);
       } else {
@@ -422,7 +429,8 @@ export class ChatGateway
   checkOwner(userSocket: string, channel: string) {
     if (this.sockets.has(userSocket) && this.channels.has(channel)) {
       const { owner } = this.channels.get(channel);
-      if (this.sockets.get(userSocket) === owner) { // userSocket -> this.sockets.get(userSocket)
+      if (this.sockets.get(userSocket) === owner) {
+        // userSocket -> this.sockets.get(userSocket)
         return true;
       }
     }
@@ -432,7 +440,11 @@ export class ChatGateway
   checkAdmin(userSocket: string, channel: string) {
     if (this.sockets.has(userSocket) && this.channels.has(channel)) {
       const { owner, admins } = this.channels.get(channel);
-      if (this.sockets.get(userSocket) === owner || admins.has(this.sockets.get(userSocket))) { // userSocket -> this.sockets.get(userSocket)
+      if (
+        this.sockets.get(userSocket) === owner ||
+        admins.has(this.sockets.get(userSocket))
+      ) {
+        // userSocket -> this.sockets.get(userSocket)
         return true;
       }
     }
@@ -532,6 +544,9 @@ export class ChatGateway
             }
           });
           this.banUser(socket, input);
+          socket
+            .to(this.sockets.get(input.target))
+            .emit('leave-channel', output);
           return output;
         }
       }
@@ -584,7 +599,8 @@ export class ChatGateway
   ): Promise<SocketOutputDto> {
     const channel = this.users.get(socket.id).channel;
 
-    if (this.checkOwner(input.author, channel)) { // socket.id -> input.author
+    if (this.checkOwner(input.author, channel)) {
+      // socket.id -> input.author
       const hashedPassword = await this.hashPassword(input.password);
       this.channels.get(channel).password = hashedPassword;
       const output = {
@@ -612,7 +628,8 @@ export class ChatGateway
     @MessageBody() input: SocketInputDto,
   ): SocketOutputDto {
     const channel = this.users.get(socket.id).channel;
-    if (this.checkOwner(input.author, channel)) { // socket.id -> input.author
+    if (this.checkOwner(input.author, channel)) {
+      // socket.id -> input.author
       this.channels.get(channel).private = true;
       const output = {
         author: 'server',
@@ -640,7 +657,8 @@ export class ChatGateway
   ): SocketOutputDto {
     const channel = this.users.get(socket.id).channel;
 
-    if (this.checkOwner(input.author, channel)) { // socket.id -> input.author
+    if (this.checkOwner(input.author, channel)) {
+      // socket.id -> input.author
       this.channels.get(channel).private = false;
       const output = {
         author: 'server',
@@ -673,9 +691,9 @@ export class ChatGateway
         author: input.author,
         target: input.target,
         message: `${input.author} wants to be friend with you`,
-        user
+        user,
       };
-      const targetSocket :string = this.sockets.get(input.target);
+      const targetSocket: string = this.sockets.get(input.target);
       socket.to(targetSocket).emit('be-friend', output);
       return {
         author: 'server',
@@ -699,14 +717,18 @@ export class ChatGateway
       const output = {
         author: 'server',
         target: null,
-        message: input.message ? `${input.author} become friend with you` :`${input.author} rejected your request`,
+        message: input.message
+          ? `${input.author} become friend with you`
+          : `${input.author} rejected your request`,
       };
-      const targetSocket :string = this.sockets.get(input.target);
+      const targetSocket: string = this.sockets.get(input.target);
       socket.to(targetSocket).emit('notice', output);
       return {
         author: 'server',
         target: null,
-        message: `you ${input.message ? 'accepted' : 'rejected'} friend request from ${input.target}`,
+        message: `you ${
+          input.message ? 'accepted' : 'rejected'
+        } friend request from ${input.target}`,
       };
     }
     return {
@@ -727,18 +749,16 @@ export class ChatGateway
       author: 'server',
       target: null,
       message: `get ${input.target}'s profile`,
-      user
+      user,
     };
   }
 
   @SubscribeMessage('check-status')
   checkStatus(
     @ConnectedSocket() socket: Socket,
-	@MessageBody() nickname: string,
+    @MessageBody() nickname: string,
   ): boolean {
-	console.log(this.users.has(this.sockets.get(nickname)));
-    if (this.users.has(this.sockets.get(nickname)))
-      return true;
+    if (this.users.has(this.sockets.get(nickname))) return true;
     return false;
   }
 
@@ -754,7 +774,7 @@ export class ChatGateway
         author: input.author,
         target: input.target,
         message: `you are invited to ${input.author}`,
-        user
+        user,
       };
       socket.to(this.sockets.get(input.target)).emit('invite', output);
       return {

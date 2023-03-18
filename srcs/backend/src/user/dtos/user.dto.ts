@@ -1,21 +1,24 @@
 import { User } from 'src/user/entities/user.entity';
-import Avatar  from 'src/user/entities/avatar.entity';
 import { BaseOutput } from 'src/common/dtos/base.dto';
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class getMeOutput extends BaseOutput {
+  @IsOptional()
   user?: User;
 }
 
 export class CreateUserOutput extends BaseOutput {
+  @IsOptional()
   user?: User;
 }
 
 export class getUserByNickNameOutput extends BaseOutput {
+  @IsOptional()
   user?: User;
 }
 
 export class getUserByIdOutput extends BaseOutput {
+  @IsOptional()
   user?: User;
 }
 
@@ -37,5 +40,5 @@ export class UpdateUserDto {
 }
 
 export class getScoreByNickNameOutput extends BaseOutput {
-	score?: any;
+  score?: any;
 }

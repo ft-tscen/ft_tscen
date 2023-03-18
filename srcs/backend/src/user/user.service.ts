@@ -61,7 +61,6 @@ export class UserService {
 
   async getUserByNickName(nickname: string): Promise<getUserByNickNameOutput> {
     try {
-		console.log(nickname);
       const user = await this.users.findOne({
         where: { nickname },
       });
@@ -142,7 +141,11 @@ export class UserService {
     return file;
   }
 
-  async changeAvatar(id: number, imageBuffer: Buffer, filename: string): Promise<changeAvatarOutput> {
+  async changeAvatar(
+    id: number,
+    imageBuffer: Buffer,
+    filename: string,
+  ): Promise<changeAvatarOutput> {
     try {
       const user = await this.users.findOne({ where: { id } });
       if (user.avatarId) {
@@ -150,108 +153,126 @@ export class UserService {
       }
       const avatar = await this.uploadAvatar(imageBuffer, filename);
       await this.users.update(id, { avatarId: avatar.id });
-      return { ok: true }
+      return { ok: true };
     } catch (error) {
-      return {ok: false, error};
+      return { ok: false, error };
     }
   }
 
   async getFriends(id: number) {
     try {
-      const user = await this.users.findOne({ where: { id }, relations: ['friends'] });
-      return {ok:true, friends: user.friends};
+      const user = await this.users.findOne({
+        where: { id },
+        relations: ['friends'],
+      });
+      return { ok: true, friends: user.friends };
     } catch (error) {
-      return {ok: false, error};
+      return { ok: false, error };
     }
   }
 
-  async addFriends(id: number, nickname:string) {
+  async addFriends(id: number, nickname: string) {
     try {
-      const user1 = await this.users.findOne({ where: { id }, relations: ['friends'] });
-      const user2 = await this.users.findOne({ where: { nickname }, relations: ['friends'] });
+      const user1 = await this.users.findOne({
+        where: { id },
+        relations: ['friends'],
+      });
+      const user2 = await this.users.findOne({
+        where: { nickname },
+        relations: ['friends'],
+      });
 
-      if (!user1.friends.some(friend => friend.id === user2.id)) {
+      if (!user1.friends.some((friend) => friend.id === user2.id)) {
         user1.friends.push(user2);
         user2.friends.push(user1);
         await this.users.save([user1, user2]);
       }
-      return {ok: true};
+      return { ok: true };
     } catch (error) {
-      return {ok: false, error};
+      return { ok: false, error };
     }
   }
 
-  async deleteFriends(id: number, nickname:string) {
+  async deleteFriends(id: number, nickname: string) {
     try {
-      const user1 = await this.users.findOne({ where: { id }, relations: ['friends'] });
-      const user2 = await this.users.findOne({ where: { nickname }, relations: ['friends'] });
+      const user1 = await this.users.findOne({
+        where: { id },
+        relations: ['friends'],
+      });
+      const user2 = await this.users.findOne({
+        where: { nickname },
+        relations: ['friends'],
+      });
 
-      if (user1.friends.some(friend => friend.id === user2.id)) {
-        user1.friends = user1.friends.filter(friend => friend.id !== user2.id);
-        user2.friends = user2.friends.filter(friend => friend.id !== user1.id);
+      if (user1.friends.some((friend) => friend.id === user2.id)) {
+        user1.friends = user1.friends.filter(
+          (friend) => friend.id !== user2.id,
+        );
+        user2.friends = user2.friends.filter(
+          (friend) => friend.id !== user1.id,
+        );
         await this.users.save([user1, user2]);
       }
-      return {ok: true};
+      return { ok: true };
     } catch (error) {
-      return {ok: false, error};
+      return { ok: false, error };
     }
   }
 
   async winGame(nickname: string, mod: gameMod) {
     try {
-	  console.log(`nickname: ${nickname}`);
       const user = await this.users.findOne({
-        where: { nickname }
+        where: { nickname },
       });
-      if (!user)
-        return {ok: false, error: 'User Not Found'};
-      if (mod == gameMod.rankGame)
-        user.r_win += 1;
-      else
-        user.f_win += 1;
-      await this.users.update(user.id, { f_win: user.f_win, r_win: user.r_win});
-      return {ok: true, error: 'Success'};
+      if (!user) return { ok: false, error: 'User Not Found' };
+      if (mod == gameMod.rankGame) user.r_win += 1;
+      else user.f_win += 1;
+      await this.users.update(user.id, {
+        f_win: user.f_win,
+        r_win: user.r_win,
+      });
+      return { ok: true, error: 'Success' };
     } catch (error) {
-      return {ok: false, error};
+      return { ok: false, error };
     }
   }
 
   async loseGame(nickname: string, mod: gameMod) {
     try {
       const user = await this.users.findOne({
-        where: { nickname }
+        where: { nickname },
       });
-      if (!user)
-        return {ok: false, error: 'User Not Found'};
-      if (mod == gameMod.rankGame)
-        user.r_lose += 1;
-      else
-        user.f_lose += 1;
-      await this.users.update(user.id, { f_lose: user.f_lose, r_lose: user.r_lose});
-      return {ok: true, error: 'Success'};
+      if (!user) return { ok: false, error: 'User Not Found' };
+      if (mod == gameMod.rankGame) user.r_lose += 1;
+      else user.f_lose += 1;
+      await this.users.update(user.id, {
+        f_lose: user.f_lose,
+        r_lose: user.r_lose,
+      });
+      return { ok: true, error: 'Success' };
     } catch (error) {
-      return {ok: false, error};
+      return { ok: false, error };
     }
   }
 
   async getScoreByNickName(nickname: string) {
     try {
-	  const user = await this.users.findOne({
-	    where: { nickname },
-	  });
-	  if (user == undefined) {
-		return {
-		  ok: false,
-		  error: 'User Not Found',
-		};
-	  }
-		const score = {
-		  f_win: user.f_win,
-		  f_lose: user.f_lose,
-		  r_win: user.r_win,
-		  r_lose: user.r_lose,
-		}
-        return { ok: true, score };
+      const user = await this.users.findOne({
+        where: { nickname },
+      });
+      if (user == undefined) {
+        return {
+          ok: false,
+          error: 'User Not Found',
+        };
+      }
+      const score = {
+        f_win: user.f_win,
+        f_lose: user.f_lose,
+        r_win: user.r_win,
+        r_lose: user.r_lose,
+      };
+      return { ok: true, score };
     } catch (error) {
       return { ok: false, error };
     }

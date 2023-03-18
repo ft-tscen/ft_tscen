@@ -56,12 +56,15 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 		mySocket.socket.emit(
 			SOCKET_EVENT.LEAVE,
 			{ author: mySocket.name, target: mySocket.enteredChannelName },
-			setReceivedMsg
+			resetChannel
 		);
+	};
+	const resetChannel = (dto: SocketOutputDto) => {
 		mySocket.enteredChannelName = "";
 		setEnteredChannel(false);
 		setEnterChannelFlag(LEAVE_CHANNEL);
-	};
+		setReceivedMsg(dto)
+	}
 	const setDMMsg = (dto: SocketOutputDto) => {
 		dto.type = SOCKET_EVENT.DM;
 		setReceivedMsg(dto);
@@ -99,6 +102,7 @@ export default function ChatPart({ setInform, setEnteredChannel }: ArgsType) {
 		mySocket.socket.on(SOCKET_EVENT.INVITE, setInviteMsg);
 		mySocket.socket.on(SOCKET_EVENT.NOTICE, setReceivedMsg);
 		mySocket.socket.on(SOCKET_EVENT.BEFRIEND, connectFriendMsg);
+		mySocket.socket.on(SOCKET_EVENT.LEAVE, resetChannel);
 		return () => {
 			mySocket.socket.off(SOCKET_EVENT.MSG, setReceivedMsg);
 			mySocket.socket.off(SOCKET_EVENT.DM, setDMMsg);

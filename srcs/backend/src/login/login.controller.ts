@@ -8,7 +8,9 @@ export class LoginController {
   constructor(private readonly loginService: LoginService) {}
 
   @Get()
-  @Redirect(`http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}`)
+  @Redirect(
+    `http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}`,
+  )
   checkLogin(@Session() session: Record<string, any>) {
     if (!session.login) {
       return {
@@ -18,7 +20,9 @@ export class LoginController {
   }
 
   @Get('/redirect')
-  @Redirect(`http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}`)
+  @Redirect(
+    `http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}`,
+  )
   async login(
     @Session() session: Record<string, any>,
     @Query('code') code: string,

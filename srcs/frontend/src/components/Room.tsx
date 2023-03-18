@@ -50,7 +50,6 @@ function CreatRoom({SetNeedclear}: CreatRoomType) {
 					if (res.success) {
 						navigate("/privateGame");
 						mySocket.enteredGameRoom = true
-						console.log('성공');
 					}
 				})
 			} else {
@@ -64,7 +63,6 @@ function CreatRoom({SetNeedclear}: CreatRoomType) {
 					if (res) {
 						navigate("/friendlyGame");
 						mySocket.enteredGameRoom = true
-						console.log('성공');
 					}
 				})
 			}

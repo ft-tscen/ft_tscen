@@ -87,10 +87,6 @@ function App() {
 				}
 				record.push(rec);
 			}
-			for (let i = 0; i < record.length; i++) {
-				console.log("record[i]");
-				console.log(record[i]);
-			}
 			setGameData(record);
 		} catch (e) {
 			console.error(e);
@@ -136,6 +132,7 @@ function App() {
 	useEffect(() => {
 		intraLogin();
 		getGameData();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loggedIn, isChangedGameData]);
 
 	useEffect(() => {

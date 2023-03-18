@@ -15,10 +15,7 @@ export class TfaService {
     private readonly userService: UserService,
   ) {}
 
-  async sendSMS(
-    id: number,
-    phone: string,
-  ): Promise<SendSMSOutput> {
+  async sendSMS(id: number, phone: string): Promise<SendSMSOutput> {
     try {
       const messageService = new SolapiMessageService(
         this.options.apiKey,

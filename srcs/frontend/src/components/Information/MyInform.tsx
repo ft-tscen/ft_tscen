@@ -14,39 +14,23 @@ import { api } from "../../axios/api";
 import { mySocket } from "../../common/MySocket";
 import { GameData, UserData } from "../../common/types";
 import Friends from "../Friends";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
-
-type Record = {
-	timestamp: string;
-	nickname: string;
-	isRank: boolean;
-	isWin: boolean;
-};
 
 type InformComponent = {
 	inform: UserData;
 	setInform: React.Dispatch<React.SetStateAction<UserData | undefined>>;
 	myData: UserData;
-	gameData: GameData[] | undefined;
-	setChangedGameData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: InformComponent) {
+function MyInform({ inform, setInform, myData}: InformComponent) {
 	const [imageURL, setImageURL] = useState("");
-	//const [refresh, setRefresh] = useState(false);
 	const [show, setShow] = useState(false);
 	const [myFriends, setMyFriends] = useState([]);
+	let [gameData2, setGameData2] = useState<GameData[]>();
 	const handleClose = () => setShow(false);
 	const handleShow = () => {
 		setShow(true);
 		getMyFriends();
 	};
-
-	const refresh = () => {
-		getMyFriends();
-		setChangedGameData((prev) => !prev);
-	}
 
 	const getAvatar = async () => {
 		if (inform.avatarId) {
@@ -64,6 +48,40 @@ function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: I
 			}
 		} else {
 			setImageURL("./Anonymous.jpeg");
+		}
+	};
+
+	const getHistory = async () => {
+		try {
+			const res = await api.get(`/game/history?nickname=${inform.nickname}`);
+			let record: GameData[] = [];
+			res.data?.history?.sort((h:any) => -new Date(h.createdAt).valueOf());
+			for (let i = 0; i < res.data?.history?.length; i++) {
+				let WinCheck : boolean;
+				let RankCheck : boolean = true;
+				let opponent : string;
+				const dateObject = new Date(res.data?.history[i].createdAt);
+				if (res.data?.history[i].winner === inform.nickname) {
+					WinCheck = true;
+					opponent = res.data?.history[i].loser;
+				}
+				else {
+					WinCheck = false;
+					opponent = res.data?.history[i].winner;
+				}
+				if (res.data?.history[i].type !== 3)
+					RankCheck = false;
+				let rec : GameData = {
+					timestamp : dateObject.toLocaleTimeString(),
+					nickname: opponent,
+					isRank : RankCheck,
+					isWin : WinCheck,
+				}
+				record.push(rec);
+			}
+			setGameData2(record);
+		} catch (e) {
+			console.error(e);
 		}
 	};
 
@@ -93,7 +111,10 @@ function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: I
 
 	useEffect(() => {
 		getAvatar();
+		getHistory();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [inform]);
+
 	return (
 		<>
 			<Container className="d-flex justify-content-between">
@@ -168,14 +189,11 @@ function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: I
 							</Form>
 						</Card.Body>
 					</Card>
-					<Form.Group className="mb-2 mt-5 d-flex justify-content-between" controlId="formName">
+					<Form.Group className="mb-2 mt-5" controlId="formName">
 						<Form.Label className="text-white">최근 전적(최대 30게임)</Form.Label>
-						<Button variant="outline-light" onClick={refresh}>
-							<FontAwesomeIcon icon={faArrowsRotate} />
-						</Button>
 					</Form.Group>
 					{
-						gameData && gameData.length === 0 ? (
+						gameData2 && gameData2.length === 0 ? (
 						<Container style={{ height: "30vmin" , overflowY: "scroll" }} className="d-flex justify-content-center align-items-center">
 								<span className="fw-bold text-white">게임 전적이 없습니다!</span>
 						</Container>
@@ -185,7 +203,7 @@ function MyInform({ inform, setInform, myData, gameData, setChangedGameData }: I
 										<Card.Body className="p-0">
 											<ListGroup variant="flush">
 												{
-													gameData && gameData.map((res: GameData, index: any) =>
+													gameData2 && gameData2.map((res: GameData, index: any) =>
 															<ListGroup.Item key={index} className="py-2" style={{backgroundColor: "black"}}>
 																<span className="fw-bold">{res.timestamp}</span>
 																<span className="ms-2 text-muted fw-bold ">{res.isRank ? "랭킹전 " : "친선전 "}</span>

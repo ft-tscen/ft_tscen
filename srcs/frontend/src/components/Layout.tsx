@@ -105,8 +105,6 @@ function Layout({
 									inform={inform ?? userData}
  									setInform={setInform}
  									myData={userData}
- 									gameData={gameData}
- 									setChangedGameData={setChangedGameData}
  								/>
  							)}
  						</Col>

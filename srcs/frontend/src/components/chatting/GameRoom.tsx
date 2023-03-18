@@ -28,7 +28,7 @@ export function GameRoom({obj, setReceivedMsg} :ArgsType) {
 		}
         myGameSocket.socket.emit(SOCKET_GAME_EVENT.WATCH, room,
             ({success, payload} :{success :boolean, payload :string}) => {
-                setReceivedMsg({author:'server', message:payload})
+                setReceivedMsg({author:'server', message:`Entered room : ${payload}`})
 				navigate('/watchGame')
             });
         offVisible();
@@ -64,6 +64,7 @@ export function GameRoom({obj, setReceivedMsg} :ArgsType) {
                                         variant="outline-light"
                                         size="lg"
                                         onClick={toWatchTheGame}
+										disabled={mySocket.enteredGameRoom}
                                         >관전하기
                                     </Button>
                                 </Card.Body>

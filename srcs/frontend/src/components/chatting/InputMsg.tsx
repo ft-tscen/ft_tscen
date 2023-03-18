@@ -39,7 +39,7 @@ export function InputMsg({
 				message: text,
 				password: "",
 			};
-			switch (words.at(0)) {
+			switch (words[0]) {
 				case "/HELP":
 					text = HELP;
 					words.length !== 1
@@ -139,7 +139,6 @@ export function InputMsg({
 
 					for (; idx < words.length; ++idx) {
 						if (words[idx][0] === "-" && words[idx].length === 2) {
-							console.log(words[idx]);
 							if (
 								words[idx][1] === "p" &&
 								enteredMSG.password === "" &&

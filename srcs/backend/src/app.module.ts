@@ -8,8 +8,8 @@ import { LoginModule } from './login/login.module';
 import { TfaModule } from './tfa/tfa.module';
 import { ChatModule } from './chat/chat.module';
 import { GameModule } from './game/game.module';
-import { ValidationPipe } from "@nestjs/common";
-import { APP_PIPE } from "@nestjs/core";
+import { ValidationPipe } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -42,11 +42,11 @@ import { APP_PIPE } from "@nestjs/core";
   ],
   controllers: [AppController],
   providers: [
-	  AppService,
-	  {
-		provide: APP_PIPE,
-		useClass: ValidationPipe,
-	  },
-	],
+    AppService,
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
+  ],
 })
 export class AppModule {}

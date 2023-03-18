@@ -31,9 +31,7 @@ function Home({ isLoggedIn, userData, enteredChannel }: HomeComponent) {
 	}
 
 	const isDisable = () => {
-		// 커밋전에 수정
-		//if (isLoggedIn && enteredChannel && userData.verified)
-		if (isLoggedIn && enteredChannel)
+		if (isLoggedIn && enteredChannel && userData.verified)
 			return false;
 		else
 			return true;

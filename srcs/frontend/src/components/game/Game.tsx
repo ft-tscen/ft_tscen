@@ -26,7 +26,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 	const navigate = useNavigate();
 	const [canvas, setCanvas] = useState<any>();
 	const [ctx, setCtx] = useState<any>();
-	const [match,setMatch] :BoolType = useState<boolean>(false);
 	const [player,setPlayer] :BoolType = useState<boolean>(true);
 
 	const [startGame, setStartGame] :BoolType = useState<boolean>(false);
@@ -49,7 +48,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 			}
 		}
 		catch (error: any) {
-			console.log(error);
 			navigate('/');
 		}
 	}, []);
@@ -62,7 +60,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 				// watch모드 대비 추가 iswatch일시 paddle 작동 막아둠
 				if (mod === gameMod.watchGame) {
 					myGameSocket.socket.emit('watching', (data: any) => {
-						console.log(data);
 						const PlayerInfo : playerType = {
 							p1 : {
 								intra: data.p1.intra,
@@ -92,7 +89,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 				})
 				// matching-success는 rank, 친선 경기시 상대방 들어왔을떄 이벤트 발생(ready 페이지)
 				myGameSocket.socket.on('matching-success', (data: any) => {
-					console.log('매칭 성공~');
 					const PlayerInfo : playerType = {
 						p1 : {
 							intra: data.p1.intra,
@@ -114,7 +110,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 					mySocket.enteredGameRoom = true;
 					setIsInfo(true);
 					setPlayerInfo(PlayerInfo);
-					setMatch(true);
 					ReadyPage(ctx, CanvasWidth, CanvasHeight);
 					document.addEventListener('keydown', (e) => {
 						if (e.code === 'KeyR') {
@@ -125,9 +120,9 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 			// Sologame 특징: playerbar 컴포넌트 불러오지 않음
 			if (mod === gameMod.soloGame) {
 				ReadyPage(ctx, CanvasWidth, CanvasHeight);
+				mySocket.enteredGameRoom = true;
 				document.addEventListener('keydown', (e) => {
 					if (e.code === 'KeyR') {
-						console.log('solo ready!');
 						myGameSocket.socket.emit(SOCKET_GAME_EVENT.SOLO_READY);
 						setStartGame(true);
 					}
@@ -187,9 +182,9 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 				}
 			})
 		} catch (error: any) {
-			console.log(error);
 			navigate('/');
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, [ctx])
 
 		function killSockets(socket : any) {
@@ -233,7 +228,6 @@ function Game({ mod, isChangedGameData, setChangedGameData, SetNeedclear}: gameC
 	useEffect(() => {
 		// game시작 했을 때만 적용되게
 		if (startGame && !isWatch) {
-			console.log(player);
 			if (paddleUp === true) {
 				myGameSocket.socket.emit('PaddleUp', player);
 			}

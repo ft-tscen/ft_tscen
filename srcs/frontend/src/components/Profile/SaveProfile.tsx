@@ -39,7 +39,6 @@ function SaveProfile({
 					const { ok } = res.data;
 					setDuplicated(`${!ok}`);
 				} catch (e) {
-					console.log(e);
 				}
 			}
 		}
@@ -107,6 +106,7 @@ function SaveProfile({
 					nickname: nick_name,
 					phone: phone_number,
 					verified: isCertificated,
+					code: "",
 				});
 				if (file) {
 					const formData = new FormData();
