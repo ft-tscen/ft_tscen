@@ -31,15 +31,21 @@ function NavBar({ isLoggedIn, setLoggedIn }: NavBarComponent) {
 					<Nav>
 						<Nav.Item>
 							{isLoggedIn === false ? (
-								<Button
+								<>
+									<Button
 									variant="outline-light"
 									size="lg"
-									onClick={() =>
-										(window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login`)
-									}
-								>
-									로그인
-								</Button>
+									onClick={() => (window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login`)}
+									>
+										로그인
+									</Button><Button
+										variant="outline-light"
+										size="lg"
+										onClick={() => (window.location.href = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/login/anonymous`)}
+									>
+										익명 로그인
+									</Button>
+								</>
 							) : (
 								<>
 									<Button
